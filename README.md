@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://ax-framework.gitbook.io/wiki" target="_blank"> 
-<img src="https://raw.githubusercontent.com/attacksurge/ax/main/screenshots/read-the-docs.png"/>
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/read-the-docs.png"/>
 </a> 
 </p>
 
@@ -8,13 +8,13 @@
 # Overview
 The Ax Framework is a free and open-source tool utilized by Bug Hunters and Penetration Testers to efficiently operate in multiple cloud environments. It helps build and deploy repeatable infrastructure tailored for offensive security purposes.
 
-Ax includes a set of Packer [Provisioner](https://github.com/attacksurge/ax/tree/main/images/provisioners) files to choose from, or you can [create your own](https://ax-framework.gitbook.io/wiki/fundamentals/bring-your-own-provisioner) (recommended).
+Ax includes a set of Packer [Provisioner](https://github.com/attacksurge/ax/tree/master/images/provisioners) files to choose from, or you can [create your own](https://ax-framework.gitbook.io/wiki/fundamentals/bring-your-own-provisioner) (recommended).
 
-Whichever [Packer](https://www.packer.io/) Provisioner you select, Ax installs your tools of choice into a "base image". Then using that image, you can deploy fleets of fresh instances (cloud hosted compute devices). Using the [Default](https://github.com/attacksurge/ax/blob/main/images/provisioners/default.json) image, you can connect and immediately access a wide range of tools useful for both Bug Hunting and Penetration Testing.
+Whichever [Packer](https://www.packer.io/) Provisioner you select, Ax installs your tools of choice into a "base image". Then using that image, you can deploy fleets of fresh instances (cloud hosted compute devices). Using the [Default](https://github.com/attacksurge/ax/blob/master/images/provisioners/default.json) image, you can connect and immediately access a wide range of tools useful for both Bug Hunting and Penetration Testing.
 
 Various [Ax Utility Scripts](https://ax-framework.gitbook.io/wiki/fundamentals/ax-utility-scripts) streamline tasks like spinning up and deleting fleets of instances, parallel command execution and file transfers, instance and image backups, and many other operations.
 
-With the power of ephemeral infrastructure, most of which is automated, you can easily create many disposable instances. Ax enables the distribution of scanning operations for arbitrary binaries and scripts (the full list varies based on your chosen [Provisioner](https://github.com/attacksurge/ax/tree/main/images/provisioners)). Once installed and configured, Ax allows you to initialize and distribute a large scan across 50-100+ instances within minutes, delivering rapid results. This process is known as [ax scan](https://ax-framework.gitbook.io/wiki/fundamentals/scans).
+With the power of ephemeral infrastructure, most of which is automated, you can easily create many disposable instances. Ax enables the distribution of scanning operations for arbitrary binaries and scripts (the full list varies based on your chosen [Provisioner](https://github.com/attacksurge/ax/tree/master/images/provisioners)). Once installed and configured, Ax allows you to initialize and distribute a large scan across 50-100+ instances within minutes, delivering rapid results. This process is known as [ax scan](https://ax-framework.gitbook.io/wiki/fundamentals/scans).
 
 Ax attempts to follow the Unix philosophy by providing building blocks that allow users to easily orchestrate one or many cloud instances. This flexibility enables the creation of continuous scanning pipelines and the execution of general, one-off, highly parallelized workloads.
 
@@ -43,33 +43,33 @@ Currently Digital Ocean, IBM Cloud, Linode, Azure and AWS are officially support
 Digital Ocean is still our best and most supported cloud provider. If you're signing up for a new Digital Ocean account, [please use this link](https://m.do.co/c/541daa5b4786) for a $200 free credit!
 <p align="center">
 <a href="https://m.do.co/c/541daa5b4786" target="_blank"> 
-<img src="https://raw.githubusercontent.com/attacksurge/ax/main/screenshots/digitalocean_referral.png"/>
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/digitalocean_referral.png"/>
 </a> 
 </p>
 
 IBM Cloud is still our best supported business provider! If you're signing up for a new IBM Cloud account, [please use this link](https://cloud.ibm.com/docs/overview?topic=overview-tutorial-try-for-free) for $200 free credit!
 <p align="center">
 <a href="https://cloud.ibm.com/docs/overview?topic=overview-tutorial-try-for-free" target="_blank"> 
-<img src="https://raw.githubusercontent.com/attacksurge/ax/main/screenshots/ibm_cloud_referral_new.png"/>
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/ibm_cloud_referral_new.png"/>
 </a> 
 </p>
 
 Linode is an absoutely fantastic cloud provider and fully supported! If you're signing up for a new Linode account, [please use this link](https://www.linode.com/lp/refer/?r=71f79f7e02534d6f673cbc8a17581064e12ac27d) for $100 free credit!
 <p align="center">
 <a href="https://www.linode.com/lp/refer/?r=71f79f7e02534d6f673cbc8a17581064e12ac27d" target="_blank"> 
-<img src="https://raw.githubusercontent.com/attacksurge/ax/main/screenshots/linode-referral.png"/>
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/linode-referral.png"/>
 </a> 
 </p>
 
 <p align="center">
 <a href="https://azure.com" target="_blank"> 
-<img src="https://raw.githubusercontent.com/attacksurge/ax/main/screenshots/azure_referral.png"/>
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/azure_referral.png"/>
 </a> 
 </p>
 
 <p align="center">
 <a href="https://aws.com" target="_blank"> 
-<img src="https://raw.githubusercontent.com/attacksurge/ax/main/screenshots/aws_dark_referral.png"/>
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/aws_dark_referral.png"/>
 </a> 
 </p>
 
@@ -105,11 +105,11 @@ If you have any problems with this installer, or if using an unsupported OS plea
 
 <br>
 
-> __Bash:__ Ax is predominantly written in Bash! This makes it easy to contribute to, and it was chosen because [early versions](https://github.com/pry0cc/axiom) were rapidly prototyped in this language. For a detailed step-by-step walk-though of how ax scan works under the hood, its highly recommended to read the comments in the [source code](https://github.com/attacksurge/ax/blob/main/interact/axiom-scan)! 
+> __Bash:__ Ax is predominantly written in Bash! This makes it easy to contribute to, and it was chosen because [early versions](https://github.com/pry0cc/axiom) were rapidly prototyped in this language. For a detailed step-by-step walk-though of how ax scan works under the hood, its highly recommended to read the comments in the [source code](https://github.com/attacksurge/ax/blob/master/interact/axiom-scan)! 
 
 <br>
 <p align="center">
 <a href="https://ax-framework.gitbook.io/wiki" target="_blank"> 
-<img src="https://raw.githubusercontent.com/attacksurge/ax/main/screenshots/read-the-docs.png"/>
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/read-the-docs.png"/>
 </a> 
 </p>

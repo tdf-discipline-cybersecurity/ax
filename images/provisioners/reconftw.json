@@ -80,11 +80,11 @@
         "echo 'Downloading permutations'",
         "wget -q -O /home/op/lists/permutations.txt https://gist.github.com/six2dez/ffc2b14d283e8f8eff6ac83e20a3c4b4/raw",
         "echo 'Downloading resolvers'",
-        "wget -q -O /home/op/lists/resolvers.txt https://raw.githubusercontent.com/trickest/resolvers/main/resolvers.txt",
+        "wget -q -O /home/op/lists/resolvers.txt https://raw.githubusercontent.com/trickest/resolvers/master/resolvers.txt",
         "echo 'Downloading trusted resolvers'",
-        "wget -q -O /home/op/lists/resolvers_trusted.txt https://raw.githubusercontent.com/six2dez/resolvers_reconftw/main/resolvers_trusted.txt",
+        "wget -q -O /home/op/lists/resolvers_trusted.txt https://raw.githubusercontent.com/six2dez/resolvers_reconftw/master/resolvers_trusted.txt",
         "echo 'Downloading fuzz wordlist'",
-        "wget -O /home/op/lists/fuzz_wordlist.txt https://raw.githubusercontent.com/six2dez/OneListForAll/main/onelistforallmicro.txt",
+        "wget -O /home/op/lists/fuzz_wordlist.txt https://raw.githubusercontent.com/six2dez/OneListForAll/master/onelistforallmicro.txt",
 
         "echo 'Installing Tools'",
 
