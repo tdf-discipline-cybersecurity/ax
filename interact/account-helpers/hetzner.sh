@@ -125,9 +125,9 @@ if [[ "$title" == "" ]]; then
 fi
 
 
-echo -e "${BGreen}Creating hetzner context and config file in ${Color_Off}'${BGreen}/home/user/.config/hcloud/cli.toml${Color_Off}'"
-
-cat <<EOT > $(echo /home/user/.config/hcloud/cli.toml)
+echo -e "${BGreen}Creating hetzner context and config file in ${Color_Off}'${BGreen}$HOME/.config/hcloud/cli.toml${Color_Off}'"
+mkdir -p $HOME/.config/hcloud/
+cat <<EOT > $(echo "$HOME/.config/hcloud/cli.toml")
 active_context = "$title"
 
 [[contexts]]

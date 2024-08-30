@@ -227,7 +227,7 @@ then
          token="$(jq -r '.hetzner_key' "$AXIOM_PATH"/accounts/"$1".json)"
          status_code=$(curl -s -o /dev/null -w "%{http_code}"  -H "Authorization: Bearer $token"   https://api.hetzner.cloud/v1/servers)
          if [[ "$status_code" == "200" ]]; then
-          mkdir -p "$HOME/.config"
+          mkdir -p "$HOME/.config/hcloud"
 
 
 cat <<EOT > $(echo "$HOME/.config/hcloud/cli.toml")
