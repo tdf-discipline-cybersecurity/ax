@@ -3,14 +3,10 @@
 AXIOM_PATH="$HOME/.axiom"
 source "$AXIOM_PATH/interact/includes/vars.sh"
 
-appliance_name=""
-appliance_key=""
-appliance_url=""
 token=""
 region=""
 provider=""
 size=""
-email=""
 cpu=""
 username=""
 ibm_cloud_api_key=""
@@ -42,7 +38,7 @@ if [[ $BASEOS == "Linux" ]]; then
  if $(uname -a | grep -qi "Microsoft"); then
   OS="UbuntuWSL"
  else
-   OS=$(lsb_release -i | awk '{ print $3 }')
+   OS=$(lsb_release -i 2>/dev/null | awk '{ print $3 }')
    if ! command -v lsb_release &> /dev/null; then
             OS="unknown-Linux"
             BASEOS="Linux"
@@ -52,18 +48,18 @@ if [[ $BASEOS == "Linux" ]]; then
   echo "Needs Conversation"
    elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]]; then
      if ! [ -x "$(command -v ibmcloud)" ]; then
-      echo -e "${Blue}Installing ibmcloud-cli...${Color_Off}"
+      echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
       curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-      echo -e "${Blue}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+      echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
       ibmcloud plugin install sl -q -f
      fi
 elif [[ $OS == "Fedora" ]]; then
   echo "Needs Conversation"
 	 elif [ $OS == "UbuntuWSL" ]; then
      if ! [ -x "$(command -v ibmcloud)" ]; then
-      echo -e "${Blue}Installing ibmcloud-cli...${Color_Off}"
+      echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
       curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-      echo -e "${Blue}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+      echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
       ibmcloud plugin install sl -q -f
      fi
  fi
@@ -72,17 +68,17 @@ fi
 if [[ $BASEOS == "Mac" ]]; then
  whereis brew
   if [ ! $? -eq 0 ] || [[ ! -z ${AXIOM_FORCEBREW+x} ]]; then
-   echo -e "${Blue}Installing brew...${Color_Off}"
+   echo -e "${BGreen}Installing brew...${Color_Off}"
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   else
-   echo -e "${Blue}Checking for brew... already installed, skipping installation.${Color_Off}"
-   echo -e "${Blue}    Note: You can force brew installation by running${Color_Off}"
+   echo -e "${BGreen}Checking for brew... already installed, skipping installation.${Color_Off}"
+   echo -e "${BGreen}    Note: You can force brew installation by running${Color_Off}"
    echo -e '    $ AXIOM_FORCEBREW=yes $HOME/.axiom/interact/axiom-configure'
   fi
    if ! [ -x "$(command -v ibmcloud)" ]; then
-    echo -e "${Blue}Installing ibmcloud-cli...${Color_Off}"
+    echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
     curl -fsSL https://clis.cloud.ibm.com/install/osx | sh
-    echo -e "${Blue}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+    echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
     ibmcloud plugin install sl -q -f
    fi
 fi
@@ -112,7 +108,7 @@ fi
 
 # packer plugin check
 if [[ ! -f "$HOME/.packer.d/plugins/packer-builder-ibmcloud" ]]; then
- echo -n -e "${Blue}Installing IBM Cloud Packer Builder (https://github.com/IBM/packer-plugin-ibmcloud/):\n y/n >> ${Color_Off}"
+ echo -n -e "${BGreen}Installing IBM Cloud Packer Builder (https://github.com/IBM/packer-plugin-ibmcloud/):\n y/n >> ${Color_Off}"
  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
  mkdir -p ~/.packer.d/plugins/
  wget https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_linux_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
@@ -169,14 +165,14 @@ if [[ "$region" == "" ]]; then
 	region="dal13"
 fi
 echo -e -n "${Green}Please enter your default size: (Default '2048', press enter) \n${Color_Off}"
-echo -e -n "${Green}Options: 2048, 4096, 8192, 16384, 32768, 64512\n>> ${Color_Off}"
+echo -e -n "${Blue}Options: 2048, 4096, 8192, 16384, 32768, 64512\n>> ${Color_Off}"
 read size
 if [[ "$size" == "" ]]; then
 	echo -e "${Blue}Selected default option '2048'${Color_Off}"
   size="2048"
 fi
 echo -e -n "${Green}Please enter amount of CPU Cores: (Default '2', press enter) \n${Color_Off}"
-echo -e -n "${Green}Options: 1, 2, 4, 8, 16, 32, 48\n>> ${Color_Off}"
+echo -e -n "${Blue}Options: 1, 2, 4, 8, 16, 32, 48\n>> ${Color_Off}"
 
 read cpu
 if [[ "$cpu" == "" ]]; then
@@ -187,23 +183,9 @@ fi
 
 
 function setprofile {
-echo -e -n "${Green}Please enter your GPG Recipient Email (for encryption of boxes): (optional, press enter) \n>> ${Color_Off}"
-read email
-echo -e -n "${Green}Would you like to configure connection to an Axiom Pro Instance? Y/n (Must be deployed.) (optional, default 'n', press enter) \n>> ${Color_Off}"
-read ans
-if [[ "$ans" == "Y" ]]; then
-    echo -e -n "${Green}Enter the axiom pro instance name \n>> ${Color_Off}"
-    read appliance_name
-
-    echo -e -n "${Green}Enter the instance URL (e.g \"https://pro.acme.com\") \n>> ${Color_Off}"
-    read appliance_url
-
-    echo -e -n "${Green}Enter the access secret key \n>> ${Color_Off}"
-    read appliance_key 
-fi
-data="$(echo "{\"do_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm\",\"default_size\":\"$size\",\"cpu\":\"$cpu\",\"username\":\"$username\",\"base_image_id\":\"$base_image_id\",\"appliance_name\":\"$appliance_name\",\"appliance_key\":\"$appliance_key\",\"appliance_url\":\"$appliance_url\", \"email\":\"$email\"}")"
+data="$(echo "{\"sl_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm\",\"default_size\":\"$size\",\"cpu\":\"$cpu\",\"username\":\"$username\",\"base_image_id\":\"$base_image_id\"}")"
 echo -e "${BGreen}Profile settings below: ${Color_Off}"
-echo $data | jq
+echo $data | jq '.sl_key = "************************************************************************" | .ibm_cloud_api_key = "***************************************"'
 echo -e "${BWhite}Press enter if you want to save these to a new profile, type 'r' if you wish to start again.${Color_Off}"
 read ans
 if [[ "$ans" == "r" ]];
@@ -215,7 +197,7 @@ echo -e -n "${BWhite}Please enter your profile name (e.g 'personal', must be all
 read title
 if [[ "$title" == "" ]]; then
     title="personal"
-    echo -e "${Blue}Named profile 'personal'${Color_Off}"
+    echo -e "${BGreen}Named profile 'personal'${Color_Off}"
 fi
 echo $data | jq > "$AXIOM_PATH/accounts/$title.json"
 echo -e "${BGreen}Saved profile '$title' successfully!${Color_Off}"

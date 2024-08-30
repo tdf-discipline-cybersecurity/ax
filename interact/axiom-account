@@ -27,7 +27,7 @@ esac
 
 accounts=$(ls -A1 "$AXIOM_PATH/accounts/" | grep "json" | sed 's/\.json//g')
 if [ -f ~/.axiom/axiom.json ] ; then
-    current=$(ls -lh "$AXIOM_PATH/axiom.json" | awk '{ print $11 }' | tr '/' '\n' | grep json | sed 's/\.json//g') > /dev/null 2>&1
+	current=$(readlink -f "$AXIOM_PATH/axiom.json" | rev | cut -d / -f 1 | rev | cut -d . -f 1)> /dev/null 2>&1
 fi
 
 function bootstrap() {
@@ -50,11 +50,12 @@ then
 
         # Update doctl and check for valid token. If token isnt valid, kick off account bootstrap
         if [[ "$provider" == "do" ]]; then
-            echo -e "${Blue}Updating doctl...${Color_Off}"
+            echo -e "${BGreen}Updating doctl...${Color_Off}"
             if [[ $BASEOS == "Mac" ]]; then
                 brew install doctl
-                echo -e "${Blue}Installing doctl packer plugin...${Color_Off}"
+                echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
                 packer plugins install github.com/digitalocean/digitalocean
+                doctl auth init -t "$token" || bootstrap
             elif [[ $BASEOS == "Linux" ]]; then
                 OS=$(lsb_release -i | awk '{ print $3 }')
                 if ! command -v lsb_release &> /dev/null; then
@@ -64,7 +65,10 @@ then
                 if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
                     sudo pacman -Syu doctl --noconfirm
                 else
+                 if ! command -v doctl &> /dev/null
+                 then
                     wget -q -O /tmp/doctl.tar.gz https://github.com/digitalocean/doctl/releases/download/v1.66.0/doctl-1.66.0-linux-amd64.tar.gz && tar -xvzf /tmp/doctl.tar.gz && sudo mv doctl /usr/bin/doctl && rm /tmp/doctl.tar.gz
+                 fi
                 fi
                 token="$(jq -r '.do_key' "$AXIOM_PATH"/accounts/"$1".json)"
                 doctl auth init -t "$token" || bootstrap
@@ -78,10 +82,10 @@ then
             echo -e "${Green}Updating linode-cli\n ${Color_Off}"
             pip3 install linode-cli --upgrade
             if [[ $BASEOS == "Mac" ]]; then
-              echo -e "${Blue}Installing linode packer plugin...${Color_Off}"
+              echo -e "${BGreen}Installing linode packer plugin...${Color_Off}"
               packer plugins install github.com/linode/linode
             fi
-            token="$(jq -r '.do_key' "$AXIOM_PATH"/accounts/"$1".json)"
+            token="$(jq -r '.linode_key' "$AXIOM_PATH"/accounts/"$1".json)"
             size="$(jq -r '.default_size' "$AXIOM_PATH"/accounts/"$1".json)"
             region="$(jq -r '.region' "$AXIOM_PATH"/accounts/"$1".json)"
             mkdir -p "$HOME/.config"
@@ -110,18 +114,18 @@ then
           echo "Needs Conversation"
          elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]]; then
           if ! [ -x "$(command -v ibmcloud)" ]; then
-           echo -e "${Blue}Installing ibmcloud-cli...${Color_Off}"
+           echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
            curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-           echo -e "${Blue}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+           echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
            ibmcloud plugin install sl -q -f
           fi
          elif [[ $OS == "Fedora" ]]; then
           echo "Needs Conversation"
 	       elif [ $OS == "UbuntuWSL" ]; then
           if ! [ -x "$(command -v ibmcloud)" ]; then
-           echo -e "${Blue}Installing ibmcloud-cli...${Color_Off}"
+           echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
            curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-           echo -e "${Blue}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+           echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
            ibmcloud plugin install sl -q -f
           fi
           fi
@@ -130,17 +134,17 @@ then
          if [[ $BASEOS == "Mac" ]]; then
           whereis brew
           if [ ! $? -eq 0 ] || [[ ! -z ${AXIOM_FORCEBREW+x} ]]; then
-           echo -e "${Blue}Installing brew...${Color_Off}"
+           echo -e "${BGreen}Installing brew...${Color_Off}"
            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           else
-           echo -e "${Blue}Checking for brew... already installed, skipping installation.${Color_Off}"
-           echo -e "${Blue}    Note: You can force brew installation by running${Color_Off}"
+           echo -e "${BGreen}Checking for brew... already installed, skipping installation.${Color_Off}"
+           echo -e "${BGreen}    Note: You can force brew installation by running${Color_Off}"
            echo -e '    $ AXIOM_FORCEBREW=yes $HOME/.axiom/interact/axiom-configure'
           fi
          if ! [ -x "$(command -v ibmcloud)" ]; then
-          echo -e "${Blue}Installing ibmcloud-cli...${Color_Off}"
+          echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
           curl -fsSL https://clis.cloud.ibm.com/install/osx | sh
-          echo -e "${Blue}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+          echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
           ibmcloud plugin install sl -q -f
          fi
          fi
@@ -158,7 +162,7 @@ then
         fi
         # packer check
          if [[ ! -f "$HOME/.packer.d/plugins/packer-builder-ibmcloud" ]]; then
-          echo -n -e "${Blue}Installing IBM Cloud Packer Builder (https://github.com/IBM/packer-plugin-ibmcloud/):\n y/n >> ${Color_Off}"
+          echo -n -e "${BGreen}Installing IBM Cloud Packer Builder (https://github.com/IBM/packer-plugin-ibmcloud/):\n y/n >> ${Color_Off}"
           os="$(uname -s | tr '[:upper:]' '[:lower:]')"
           mkdir -p ~/.packer.d/plugins/
           wget https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_linux_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
@@ -184,7 +188,7 @@ then
     fi #if path
 else
     echo -e "${BWhite}Available Accounts${Color_Off}"
-    echo -n -e "${Blue}"
+    echo -n -e "${BGreen}"
     for account in $accounts
         do
             if [[ $account == $current ]]
