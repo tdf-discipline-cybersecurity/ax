@@ -230,7 +230,7 @@ then
           mkdir -p "$HOME/.config"
 
 
-cat <<EOT > $(echo /home/user/.config/hcloud/cli.toml)
+cat <<EOT > $(echo "$HOME/.config/hcloud/cli.toml")
 active_context = "$1"
 
 [[contexts]]
