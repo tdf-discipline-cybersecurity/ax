@@ -18,7 +18,7 @@ With the power of ephemeral infrastructure, most of which is automated, you can 
 
 Ax attempts to follow the Unix philosophy by providing building blocks that allow users to easily orchestrate one or many cloud instances. This flexibility enables the creation of continuous scanning pipelines and the execution of general, one-off, highly parallelized workloads.
 
-Currently Digital Ocean, IBM Cloud, Linode, Azure and AWS are officially supported cloud providers.
+Currently Digital Ocean, IBM Cloud, Linode, Azure, AWS and Hetzner are officially supported cloud providers.
 
 # Resources
 
@@ -71,6 +71,12 @@ Linode is an absoutely fantastic cloud provider and fully supported! If you're s
 <a href="https://aws.com" target="_blank"> 
 <img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/aws_dark_referral.png"/>
 </a> 
+</p>
+
+<p align="center">
+<a href="https://console.hetzner.cloud" target="_blank">
+<img src="https://raw.githubusercontent.com/attacksurge/ax/master/screenshots/hetzner-refferal.png"/>
+</a>
 </p>
 
 # Installation

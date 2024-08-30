@@ -67,6 +67,9 @@ get_default_size() {
   elif [[ "$provider" == "linode" ]]; then
     default_size="g6-standard-1"
 
+  elif [[ "$provider" == "hetzner" ]]; then
+    default_size="cx22"
+
   else
     echo "Error: Unknown provider '$provider'"
     exit 1

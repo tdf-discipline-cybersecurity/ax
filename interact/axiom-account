@@ -34,7 +34,7 @@ function bootstrap() {
     account_helpers=$(find "$AXIOM_PATH/interact/account-helpers" -name '*.sh' ! -name 'generate*' -execdir basename -s '.sh' {} +)
     account_str=$(echo "$account_helpers" | sed 's/ /, /g')
     provider_path="$AXIOM_PATH/interact/account-helpers/$provider.sh"
-    bash "$provider_path" 
+    bash "$provider_path"
 }
 
 if [ ! -z "$1" ]
@@ -77,7 +77,7 @@ then
 
         # Update Linode-cli and check for valid token. If token isnt valid, kick off account bootstrap
         #
-        if [[ "$provider" == "linode" ]]; 
+        if [[ "$provider" == "linode" ]];
         then
             echo -e "${Green}Updating linode-cli\n ${Color_Off}"
             pip3 install linode-cli --upgrade
@@ -175,17 +175,79 @@ then
         # If Azure cli isnt logged in, kick off bootstrap
         # TODO: Make sure az is up to date
         # TODO: This likely doesnt play well with multiple account accounts
-        # TODO: grep account creds from account.json and authenticate with those 
+        # TODO: grep account creds from account.json and authenticate with those
         #
-        if [[ "$provider" == "azure" ]]; 
-            then    
+        if [[ "$provider" == "azure" ]];
+            then
             az ad signed-in-user show || bootstrap
         fi
+
+        # Install hetzner if not already installed, check token is valid or kick off bootstrap
+        #
+        if [[ "$provider" == "hetzner" ]]; then
+         if [[ $BASEOS == "Linux" ]]; then
+          if $(uname -a | grep -qi "Microsoft"); then
+           OS="UbuntuWSL"
+          else
+           OS=$(lsb_release -i 2>/dev/null | awk '{ print $3 }')
+           if ! command -v lsb_release &> /dev/null; then
+            OS="unknown-Linux"
+            BASEOS="Linux"
+           fi
+          fi
+          if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
+           sudo pacman -Syu hcloud --noconfirm
+          elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] ||[[ $OS == "UbuntuWSL" ]]; then
+           if ! [ -x "$(command -v hcloud)" ]; then
+            echo -e "${BGreen}Installing hetzner-cli...${Color_Off}"
+            wget -q -O /tmp/hetzner-cli.tar.gz https://github.com/hetznercloud/cli/releases/download/v1.46.0/hcloud-linux-amd64.tar.gz && tar -xvzf /tmp/hetzner-cli.tar.gz -C /tmp && sudo mv /tmp/hcloud /usr/bin/hcloud && rm /tmp/hetzner-cli.tar.gz
+           fi
+          elif [[ $OS == "Fedora" ]]; then
+           echo "Needs Conversation"
+          fi
+         fi
+
+         if [[ $BASEOS == "Mac" ]]; then
+          whereis brew
+          if [ ! $? -eq 0 ] || [[ ! -z ${AXIOM_FORCEBREW+x} ]]; then
+           echo -e "${BGreen}Installing brew...${Color_Off}"
+           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          else
+           echo -e "${BGreen}Checking for brew... already installed, skipping installation.${Color_Off}"
+           echo -e "${BGreen}    Note: You can force brew installation by running${Color_Off}"
+           echo -e '    $ AXIOM_FORCEBREW=yes $HOME/.axiom/interact/axiom-configure'
+          fi
+          if ! [ -x "$(command -v hcloud)" ]; then
+           echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
+           brew install hcloud
+           packer plugins install github.com/hetznercloud/hcloud
+          fi
+         fi
+
+         token="$(jq -r '.hetzner_key' "$AXIOM_PATH"/accounts/"$1".json)"
+         status_code=$(curl -s -o /dev/null -w "%{http_code}"  -H "Authorization: Bearer $token"   https://api.hetzner.cloud/v1/servers)
+         if [[ "$status_code" == "200" ]]; then
+          mkdir -p "$HOME/.config"
+
+
+cat <<EOT > $(echo /home/user/.config/hcloud/cli.toml)
+active_context = "$1"
+
+[[contexts]]
+ name = "$1"
+ token = "$token"
+EOT
+
+         else
+         echo -e "Not authenticated to hetzner cli"
+            bootstrap
+         fi
+       fi
 
     echo -e "${Green}Selected $1 successfully${Color_Off}"
     else
         echo -e "${Red}Account name not present${Color_Off}"
-    fi #if path
+    fi
 else
     echo -e "${BWhite}Available Accounts${Color_Off}"
     echo -n -e "${BGreen}"
