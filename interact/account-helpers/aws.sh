@@ -3,14 +3,10 @@
 AXIOM_PATH="$HOME/.axiom"
 source "$AXIOM_PATH/interact/includes/vars.sh"
 
-appliance_name=""
-appliance_key=""
-appliance_url=""
 token=""
 region=""
 provider=""
 size=""
-email=""
 
 BASEOS="$(uname)"
 case $BASEOS in
@@ -36,7 +32,7 @@ esac
 
 
 install_aws_cli() {
-  echo -e "${Blue}Installing aws cli...${Color_Off}"
+  echo -e "${BGreen}Installing aws cli...${Color_Off}"
   if [[ $BASEOS == "Mac" ]]; then
     curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
     open AWSCLIV2.pkg
@@ -109,7 +105,7 @@ sec_group_id="$(echo "$group_rules" | jq -r '.SecurityGroupRules[].SecurityGroup
 data="$(echo "{\"aws_access_key\":\"$ACCESS_KEY\",\"aws_secret_access_key\":\"$SECRET_KEY\",\"group_owner_id\":\"$group_owner_id\",\"security_group_id\":\"$sec_group_id\",\"region\":\"$region\",\"provider\":\"aws\",\"default_size\":\"$size\"}")"
 
 echo -e "${BGreen}Profile settings below: ${Color_Off}"
-echo $data | jq
+echo $data | jq '.aws_secret_access_key = "*************************************"'
 echo -e "${BWhite}Press enter if you want to save these to a new profile, type 'r' if you wish to start again.${Color_Off}"
 read ans
 
@@ -124,7 +120,7 @@ read title
 
 if [[ "$title" == "" ]]; then
     title="personal"
-    echo -e "${Blue}Named profile 'personal'${Color_Off}"
+    echo -e "${BGreen}Named profile 'personal'${Color_Off}"
 fi
 
 echo $data | jq > "$AXIOM_PATH/accounts/$title.json"

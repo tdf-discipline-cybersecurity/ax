@@ -5,92 +5,172 @@ source "$AXIOM_PATH/interact/includes/vars.sh"
 fi
 cat << EOF
 
- ▄▄▄      ▒██   ██▒ ██▓ ▒█████   ███▄ ▄███▓
-▒████▄    ▒▒ █ █ ▒░▓██▒▒██▒  ██▒▓██▒▀█▀ ██▒
-▒██  ▀█▄  ░░  █   ░▒██▒▒██░  ██▒▓██    ▓██░
-░██▄▄▄▄██  ░ █ █ ▒ ░██░▒██   ██░▒██    ▒██
- ▓█   ▓██▒▒██▒ ▒██▒░██░░ ████▓▒░▒██▒   ░██▒
- ▒▒   ▓▒█░▒▒ ░ ░▓ ░░▓  ░ ▒░▒░▒░ ░ ▒░   ░  ░
-  ▒   ▒▒ ░░░   ░▒ ░ ▒ ░  ░ ▒ ▒░ ░  ░      ░
-  ░   ▒    ░    ░   ▒ ░░ ░ ░ ▒  ░      ░
-      ░  ░ ░    ░   ░      ░ ░         ░
+ █████╗ ██╗  ██╗     ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗ ██╗   ██╗██████╗ ███████╗
+██╔══██╗╚██╗██╔╝    ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝ ██║   ██║██╔══██╗██╔════╝
+███████║ ╚███╔╝     ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗██║   ██║██████╔╝█████╗  
+██╔══██║ ██╔██╗     ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║██║   ██║██╔══██╗██╔══╝  
+██║  ██║██╔╝ ██╗    ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝╚██████╔╝██║  ██║███████╗
+╚═╝  ╚═╝╚═╝  ╚═╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝
 
-The Dynamic Infrastructure Framework for Everybody - @pry0cc & @0xtavian
-
-We are lucky enough to be sponsored by the awesome SecurityTrails! 
-Sign up for your free account here! https://securitytrails.com/app/account?utm_source=axiom
+Maintainer: 0xtavian
 
 EOF
+
+echo '
+ "𝓲𝓷𝓼𝓹𝓲𝓻𝓮𝓭 𝓫𝔂 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷" 
+ "𝓽𝓱𝓮 𝓬𝓸𝓷𝓽𝓲𝓷𝓾𝓪𝓽𝓲𝓸𝓷 𝓸𝓯 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
+ "𝓬𝓸𝓷𝓽𝓲𝓷𝓾𝓮𝓭 𝓯𝓻𝓸𝓶: 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
+ "𝓫𝓪𝓼𝓲𝓬𝓪𝓵𝓵𝔂, 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷 "
+ "𝓶𝓲𝓰𝓱𝓽 𝓪𝓼 𝔀𝓮𝓵𝓵 𝓫𝓮 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷" 
+ "𝓪𝓵𝓻𝓲𝓰𝓱𝓽, 𝔂𝓸𝓾 𝓰𝓸𝓽 𝓶𝓮, 𝓲𝓽𝓼 𝓳𝓾𝓼𝓽 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
+ "𝓼𝓽𝓸𝓵𝓮𝓷 𝓯𝓻𝓸𝓶: 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
+ ' | xargs shuf -n1 -e 
+echo ''
 
 ###########################################################################################################
 # Shell setup functions
 #
 function bash_shell(){
-    echo -e "${Blue}Backing up $(echo "$HOME"/.bashrc) to $(echo "$HOME"/.bashrcbak) just in case.${Color_Off}"
-    cp "$HOME"/.bashrc "$HOME"/.bashrcbak >> /dev/null 2>&1
-    if [[ -d "/usr/local/go/" ]] ; then
-    echo -e "${Blue}Golang already installed, skipping...${Color_Off}" 
+    timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+    echo -e "${BGreen}Backing up $(echo "$HOME"/.bashrc) to $(echo "$HOME"/.bashrc-$timestamp) just in case.${Color_Off}"
+    cp "$HOME"/.bashrc "$HOME"/.bashrc-$timestamp >> /dev/null 2>&1
+
+    if [[ "$unattended" == "true" ]]; then
+     echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
+     wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+     mkdir -p "${HOME}/go"
+     export GOPATH=$HOME/go
+     export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+     echo "export GOPATH=\$HOME/go" >> "${HOME}"/.bashrc
+     echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >> "${HOME}"/.bashrc
+     source "${HOME}"/.bashrc
+     SHELL=$(which bash)
+     echo -e "${Green}You're running Bash! Installing Ax to \$PATH...${Color_Off}"
+     echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.bashrc
+     echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.bashrc
+     echo "[[ -f ~/.bashrc ]] && . ~/.bashrc" >> "${HOME}"/.bash_profile
+     source ~/.bashrc  >> /dev/null 2>&1
     else
-    echo -e "${Blue}Installing Golang 1.19.1${Color_Off}"
-    wget -q https://golang.org/dl/go1.19.1.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.19.1.linux-amd64.tar.gz && rm go1.19.1.linux-amd64.tar.gz
+     echo -e -n "${BYellow}Do you want to install Golang 1.22.2? y/n: \n>> ${Color_Off}"
+     read acc
+     if [[ "$acc" == "y" ]]; then
+      echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
+      wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+      mkdir -p "${HOME}/go"
+      export GOPATH=$HOME/go
+      export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+      echo "export GOPATH=\$HOME/go" >> "${HOME}"/.bashrc
+      echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >> "${HOME}"/.bashrc
+      source "${HOME}"/.bashrc
+      SHELL=$(which bash)
+      echo -e "${Green}You're running Bash! Installing Ax to \$PATH...${Color_Off}"
+      echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.bashrc
+      echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.bashrc
+      echo "[[ -f ~/.bashrc ]] && . ~/.bashrc" >> "${HOME}"/.bash_profile
+      source ~/.bashrc  >> /dev/null 2>&1
+     else
+      source "${HOME}"/.bashrc
+      SHELL=$(which bash)
+      echo -e "${Green}You're running Bash! Installing Ax to \$PATH...${Color_Off}"
+      echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.bashrc
+      echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.bashrc
+      echo "[[ -f ~/.bashrc ]] && . ~/.bashrc" >> "${HOME}"/.bash_profile
+      source ~/.bashrc  >> /dev/null 2>&1
+     fi
     fi
-    mkdir -p "${HOME}/go"
-    export GOPATH=$HOME/go
-    export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-    echo "export GOPATH=\$HOME/go" >> "${HOME}"/.bashrc
-    echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >> "${HOME}"/.bashrc
-    source "${HOME}"/.bashrc
-    SHELL=$(which bash)
-    echo -e "${Green}You're running Bash! Installing Axiom to \$PATH...${Color_Off}"
-    echo "export PATH=\"\$PATH:\$HOME/.axiom/interact\"" >>~/.bashrc
-    echo "[[ -f ~/.bashrc ]] && . ~/.bashrc" >> "${HOME}"/.bash_profile
-    source ~/.bashrc  >> /dev/null 2>&1
 }
 
 function zsh_shell(){
+    timestamp=$(date +%Y-%m-%d_%H-%M-%S)
     sudo apt install zsh -y
-    echo -e "${Blue}Backing up $(echo "$HOME"/.zshrc) to $(echo "$HOME"/.zshrcbak) just in case.${Color_Off}"
-    cp "$HOME"/.zshrc "$HOME"/.zshrcbak >> /dev/null 2>&1
-    if [[ -d "/usr/local/go/" ]] ; then
-    echo -e "${Blue}Golang already installed, skipping...${Color_Off}" 
+    echo -e "${BGreen}Backing up $(echo "$HOME"/.zshrc) to $(echo "$HOME"/.zshrc-$timestamp) just in case.${Color_Off}"
+    cp "$HOME"/.zshrc "$HOME"/.zshrc-$timestamp >> /dev/null 2>&1
+
+    if [[ "$unattended" == "true" ]]; then
+     echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
+     wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+     mkdir -p "${HOME}/go"
+     export GOPATH=$HOME/go
+     export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+     echo "export GOPATH=\$HOME/go" >> "${HOME}"/.zshrc
+     echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >> "${HOME}"/.zshrc
+     echo -e "${Green}You're running Zsh! Installing Ax to \$PATH...${Color_Off}"
+     echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.zshrc
+     echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc
+     source "${HOME}"/.zshrc >> /dev/null 2>&1
+     SHELL=$(which zsh)
     else
-    echo -e "${Blue}Installing Golang 1.19.1${Color_Off}"
-    wget -q https://golang.org/dl/go1.19.1.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.19.1.linux-amd64.tar.gz && rm go1.19.1.linux-amd64.tar.gz
+     echo -e -n "${BYellow}Do you want to install Golang 1.22.2? y/n: \n>> ${Color_Off}"
+     read acc
+     if [[ "$acc" == "y" ]]; then
+      echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
+      wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+      mkdir -p "${HOME}/go"
+      export GOPATH=$HOME/go
+      export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+      echo "export GOPATH=\$HOME/go" >> "${HOME}"/.zshrc
+      echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >> "${HOME}"/.zshrc
+      echo -e "${Green}You're running Zsh! Installing Ax to \$PATH...${Color_Off}"
+      echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.zshrc
+      echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc
+      source "${HOME}"/.zshrc >> /dev/null 2>&1
+      SHELL=$(which zsh)
+     else
+      echo -e "${Green}You're running ZSH! Installing Ax to \$PATH...${Color_Off}"
+      echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.zshrc
+      echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >>~/.zshrc
+      source "${HOME}"/.zshrc >> /dev/null 2>&1
+      SHELL=$(which zsh)
+     fi
     fi
-    mkdir -p "${HOME}/go"
-    export GOPATH=$HOME/go
-    export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-    echo "export GOPATH=\$HOME/go" >>~/.zshrc
-    echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin"  >>~/.zshrc
-    echo -e "${Green}You're running ZSH! Installing Axiom to \$PATH...${Color_Off}"
-    echo "export PATH=\"\$PATH:\$HOME/.axiom/interact\"" >>~/.zshrc  
-    echo "source $HOME/.axiom/functions/autocomplete.zsh" >>~/.zshrc 
-    source "${HOME}"/.zshrc >> /dev/null 2>&1
-    SHELL=$(which zsh)
 }
 
 function omz_shell(){
-    echo -e "${Blue}Backing up $(echo "$HOME"/.zshrc) to $(echo "$HOME"/.zshrcbak) just in case.${Color_Off}"
-    cp "$HOME"/.zshrc "$HOME"/.zshrcbak >> /dev/null 2>&1
+    timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+    echo -e "${BGreen}Backing up $(echo "$HOME"/.zshrc) to $(echo "$HOME"/.zsh-$timestamp) just in case.${Color_Off}"
+    mv "$HOME"/.zshrc "$HOME"/.zshrc-$timestamp >> /dev/null 2>&1
+    echo -e "${BGreen}Backing up $(echo "$HOME"/.oh-my-zsh/) to $(echo "$HOME"/.oh-my-zsh-$timestamp) just in case.${Color_Off}"
+    mv "$HOME"/.oh-my-zsh "$HOME"/.oh-my-zsh-$timestamp >> /dev/null 2>&1
+
     sudo apt install zsh zsh-syntax-highlighting zsh-autosuggestions -y
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-    if [[ -d "/usr/local/go/" ]] ; then
-    echo -e "${Blue}Golang already installed, skipping...${Color_Off}" 
+    if [[ "$unattended" == "true" ]]; then
+     echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
+     wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+     mkdir -p "${HOME}/go"
+     export GOPATH=$HOME/go
+     export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+     echo "export GOPATH=\$HOME/go" >> "${HOME}"/.zshrc
+     echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >> "${HOME}"/.zshrc
+     echo -e "${Green}You're running Oh-My-Zsh! Installing Ax to \$PATH...${Color_Off}"
+     echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.zshrc
+     echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc
+     source "${HOME}"/.zshrc >> /dev/null 2>&1
+     SHELL=$(which zsh)
     else
-    echo -e "${Blue}Installing Golang 1.19.1${Color_Off}"
-    wget -q https://golang.org/dl/go1.19.1.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.19.1.linux-amd64.tar.gz && rm go1.19.1.linux-amd64.tar.gz
+     echo -e -n "${BYellow}Do you want to install Golang 1.22.2? y/n: \n>> ${Color_Off}"
+     read acc
+     if [[ "$acc" == "y" ]]; then
+      echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
+      wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+      mkdir -p "${HOME}/go"   
+      export GOPATH=$HOME/go
+      export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+      echo "export GOPATH=\$HOME/go" >> "${HOME}"/.zshrc
+      echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >> "${HOME}"/.zshrc
+      echo -e "${Green}You're running Oh-My-Zsh! Installing Ax to \$PATH...${Color_Off}"
+      echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.zshrc
+      echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc
+      source "${HOME}"/.zshrc >> /dev/null 2>&1
+      SHELL=$(which zsh)
+     else
+      echo -e "${Green}You're running Oh-My-Zsh! Installing Ax to \$PATH...${Color_Off}"
+      echo "export PATH=\"\$PATH:\$HOME/.local/bin:\$HOME/.axiom/interact\"" >>~/.zshrc
+      echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >>~/.zshrc
+      source "${HOME}"/.zshrc >> /dev/null 2>&1
+      SHELL=$(which zsh)
+     fi
     fi
-    mkdir -p "${HOME}/go"
-    export GOPATH=$HOME/go
-    export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-    echo "export GOPATH=\$HOME/go" >>~/.zshrc
-    echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin"  >>~/.zshrc
-    echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH" >>~/.zshrc
-    echo -e "${Green}You're running ZSH! Installing Axiom to \$PATH...${Color_Off}"
-    echo "export PATH=\"\$PATH:\$HOME/.axiom/interact\"" >>~/.zshrc  
-    echo "source $HOME/.axiom/functions/autocomplete.zsh" >>~/.zshrc   
-    source "${HOME}"/.zshrc  >> /dev/null 2>&1
-    SHELL=$(which zsh)
 }
 
 ###########################################################################################################
@@ -99,17 +179,22 @@ function omz_shell(){
 function usage() {
         echo -e "${BWhite}Description:"
         echo -e "${BWhite}Examples:${Color_Off}"
-        echo -e "  ${Blue}axiom-configure${Color_Off} # kick off axiom configuration wizard"
-        echo -e "  ${Blue}axiom-configure --shell Zsh${Color_Off} # Set default shell to Zsh via command line"
-        echo -e "  ${Blue}axiom-configure --config <axiom.json config data>${Color_Off} # Use plaintext axiom.json data for account setup TODO: support axiom.json as a file"
-        echo -e "  ${Blue}axiom-configure --shell BASH --unattended --config <axiom.json config data> ${Color_Off} # Use bash for default shell, do not promot, use plaintext axiom.json data for account setup"
+        echo -e "  ${BGreen}axiom-configure --setup${Color_Off} # kick off Ax configuration wizard"
+        echo -e "  ${BGreen}axiom-configure --shell zsh${Color_Off} # Set default shell to zsh via command line"
+        echo -e "  ${BGreen}axiom-configure --config <personal.json file>${Color_Off} # Use personal.json from a file for account setup"
+        echo -e "  ${BGreen}axiom-configure --config <personal.json string>${Color_Off} # Use personal.json data supplied by command-line for account setup (must be vaild personal.json data wrapped in single quotes)"
+        echo -e "  ${BGreen}axiom-configure --shell bash --unattended --config <path to personal.json file> ${Color_Off} # Use bash for default shell, do not promot, use personal.json data from file for axiom setup"
         echo -e "${BWhite}Usage:${Color_Off}"
+        echo -e "  --setup (optional)"
+        echo -e "    Start axiom-configure wizard, install dependencies, kick off axiom-account-setup and axiom-build"
         echo -e "  --config <axiom.json data>"
-        echo -e "    Setup account with data supplied from the command line (must be vaild data from axiom.json wrapped in single quotes)"
+        echo -e "    Setup account with data from file or supplied from the command line (must be vaild data from a personal.json axiom file)"
         echo -e "  --unattended (optional)"
         echo -e "    Avoid any promots, defaults to Oh My Zsh unless --shell argument is also provided"
-        echo -e "  --shell <Bash, Zsh, OMZ (Oh My Zsh)> (optional)"
-        echo -e "    Choose bash/zsh to add axiom to .bashrc/.zshrc. OMZ installs Oh My Zsh and overwrites .zshrc"
+        echo -e "  --shell <bash, zsh, omz (Oh My Zsh)> (optional)"
+        echo -e "    Add axiom to path, backup .zshrc/.bashrc to .zshrcbak/.bashrcbak"
+        echo -e "  --debug (optional)"
+        echo -e "    Enable debug mode (VERY VERBOSE!)"
         echo -e "  --help"
         echo -e "    Display this help menu"
 }
@@ -130,6 +215,16 @@ do
             set=true
             pass+=($i)
             pass+=($n)
+        fi
+       if [[ "$arg" == "--debug" ]]; then
+            set -xv
+            set=true
+            pass+=($i)
+        fi
+       if [[ "$arg" == "--setup" ]]; then
+            setup=true
+            set=true
+            pass+=($i)
         fi
         if [[ "$arg" == "--unattended" ]]; then
             unattended=true          
@@ -152,22 +247,29 @@ do
 fi
 done
 
+if [[ "$setup" != "true" ]]; then
+usage 
+exit
+
+fi
+
+
 if [ ! -z ${unattended:+x} ]; then
-echo -e "${Blue}Hello! Welcome to Axiom configuration :)"
+echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
 echo -e "${Green}Detected unattended option passed from command line...${Color_Off}"
-echo -e "${Blue}Automatically installing dependencies and begining installation!${Color_Off}"
+echo -e "${BGreen}Automatically installing dependencies and begining installation!${Color_Off}"
 if [ -z ${usershell:+x} ]; then
 usershell="omz"
 fi
 elif [ ! -z ${config+x} ]; then
-echo -e "${Blue}Hello! Welcome to Axiom configuration :)"
+echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
 echo -e "${Green}Detected axiom.json option passed from command line...${Color_Off}"
-echo -e "${Blue}Automatically installing dependencies and begining installation!${Color_Off}"
+echo -e "${BGreen}Automatically installing dependencies and begining installation!${Color_Off}"
 else
-echo -e "${Blue}Hello! Welcome to Axiom configuration :)"
+echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
 echo -e "Press enter to install dependencies and begin installation!${Color_Off}"
 read
-echo -e "${Blue}INSTALLING AXIOM...${Color_Off}"
+echo -e "${BGreen}INSTALLING THE AX FRAMEWORK...${Color_Off}"
 sleep 1
 fi
 
@@ -198,22 +300,22 @@ if [[ $BASEOS == "Linux" ]]; then
     if $(uname -a | grep -qi "Microsoft"); then
         OS="UbuntuWSL"
     else
-        OS=$(lsb_release -i | awk '{ print $3 }')
+        OS=$(lsb_release -i 2>/dev/null | awk '{ print $3 }')
         if ! command -v lsb_release &> /dev/null; then
-            echo "WARNING: Unless using Ubuntu latest, this install might not work"
+            echo -e "${Yellow}WARNING: lsb_release not found. Unless using Ubuntu latest, this install might not work${Color_Off}"
             echo "lsb_release could not be found, unable to determine your distribution"
             OS="unknown-Linux"
             BASEOS="Linux"
         fi
     fi
     if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
-        echo -e "${Blue}Congrats, you run arch..."
-        echo -e "${Blue}Installing other repo deps...${Color_Off}"
+        echo -e "${BGreen}Congrats, you run arch..."
+        echo -e "${BGreen}Installing git ruby curl jq packer rsync...${Color_Off}"
         # Stated dependencies in the Github-wiki
         sudo pacman -Syu git ruby curl jq packer rsync --noconfirm
         # Other dependencies
         sudo pacman -Syu go python-pip net-tools unzip libxslt bc --noconfirm
-        echo -e "${Blue}Installing Interlace...${Color_Off}"
+        echo -e "${BGreen}Installing Interlace...${Color_Off}"
         sudo rm -fr /tmp/interlace
         git clone https://github.com/codingo/Interlace.git /tmp/interlace
         cd /tmp/interlace && sudo python3 setup.py install
@@ -226,29 +328,27 @@ if [[ $BASEOS == "Linux" ]]; then
         ln -fs /usr/share/zoneinfo/$(curl ipinfo.io/"$ip" | jq -r .timezone) /etc/localtime
         dpkg-reconfigure --frontend noninteractive tzdata
        fi
-        echo -e "${Blue}Installing other repo deps...${Color_Off}"
-        DEBIAN_FRONTEND=noninteractive sudo apt-get update && sudo apt-get install git ruby python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server fail2ban -y 
-        echo -e "${Blue}Installing jq...${Color_Off}"
-        sudo wget -q -O /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && sudo chmod +x /usr/bin/jq
-        echo -e "${Blue}Installing packer...${Color_Off}"
+        echo -e "${BGreen}Installing fail2ban jq git ruby python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server...${Color_Off}"
+        DEBIAN_FRONTEND=noninteractive sudo apt-get update && sudo apt-get install git ruby python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server fail2ban jq -y 
+        echo -e "${BGreen}Installing packer...${Color_Off}"
         wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.8.1/packer_1.8.1_linux_amd64.zip && cd /tmp/ && unzip packer.zip && sudo mv packer /usr/bin/ && rm /tmp/packer.zip 
-        echo -e "${Blue}Installing Interlace...${Color_Off}"
+        echo -e "${BGreen}Installing Interlace...${Color_Off}"
         sudo rm -fr /tmp/interlace
         git clone https://github.com/codingo/Interlace.git /tmp/interlace
         cd /tmp/interlace && sudo python3 setup.py install
 
         elif [[ $OS == "Fedora" ]]; then
-        echo -e "${Blue}Installing other repo deps...${Color_Off}"
+        echo -e "${BGreen}Installing fail2ban mmv bc fzf git rubypick python3-pip curl net-tools unzip util-linux...${Color_Off}"
         sudo dnf update && sudo dnf -y install mmv bc fzf git rubypick python3-pip curl net-tools unzip util-linux fail2ban
-        echo -e "${Blue}Installing jq...${Color_Off}"
+        echo -e "${BGreen}Installing jq...${Color_Off}"
         sudo wget -q -O /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && sudo chmod +x /usr/bin/jq
-        echo -e "${Blue}Installing packer...${Color_Off}"
+        echo -e "${BGreen}Installing packer...${Color_Off}"
         wget -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.8.1/packer_1.8.1_linux_amd64.zip && cd /tmp/ && unzip packer.zip && sudo mv packer /usr/bin/ && rm /tmp/packer.zip
         fi
 fi
 
 if [[ $BASEOS == "Mac" ]]; then
-         echo -e "${Blue}Installing Brew...${Color_Off}"
+         echo -e "${BGreen}Installing Brew...${Color_Off}"
          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
          echo -e 'Setting permissions'
          sudo chown -R $(whoami) /usr/local/Homebrew
@@ -257,31 +357,55 @@ if [[ $BASEOS == "Mac" ]]; then
          sudo chown -R $(whoami) /usr/local/share/zsh /usr/local/share/zsh/site-functions
          chmod u+w /usr/local/share/zsh /usr/local/share/zsh/site-functions
          chmod u+w /usr/local/etc/bash_completion.d /usr/local/lib/pkgconfig /usr/local/share/aclocal /usr/local/share/doc /usr/local/share/info /usr/local/share/locale /usr/local/share/man /usr/local/share/man/man1 /usr/local/share/man/man3 /usr/local/share/man/man5 /usr/local/share/man/man7
-         echo -e "${Blue}Installing wget...${Color_Off}"
+         echo -e "${BGreen}Installing wget...${Color_Off}"
          brew install wget
-         echo -e "${Blue}Installing go...${Color_Off}"
-         brew install golang
          mkdir -p "${HOME}/go"
          export GOPATH=$HOME/go
          echo "export GOPATH=\$HOME/go" >>~/.zshrc
          echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin"  >>~/.zshrc
-         echo -e "${Green}You're running ZSH! Installing Axiom to \$PATH...${Color_Off}"
+         echo -e "${Green}You're running ZSH! Installing Ax to \$PATH...${Color_Off}"
          echo "export PATH=\"\$PATH:\$HOME/.axiom/interact\"" >>~/.zshrc
-         echo -e "${Blue}Installing jq...${Color_Off}"
+         echo -e "${BGreen}Installing jq...${Color_Off}"
          brew install jq
-         echo -e "${Blue}Installing coreutils...${Color_Off}"
+         echo -e "${BGreen}Installing coreutils...${Color_Off}"
          brew install coreutils
-         echo -e "${Blue}Installing Python3...${Color_Off}"
-         brew install python3
-         echo -e "${Blue}Installing Interlace...${Color_Off}"
+         echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc 
+         if [[ "$unattended" == "true" ]]; then
+          echo -e "${BGreen}Installing Python3...${Color_Off}"
+          brew install python3
+          echo -e "${BGreen}Installing setuptools...${Color_Off}"
+          pip3 install setuptools --break-system-packages
+          echo -e "${BGreen}Installing go...${Color_Off}"
+          brew install golang 
+        else
+          echo -e -n "${BYellow}Do you want to upgrade Python (brew install python3) y/n: \n>> ${Color_Off}"
+          read acc
+          if [[ "$acc" == "y" ]]; then 
+           echo -e "${BGreen}Installing Python3...${Color_Off}"
+           brew install python3
+	  fi
+           echo -e -n "${BYellow}Do you want to install setuptools? this will break system packages (pip3 install setuptools --break-system-packages)  y/n: \n>> ${Color_Off}"
+           read acc
+          if [[ "$acc" == "y" ]]; then
+           echo -e "${BGreen}Installing setuptools...${Color_Off}"
+           pip3 install setuptools --break-system-packages
+          fi
+          echo -e -n "${BYellow}Do you want to install/update Go? (brew install golang) y/n: \n>> ${Color_Off}"
+          read acc
+          if [[ "$acc" == "y" ]]; then
+           echo -e "${BGreen}Installing go...${Color_Off}"
+           brew install golang
+          fi
+         fi
+         echo -e "${BGreen}Installing Interlace...${Color_Off}"
          sudo rm -fr /tmp/interlace
          git clone https://github.com/codingo/Interlace.git /tmp/interlace
          cd /tmp/interlace && sudo python3 setup.py install
-         echo -e "${Blue}Installing packer...${Color_Off}"
+         echo -e "${BGreen}Installing packer...${Color_Off}"
          brew tap hashicorp/tap
          brew install hashicorp/tap/packer
          brew upgrade hashicorp/tap/packer
-         source "${HOME}"/.zshrc
+         source "${HOME}"/.zshrc >> /dev/null 2>&1
          SHELL=$(which zsh)
 fi
 
@@ -295,7 +419,8 @@ zsh_shell
 else
 
 # Pick your shell
-echo -e "${Blue}Choose bash/zsh to add axiom to .bashrc/.zshrc. OMZ installs Oh My Zsh and overwrites .zshrc${Color_Off}"
+echo -e "${BGreen}Choose bash/zsh to add Ax to .bashrc/.zshrc. OMZ installs Oh My Zsh and replaces .zshrc and .oh-my-zsh"
+echo -e "${BGreen}Whatever option you choose, we backup your config to ~/.\$shell-\$timestamp just in case${Color_Off}"
  PS3="Please select an option : "
   choices=("Bash" "Zsh" 'Oh My Zsh')
   select choice in "${choices[@]}"; do
@@ -317,22 +442,14 @@ done
 fi
 fi
 
-
 ###########################################################################################################
-# Clone axiom repo
+# Clone Ax repo
 #
 if [ ! -d "$AXIOM_PATH" ]; then
-    echo -e "${Blue}Installing axiom scripts...${Color_Off}"
-    git clone https://github.com/pry0cc/axiom "$AXIOM_PATH"
+    echo -e "${BGreen}Installing Ax scripts...${Color_Off}"
+    git clone https://github.com/attacksurge/ax "$AXIOM_PATH"
 else
     cd "$AXIOM_PATH" && git pull
-fi
-
-###########################################################################################################
-#  Install anew if not already installed
-#
-if ! [ -x "$(command -v anew)" ]; then
-go install github.com/tomnomnom/anew@latest >> /dev/null 2>&1
 fi
 
 ###########################################################################################################
@@ -348,8 +465,7 @@ else
 # Default setup logic ( e.g. when --unattended and --config args are not used
 #
 mkdir -p "${HOME}/.axiom/tmp/"
-"$AXIOM_PATH/interact/account-helpers/generate_amass.sh"
-echo -e "${Blue}Configuring your cloud account...${Color_Off}"
+echo -e "${BGreen}Configuring your cloud account...${Color_Off}"
 "$AXIOM_PATH"/interact/axiom-account-setup
 
 
@@ -358,12 +474,12 @@ echo -e "${Blue}Configuring your cloud account...${Color_Off}"
 #
 account_path=$(ls -la "$AXIOM_PATH"/axiom.json | rev | cut -d " " -f 1 | rev)
 if [ -f ~/.ssh/axiom_rsa ] ; then
- echo -e "${Blue}Adding axiom_rsa key to Packer builder${Color_Off}"
+ echo -e "${BGreen}Adding axiom_rsa key to Packer builder${Color_Off}"
  jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"
  cat ~/.ssh/axiom_rsa.pub >"$AXIOM_PATH"/configs/authorized_keys
 
 else
- echo -e "${Blue}Creating axiom SSH key in ~/.ssh/axiom_rsa.pub${Color_Off}"
+ echo -e "${BGreen}Creating axiom SSH key in ~/.ssh/axiom_rsa.pub${Color_Off}"
  ssh-keygen -b 2048 -t rsa -f ~/.ssh/axiom_rsa -q -N ""
  jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"  >> /dev/null 2>&1
  cat ~/.ssh/axiom_rsa.pub >"$AXIOM_PATH"/configs/authorized_keys
@@ -374,19 +490,29 @@ else
 ###########################################################################################################
 # Config parsing logic
 #
-echo "Parsing account.json file passed from command line"
-provider="$(echo "$config" | jq -r '.provider')"
-mkdir  -p "$HOME"/.axiom/accounts/
-account=${provider}$(date +%s)
-echo "$config" > "$HOME"/.axiom/accounts/"$account".json
-echo "$config" > "$HOME"/.axiom/axiom.json
-echo -e "${Blue}Cloud account configuration passed from command line...${Color_Off}"
-fi
+ echo "Parsing config passed from command line"
 
+ mkdir  -p "$HOME"/.axiom/accounts/
+ 
+ if test -f "$config"; then
+
+  provider="$(cat "$config" | jq -r '.provider')"
+  account=${provider}$(date +%s)
+  cp "$config" "$HOME"/.axiom/accounts/"$account".json  
+
+ else
+
+  provider="$(echo "$config" | jq -r '.provider')"
+  account=${provider}$(date +%s)
+  echo "$config" > "$HOME"/.axiom/accounts/"$account".json
+  echo "$config" > "$HOME"/.axiom/axiom.json
+  echo -e "${BGreen}Cloud account configuration passed from command line...${Color_Off}"
+ fi
+fi 
 export PATH="$PATH:$HOME/.axiom/interact"
 
 if [[ $unattended == "true" ]] ; then
-echo -e "${BWhite}Axiom install complete. Run axiom-account-setup to use axiom...${Color_Off}"
+echo -e "${BWhite}Ax Framework install complete. Run ax account-setup to use!...${Color_Off}"
 echo -e "${BWhite}You may need to restart your shell: $SHELL${Color_Off}"
 if [[ $config_flag == "true" ]] ; then
 "$HOME"/.axiom/interact/axiom-account "$account"  
@@ -397,7 +523,7 @@ fi
 if [ -z ${config+x} ]; then
 echo -e "${BWhite}Beginning first packer build...${Color_Off}"
 cd "$AXIOM_PATH"/ || exit
-"$AXIOM_PATH"/interact/axiom-build
+"$AXIOM_PATH"/interact/axiom-build --setup
 cd || exit
 echo -e "${BWhite}You may need to restart your shell: $SHELL${Color_Off}"
 else
