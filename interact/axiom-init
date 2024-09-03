@@ -1,20 +1,6 @@
 #!/usr/bin/env bash
 
 ###########################################################################################################
-# Title : axiom-init
-# About: Initialize axiom instances with differnet options, such as image, region, size and axiom deployment profile
-#
-# Examples: 
-#
-# axiom-init # provision instance with random name
-# axiom-init --deploy desktop # provision instance with random name, then deploy axiom profile 'desktop'
-# axiom-init testy01 # provision instance named testy01
-#
-# axiom-init testy01 --region nyc3 --image axiom-barebones-1635920849 --size s-1vcpu-2gb --deploy desktop --shell
-#
-###########################################################################################################
-
-###########################################################################################################
 # Header
 #
 AXIOM_PATH="$HOME/.axiom"
@@ -35,10 +21,11 @@ esac
 ###########################################################################################################
 # Declare defaut variables
 #
-provider="$(jq -r '.provider' "$AXIOM_PATH/axiom.json")"
+provider="$(jq -r '.provider' "$AXIOM_PATH"/axiom.json)"
 region="$(jq -r '.region' "$AXIOM_PATH"/axiom.json)"
 size="$(jq -r '.default_size' "$AXIOM_PATH"/axiom.json)"
 image="$(jq -r '.imageid' "$AXIOM_PATH"/axiom.json)"
+sshkey="$(jq -r '.sshkey' "$AXIOM_PATH"/axiom.json)"
 box_name=""
 connect_shell=false
 deploy=false
@@ -88,7 +75,7 @@ fi
 
 ###########################################################################################################
 # Help Menu
-# 
+#
 function usage() {
         echo -e "${BWhite}Description:${Color_Off}"
         echo -e "  Initialize one axiom instance with differnet options, such as image, region, size and axiom deployment profiles"
@@ -121,7 +108,7 @@ function usage() {
 }
 
 ###########################################################################################################
-# Parse command line arguments 
+# Parse command line arguments
 #
 if [ $# -eq 0 ]; then
     usage
@@ -209,16 +196,16 @@ do
 done
 
 ###########################################################################################################
-# Generate name 
+# Generate name
 #
-if [ -z ${args+x} ]; then 
+if [ -z ${args+x} ]; then
  name="${names[$RANDOM % ${#names[@]}]}$((10 + RANDOM % 20))"
 else
  name=$(echo "$args" | tr -d  ' ')
 fi
 
 ###########################################################################################################
-# Get image_id from $image ( default is from axiom.json ) or from user supplied manual image id param 
+# Get image_id from $image ( default is from axiom.json ) or from user supplied manual image id param
 #
 if [ "$manual_image_id" != "false" ]
 then
@@ -226,9 +213,29 @@ then
 else
     image_id="$(get_image_id "$image")"
     if [ -z "$image_id" ]; then
-        echo -e "${BRed}An image has not been found in this region. Do you need to run 'axiom-build'?${Color_Off}"
+        echo -e "${BRed}ERROR: image ${Color_Off}[ ${BBlue}$image ${Color_Off}]${BRed} not found. you may need to run ${Color_Off}[ ${BBlue}axiom-build --setup ${Color_Off}]${BRed} to build a new image."
+        echo -e "${BRed}if you've already built an image, list all images with ${Color_Off}[ ${BBlue}axiom-images ls ${Color_Off}]${BRed} and select it with ${Color_Off}[ ${BBlue}axiom-images select \$image_name${Color_Off}]"
+        echo -e "${BRed}exiting...${Color_Off}"
         exit 1
     fi
+fi
+
+###########################################################################################################
+# Check if ssh key is specified in axiom.json
+#
+if [ "$sshkey" == "null" ] ; then
+echo -e  "${BYellow}WARNING: sshkey not found in ~/axiom/axiom.json. Adding ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}key as a backup."
+echo -e  "${BYellow}If ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}was not used to build the initial image ${Color_Off}[ ${BBlue}$image_id ${Color_Off}]${BYellow}, you may have to manually edit ~/axiom/axiom.json to set the correct sshkey${Color_Off}"
+account_path=$(ls -la "$AXIOM_PATH"/axiom.json | rev | cut -d " " -f 1 | rev)
+ if [ -f ~/.ssh/axiom_rsa ] ; then
+  echo -e "${BGreen}Adding axiom_rsa key to Packer builder${Color_Off}"
+  jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"
+
+ else
+  echo -e "${BGreen}Creating axiom SSH key in ~/.ssh/axiom_rsa.pub${Color_Off}"
+  ssh-keygen -b 2048 -t rsa -f ~/.ssh/axiom_rsa -q -N ""
+  jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"  >> /dev/null 2>&1
+ fi
 fi
 
 ###########################################################################################################

@@ -81,9 +81,10 @@ read region
 	if [[ "$region" == "" ]]; then
 	echo -e "${Blue}Selected default option '$default_region'${Color_Off}"
 	region="$default_region"
-	fi
-	echo -e -n "${Green}Please enter your default size: (Default 't2.medium', press enter) \n>> ${Color_Off}"
-	read size
+fi
+
+echo -e -n "${Green}Please enter your default size: (Default 't2.medium', press enter) \n>> ${Color_Off}"
+read size
 	if [[ "$size" == "" ]]; then
 	echo -e "${Blue}Selected default option 't2.medium'${Color_Off}"
         size="t2.medium"
@@ -91,18 +92,51 @@ fi
 
 aws configure set default.region "$region"
 
-echo -e "${BGreen}Creating an Axiom Security Group: ${Color_Off}"
-aws ec2 delete-security-group --group-name axiom > /dev/null 2>&1
-sc="$(aws ec2 create-security-group --group-name axiom --description "Axiom SG")"
-group_id="$(echo "$sc" | jq -r '.GroupId')"
-echo -e "${BGreen}Created Security Group: $group_id ${Color_Off}"
+# Print available security groups
+echo -e "${BGreen}Printing Available Security Groups:${Color_Off}"
+(echo -e "GroupName\tGroupId\tOwnerId\tVpcId\tFromPort\tToPort" && aws ec2 describe-security-groups --query 'SecurityGroups[*].{GroupName:GroupName,GroupId:GroupId,OwnerId:OwnerId,VpcId:VpcId,FromPort:IpPermissions[0].FromPort,ToPort:IpPermissions[0].ToPort}' --output json | jq -r '.[] | [.GroupName, .GroupId, .OwnerId, .VpcId, .FromPort, .ToPort] | @tsv') | column -t
 
-######################################################################################################## we should add this to whitelist your IP - TODO
-group_rules="$(aws ec2 authorize-security-group-ingress --group-id "$group_id" --protocol tcp --port 2266 --cidr 0.0.0.0/0)"
-group_owner_id="$(echo "$group_rules" | jq -r '.SecurityGroupRules[].GroupOwnerId')"
-sec_group_id="$(echo "$group_rules" | jq -r '.SecurityGroupRules[].SecurityGroupRuleId')"
+# Prompt user to enter a security group name
+echo -e -n "${Green}Please enter a security group name above or press enter to create a new security group with a random name \n>> ${Color_Off}"
+read SECURITY_GROUP
 
-data="$(echo "{\"aws_access_key\":\"$ACCESS_KEY\",\"aws_secret_access_key\":\"$SECRET_KEY\",\"group_owner_id\":\"$group_owner_id\",\"security_group_id\":\"$sec_group_id\",\"region\":\"$region\",\"provider\":\"aws\",\"default_size\":\"$size\"}")"
+# If no security group name is provided, create a new one with a random name
+if [[ "$SECURITY_GROUP" == "" ]]; then
+  axiom_sg_random="axiom-$(date +%m-%d_%H-%M-%S-%1N)"
+  SECURITY_GROUP=$axiom_sg_random
+  echo -e "${BGreen}Creating an Axiom Security Group: ${Color_Off}"
+  aws ec2 delete-security-group --group-name "$SECURITY_GROUP" > /dev/null 2>&1
+  sc=$(aws ec2 create-security-group --group-name "$SECURITY_GROUP" --description "Axiom SG")
+  group_id=$(echo "$sc" | jq -r '.GroupId')
+  echo -e "${BGreen}Created Security Group: $group_id ${Color_Off}"
+else
+  # Use the existing security group
+  echo -e "${BGreen}Using Security Group: $SECURITY_GROUP ${Color_Off}"
+  group_id=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=$SECURITY_GROUP" --query "SecurityGroups[*].GroupId" --output text)
+
+  if [ -z "$group_id" ]; then
+    echo -e "${BGreen}Security Group '$SECURITY_GROUP' not found. Exiting.${Color_Off}"
+    exit 1
+  fi
+fi
+
+# Attempt to add the rule
+group_rules=$(aws ec2 authorize-security-group-ingress --group-id "$group_id" --protocol tcp --port 2266 --cidr 0.0.0.0/0 2>&1)
+
+# Check if the rule already exists
+if echo "$group_rules" | grep -q "InvalidPermission.Duplicate"; then
+  echo -e "${BGreen}The rule already exists for Security Group ID: $group_id ${Color_Off}"
+
+  group_owner_id=$(aws ec2 describe-security-groups --group-ids "$group_id" --query "SecurityGroups[*].OwnerId" --output text)
+  echo -e "${BGreen}GroupOwnerId: $group_owner_id, GroupId: $group_id ${Color_Off}"
+else
+  echo -e "${BGreen}Rule added successfully to Security Group: $group_id ${Color_Off}"
+
+  group_owner_id=$(aws ec2 describe-security-groups --group-ids "$group_id" --query "SecurityGroups[*].OwnerId" --output text)
+  echo -e "${BGreen}GroupOwnerId: $group_owner_id, GroupId: $group_id ${Color_Off}"
+fi
+
+data="$(echo "{\"aws_access_key\":\"$ACCESS_KEY\",\"aws_secret_access_key\":\"$SECRET_KEY\",\"group_owner_id\":\"$group_owner_id\",\"security_group_id\":\"$group_id\",\"region\":\"$region\",\"provider\":\"aws\",\"default_size\":\"$size\"}")"
 
 echo -e "${BGreen}Profile settings below: ${Color_Off}"
 echo $data | jq '.aws_secret_access_key = "*************************************"'

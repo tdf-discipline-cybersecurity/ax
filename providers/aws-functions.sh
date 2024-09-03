@@ -13,11 +13,12 @@ create_instance() {
 	size_slug="$3"
 	region="$4"
 	boot_script="$5"
-  sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
+	sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
+        security_group_id="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.security_group_id')"
 
-  aws ec2 run-instances --image-id "$image_id" --count 1 --instance-type "$size" --region "$region" --security-groups axiom --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$name}]" 2>&1 >> /dev/null
+	aws ec2 run-instances --image-id "$image_id" --count 1 --instance-type "$size" --region "$region" --security-group-ids "$security_group_id" --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$name}]" 2>&1 >> /dev/null
 
-  sleep 260
+	sleep 260
 }
 
 ###################################################################

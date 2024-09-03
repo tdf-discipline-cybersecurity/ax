@@ -63,12 +63,11 @@ if [[ $BASEOS == "Mac" ]]; then
   echo -e '    $ AXIOM_FORCEBREW=yes $HOME/.axiom/interact/axiom-configure'
  fi
  if ! [ -x "$(command -v hcloud)" ]; then
-  echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
+  echo -e "${BGreen}Installing hetzner cloud cli (i.e hcloud)...${Color_Off}"
   brew install hcloud
   packer plugins install github.com/hetznercloud/hcloud
  fi
 fi
-
 
 function hetznersetup(){
  while true; do
@@ -123,7 +122,6 @@ if [[ "$title" == "" ]]; then
     title="personal"
     echo -e "${BGreen}Named profile 'personal'${Color_Off}"
 fi
-
 
 echo -e "${BGreen}Creating hetzner context and config file in ${Color_Off}'${BGreen}$HOME/.config/hcloud/cli.toml${Color_Off}'"
 mkdir -p $HOME/.config/hcloud/

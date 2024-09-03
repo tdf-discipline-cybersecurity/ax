@@ -325,6 +325,5 @@ hcloud server-type list --output json | jq -r '
       (.prices[0].price_hourly.net | tonumber),
       (.prices[0].price_per_tb_traffic.net | tonumber)
     ]) | @tsv
-' | column -t -s $'\t'
-
+' | iconv -c -t UTF-8 | column -t -s $'\t'
 }

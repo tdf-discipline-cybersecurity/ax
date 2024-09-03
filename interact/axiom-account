@@ -149,7 +149,6 @@ then
          fi
          fi
 
-         #############################################################################################################
          # Change packer version for IBM
          #
          mkdir -p /tmp/packer-ibm/
@@ -199,7 +198,7 @@ then
            sudo pacman -Syu hcloud --noconfirm
           elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] ||[[ $OS == "UbuntuWSL" ]]; then
            if ! [ -x "$(command -v hcloud)" ]; then
-            echo -e "${BGreen}Installing hetzner-cli...${Color_Off}"
+           echo -e "${BGreen}Installing hetzner cloud cli (hcloud)...${Color_Off}"
             wget -q -O /tmp/hetzner-cli.tar.gz https://github.com/hetznercloud/cli/releases/download/v1.46.0/hcloud-linux-amd64.tar.gz && tar -xvzf /tmp/hetzner-cli.tar.gz -C /tmp && sudo mv /tmp/hcloud /usr/bin/hcloud && rm /tmp/hetzner-cli.tar.gz
            fi
           elif [[ $OS == "Fedora" ]]; then
@@ -218,7 +217,7 @@ then
            echo -e '    $ AXIOM_FORCEBREW=yes $HOME/.axiom/interact/axiom-configure'
           fi
           if ! [ -x "$(command -v hcloud)" ]; then
-           echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
+           echo -e "${BGreen}Installing hetzner-cloud cli (hcloud)...${Color_Off}"
            brew install hcloud
            packer plugins install github.com/hetznercloud/hcloud
           fi
@@ -239,7 +238,7 @@ active_context = "$1"
 EOT
 
          else
-         echo -e "Not authenticated to hetzner cli"
+         echo -e "Not authenticated to hetzner-cloud cli (hcloud)"
             bootstrap
          fi
        fi
@@ -261,4 +260,4 @@ else
             fi
         done
     echo -n -e "${Color_Off}"
-fi #main if
+fi 

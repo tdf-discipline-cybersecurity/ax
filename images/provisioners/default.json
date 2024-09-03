@@ -73,13 +73,13 @@
         "/bin/su -l root -c 'echo \"net.ipv4.ip_local_port_range = 1024 65535\" | sudo tee -a /etc/sysctl.conf'",
         "/bin/su -l root -c 'echo \"1024 65535\" | sudo tee -a /proc/sys/net/ipv4/ip_local_port_range'",
 
-        "echo 'Downloading Wordlists'",
-
-        "echo 'Downloading cent'",
-        "git clone https://github.com/xm1k3/cent.git /home/op/lists/cent",
+        "echo 'Downloading Files and Lists'",
 
         "echo 'Downloading axiom-dockerfiles'",
         "git clone https://github.com/attacksurge/dockerfiles.git /home/op/lists/axiom-dockerfiles",
+
+        "echo 'Downloading cent'",
+        "git clone https://github.com/xm1k3/cent.git /home/op/lists/cent",
 
         "echo 'Downloading permutations'",
         "wget -q -O /home/op/lists/permutations.txt https://gist.github.com/six2dez/ffc2b14d283e8f8eff6ac83e20a3c4b4/raw",
@@ -93,7 +93,6 @@
         "echo 'Installing Tools'",
 
         "echo 'Installing assetfinder'",
-
         "/bin/su -l op -c '/usr/local/go/bin/go install github.com/tomnomnom/assetfinder@latest'",
 
         "echo 'Installing Amass'",
