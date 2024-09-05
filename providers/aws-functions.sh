@@ -37,7 +37,6 @@ delete_instance() {
         fi
     fi
 
-    echo "Deleting instance '$name' with ID: $id"
     aws ec2 terminate-instances --instance-ids "$id" 2>&1 >> /dev/null
 }
 

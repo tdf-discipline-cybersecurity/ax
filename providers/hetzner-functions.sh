@@ -40,7 +40,6 @@ delete_instance() {
         fi
     fi
 
-    echo "Deleting instance '$name' with ID: $id"
     hcloud server delete "$id"
 }
 

@@ -34,7 +34,6 @@ delete_instance() {
         fi
     fi
 
-    echo "Deleting instance '$name' with ID: $id"
     linode-cli linodes delete "$id"
 }
 
