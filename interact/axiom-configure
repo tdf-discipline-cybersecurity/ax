@@ -323,13 +323,6 @@ if [ ! -z ${unattended:+x} ]; then
  if [ -z ${usershell:+x} ]; then
   usershell="omz"
  fi
- if [ -z ${auto_update:+x} ]; then
-  auto_update="yes"
-  manage_auto_update
- else
-  manage_auto_update
-fi
-
 elif [ ! -z ${config+x} ]; then
  echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
  echo -e "${Green}Detected axiom.json option passed from command line...${Color_Off}"
@@ -524,9 +517,16 @@ fi
 # unattended setup flag logic
 #
 if [ -z ${config:+x} ]; then
-if [[ "$unattended" == "true" ]]; then
-echo "Unattended setup"
-mkdir  -p "$HOME"/.axiom/accounts/
+ if [[ "$unattended" == "true" ]]; then
+  echo "Unattended setup"
+  if [ -z ${auto_update:+x} ]; then
+   auto_update="yes"
+   manage_auto_update
+  else
+   manage_auto_update
+  fi
+
+  mkdir  -p "$HOME"/.axiom/accounts/
 
 else
 
