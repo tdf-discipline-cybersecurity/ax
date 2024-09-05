@@ -52,8 +52,8 @@
         "sudo service sshd restart",
         "chmod +x /etc/update-motd.d/00-header",
 
-        "echo 'Installing Golang 1.22.2'",
-        "wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz",
+        "echo 'Installing Golang {{ user `golang_version` }}'",
+        "wget -q https://golang.org/dl/go{{ user `golang_version` }}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go{{ user `golang_version` }}.linux-amd64.tar.gz && rm go{{ user `golang_version` }}.linux-amd64.tar.gz",
         "export GOPATH=/home/op/go",
 
         "echo 'Installing Docker'",
@@ -73,7 +73,7 @@
         "/bin/su -l root -c 'echo \"net.ipv4.ip_local_port_range = 1024 65535\" | sudo tee -a /etc/sysctl.conf'",
         "/bin/su -l root -c 'echo \"1024 65535\" | sudo tee -a /proc/sys/net/ipv4/ip_local_port_range'",
 
-        "echo 'Downloading Wordlists'",
+        "echo 'Downloading Files and Lists'",
 
         "echo 'Downloading cent'",
         "git clone https://github.com/xm1k3/cent.git /home/op/lists/cent",

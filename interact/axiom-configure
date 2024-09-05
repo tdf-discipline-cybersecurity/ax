@@ -24,8 +24,56 @@ echo '
  "𝓶𝓲𝓰𝓱𝓽 𝓪𝓼 𝔀𝓮𝓵𝓵 𝓫𝓮 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷" 
  "𝓪𝓵𝓻𝓲𝓰𝓱𝓽, 𝔂𝓸𝓾 𝓰𝓸𝓽 𝓶𝓮, 𝓲𝓽𝓼 𝓳𝓾𝓼𝓽 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
  "𝓼𝓽𝓸𝓵𝓮𝓷 𝓯𝓻𝓸𝓶: 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
- ' | xargs shuf -n1 -e 
+ ' | xargs shuf -n1 -e
 echo ''
+
+###########################################################################################################
+# manage auto-update settings
+#
+manage_auto_update() {
+    auto_update_one_liner='[ $[ $RANDOM % 16 ] == 0 ] && $HOME/.axiom/interact/axiom-update >> /dev/null 2>&1'
+
+    # Check if auto_update is explicitly set
+    if [ -z "${auto_update+x}" ]; then
+        # Loop until a valid response is given
+        while true; do
+            echo -e -n "${BYellow}Do you want to periodically update axiom automatically in the background (recommended)? y/n: \n>> ${Color_Off}"
+            read acc
+
+            if [[ "$acc" == "y" ]] || [[ "$acc" == "yes" ]]; then
+                auto_update="yes"
+                break
+            elif [[ "$acc" == "n" ]] || [[ "$acc" == "no" ]]; then
+                auto_update="no"
+                break
+            else
+                echo -e "${BRed}Invalid response. Please enter 'y' for yes or 'n' for no.${Color_Off}"
+            fi
+        done
+    fi
+
+    # If auto_update is true, add the auto_update_one_liner if it's not already present
+    if [[ "$auto_update" == "yes" ]]; then
+        if ! grep -Fq "$auto_update_one_liner" "$AXIOM_PATH/interact/includes/vars.sh"; then
+            echo "$auto_update_one_liner" >> "$AXIOM_PATH/interact/includes/vars.sh"
+            echo "Auto-update has been enabled."
+        else
+            echo "Auto-update is already enabled."
+        fi
+    # If auto_update is false, remove the auto_update_one_liner if present
+    elif [[ "$auto_update" == "no" ]]; then
+        if grep -Fq "$auto_update_one_liner" "$AXIOM_PATH/interact/includes/vars.sh"; then
+            # Use grep and sed to remove the line from the file
+            grep -vF "$auto_update_one_liner" "$AXIOM_PATH/interact/includes/vars.sh" > "$AXIOM_PATH/interact/includes/vars_tmp.sh"
+            mv "$AXIOM_PATH/interact/includes/vars_tmp.sh" "$AXIOM_PATH/interact/includes/vars.sh"
+            echo "Auto-update has been disabled."
+        else
+            echo "Auto-update is already disabled."
+        fi
+    else
+        echo "Invalid value for auto_update. Please use 'yes' or 'no'."
+    fi
+}
 
 ###########################################################################################################
 # Shell setup functions
@@ -36,8 +84,9 @@ function bash_shell(){
     cp "$HOME"/.bashrc "$HOME"/.bashrc-$timestamp >> /dev/null 2>&1
 
     if [[ "$unattended" == "true" ]]; then
-     echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
-     wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+     echo -e "${BGreen}Installing Golang ${GolangVersion}${Color_Off}"
+     sudo rm -rf /usr/local/go/ >> /dev/null 2>&1
+     wget -q https://golang.org/dl/go${GolangVersion}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go${GolangVersion}.linux-amd64.tar.gz && rm go${GolangVersion}.linux-amd64.tar.gz
      mkdir -p "${HOME}/go"
      export GOPATH=$HOME/go
      export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
@@ -51,11 +100,12 @@ function bash_shell(){
      echo "[[ -f ~/.bashrc ]] && . ~/.bashrc" >> "${HOME}"/.bash_profile
      source ~/.bashrc  >> /dev/null 2>&1
     else
-     echo -e -n "${BYellow}Do you want to install Golang 1.22.2? y/n: \n>> ${Color_Off}"
+     echo -e -n "${BYellow}Do you want to install Golang ${GolangVersion}? y/n: \n>> ${Color_Off}"
      read acc
      if [[ "$acc" == "y" ]]; then
-      echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
-      wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+      echo -e "${BGreen}Installing Golang ${GolangVersion}${Color_Off}"
+      sudo rm -rf /usr/local/go/ >> /dev/null 2>&1
+      wget -q https://golang.org/dl/go${GolangVersion}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go${GolangVersion}.linux-amd64.tar.gz && rm go${GolangVersion}.linux-amd64.tar.gz
       mkdir -p "${HOME}/go"
       export GOPATH=$HOME/go
       export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
@@ -87,8 +137,9 @@ function zsh_shell(){
     cp "$HOME"/.zshrc "$HOME"/.zshrc-$timestamp >> /dev/null 2>&1
 
     if [[ "$unattended" == "true" ]]; then
-     echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
-     wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+     echo -e "${BGreen}Installing Golang ${GolangVersion}${Color_Off}"
+     sudo rm -rf /usr/local/go/ >> /dev/null 2>&1
+     wget -q https://golang.org/dl/go${GolangVersion}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go${GolangVersion}.linux-amd64.tar.gz && rm go${GolangVersion}.linux-amd64.tar.gz
      mkdir -p "${HOME}/go"
      export GOPATH=$HOME/go
      export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
@@ -100,11 +151,12 @@ function zsh_shell(){
      source "${HOME}"/.zshrc >> /dev/null 2>&1
      SHELL=$(which zsh)
     else
-     echo -e -n "${BYellow}Do you want to install Golang 1.22.2? y/n: \n>> ${Color_Off}"
+     echo -e -n "${BYellow}Do you want to install Golang ${GolangVersion}? y/n: \n>> ${Color_Off}"
      read acc
      if [[ "$acc" == "y" ]]; then
-      echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
-      wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+      echo -e "${BGreen}Installing Golang ${GolangVersion}${Color_Off}"
+      sudo rm -rf /usr/local/go/ >> /dev/null 2>&1
+      wget -q https://golang.org/dl/go${GolangVersion}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go${GolangVersion}.linux-amd64.tar.gz && rm go${GolangVersion}.linux-amd64.tar.gz
       mkdir -p "${HOME}/go"
       export GOPATH=$HOME/go
       export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
@@ -135,8 +187,9 @@ function omz_shell(){
     sudo apt install zsh zsh-syntax-highlighting zsh-autosuggestions -y
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     if [[ "$unattended" == "true" ]]; then
-     echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
-     wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+     echo -e "${BGreen}Installing Golang ${GolangVersion}${Color_Off}"
+     sudo rm -rf /usr/local/go/ >> /dev/null 2>&1
+     wget -q https://golang.org/dl/go${GolangVersion}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go${GolangVersion}.linux-amd64.tar.gz && rm go${GolangVersion}.linux-amd64.tar.gz
      mkdir -p "${HOME}/go"
      export GOPATH=$HOME/go
      export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
@@ -148,11 +201,12 @@ function omz_shell(){
      source "${HOME}"/.zshrc >> /dev/null 2>&1
      SHELL=$(which zsh)
     else
-     echo -e -n "${BYellow}Do you want to install Golang 1.22.2? y/n: \n>> ${Color_Off}"
+     echo -e -n "${BYellow}Do you want to install Golang ${GolangVersion}? y/n: \n>> ${Color_Off}"
      read acc
      if [[ "$acc" == "y" ]]; then
-      echo -e "${BGreen}Installing Golang 1.22.2${Color_Off}"
-      wget -q https://golang.org/dl/go1.22.2.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz && rm go1.22.2.linux-amd64.tar.gz
+      echo -e "${BGreen}Installing Golang ${GolangVersion}${Color_Off}"
+      sudo rm -rf /usr/local/go/ >> /dev/null 2>&1
+      wget -q https://golang.org/dl/go${GolangVersion}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go${GolangVersion}.linux-amd64.tar.gz && rm go${GolangVersion}.linux-amd64.tar.gz
       mkdir -p "${HOME}/go"   
       export GOPATH=$HOME/go
       export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
@@ -193,6 +247,8 @@ function usage() {
         echo -e "    Avoid any promots, defaults to Oh My Zsh unless --shell argument is also provided"
         echo -e "  --shell <bash, zsh, omz (Oh My Zsh)> (optional)"
         echo -e "    Add axiom to path, backup .zshrc/.bashrc to .zshrcbak/.bashrcbak"
+        echo -e "  --auto-update <yes, no> (optional)"
+        echo -e "    Toggle auto-update to periodically update axiom"
         echo -e "  --debug (optional)"
         echo -e "    Enable debug mode (VERY VERBOSE!)"
         echo -e "  --help"
@@ -200,7 +256,7 @@ function usage() {
 }
 
 ###########################################################################################################
-# Parse command line arguments 
+# Parse command line arguments
 #
 i=0
 for arg in "$@"
@@ -208,69 +264,91 @@ do
     i=$((i+1))
     if [[  ! " ${pass[@]} " =~ " ${i} " ]]; then
         set=false
-        if [[ "$arg" == "--config" ]]; then
+       if [[ "$arg" == "--config" ]]; then
             n=$((i+1))
             config=$(echo ${!n})
             config_flag="true"
             set=true
             pass+=($i)
             pass+=($n)
-        fi
+       fi
        if [[ "$arg" == "--debug" ]]; then
             set -xv
             set=true
             pass+=($i)
-        fi
+       fi
+       if [[ "$arg" == "--auto-update" ]]; then
+            n=$((i+1))
+            auto_update=$(echo ${!n})
+            auto_update_flag="true"
+            set=true
+            pass+=($i)
+            pass+=($n)
+       fi
        if [[ "$arg" == "--setup" ]]; then
             setup=true
             set=true
             pass+=($i)
-        fi
-        if [[ "$arg" == "--unattended" ]]; then
-            unattended=true          
+       fi
+       if [[ "$arg" == "--unattended" ]]; then
+            unattended=true
             set=true
             pass+=($i)
-        fi
-        if [[ "$arg" == "--shell" ]]; then
+       fi
+       if [[ "$arg" == "--shell" ]]; then
             n=$((i+1))
             usershell=$(echo ${!n})
             set=true
             pass+=($i)
             pass+=($n)
-        fi
-        if [[ "$arg" == "--help" ]] || [[ "$arg" == "-h" ]] || [[ "$arg" == "help" ]]; then
+       fi
+       if [[ "$arg" == "--help" ]] || [[ "$arg" == "-h" ]] || [[ "$arg" == "help" ]]; then
             usage
             exit
             set=true
             pass+=($i)
-        fi
+       fi
 fi
 done
 
 if [[ "$setup" != "true" ]]; then
-usage 
+usage
 exit
-
 fi
 
+if [ ! -d "$AXIOM_PATH" ]; then
+    echo -e "${BGreen}Installing Ax scripts...${Color_Off}"
+    git clone https://github.com/attacksurge/ax "$AXIOM_PATH"
+    AXIOM_PATH="$HOME/.axiom"
+     source "$AXIOM_PATH/interact/includes/vars.sh"
+else
+    cd "$AXIOM_PATH" && git pull
+fi
 
 if [ ! -z ${unattended:+x} ]; then
-echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
-echo -e "${Green}Detected unattended option passed from command line...${Color_Off}"
-echo -e "${BGreen}Automatically installing dependencies and begining installation!${Color_Off}"
-if [ -z ${usershell:+x} ]; then
-usershell="omz"
+ echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
+ echo -e "${Green}Detected unattended option passed from command line...${Color_Off}"
+ echo -e "${BGreen}Automatically installing dependencies and begining installation!${Color_Off}"
+ if [ -z ${usershell:+x} ]; then
+  usershell="omz"
+ fi
+ if [ -z ${auto_update:+x} ]; then
+  auto_update="yes"
+  manage_auto_update
+ else
+  manage_auto_update
 fi
+
 elif [ ! -z ${config+x} ]; then
-echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
-echo -e "${Green}Detected axiom.json option passed from command line...${Color_Off}"
-echo -e "${BGreen}Automatically installing dependencies and begining installation!${Color_Off}"
+ echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
+ echo -e "${Green}Detected axiom.json option passed from command line...${Color_Off}"
+ echo -e "${BGreen}Automatically installing dependencies and begining installation!${Color_Off}"
 else
-echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
-echo -e "Press enter to install dependencies and begin installation!${Color_Off}"
-read
-echo -e "${BGreen}INSTALLING THE AX FRAMEWORK...${Color_Off}"
-sleep 1
+ echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
+ echo -e "Press enter to install dependencies and begin installation!${Color_Off}"
+ read
+ echo -e "${BGreen}INSTALLING THE AX FRAMEWORK...${Color_Off}"
+ sleep 1
 fi
 
 echo -e "${BWhite}Installing deps! Please wait :) ${Color_Off}"
@@ -319,7 +397,7 @@ if [[ $BASEOS == "Linux" ]]; then
         sudo rm -fr /tmp/interlace
         git clone https://github.com/codingo/Interlace.git /tmp/interlace
         cd /tmp/interlace && sudo python3 setup.py install
-        
+ 
     elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
        if ! command -v sudo &> /dev/null; then
         export DEBIAN_FRONTEND=noninteractive
@@ -369,18 +447,18 @@ if [[ $BASEOS == "Mac" ]]; then
          brew install jq
          echo -e "${BGreen}Installing coreutils...${Color_Off}"
          brew install coreutils
-         echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc 
+         echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc
          if [[ "$unattended" == "true" ]]; then
           echo -e "${BGreen}Installing Python3...${Color_Off}"
           brew install python3
           echo -e "${BGreen}Installing setuptools...${Color_Off}"
           pip3 install setuptools --break-system-packages
           echo -e "${BGreen}Installing go...${Color_Off}"
-          brew install golang 
+          brew install golang
         else
           echo -e -n "${BYellow}Do you want to upgrade Python (brew install python3) y/n: \n>> ${Color_Off}"
           read acc
-          if [[ "$acc" == "y" ]]; then 
+          if [[ "$acc" == "y" ]]; then
            echo -e "${BGreen}Installing Python3...${Color_Off}"
            brew install python3
 	  fi
@@ -443,17 +521,7 @@ fi
 fi
 
 ###########################################################################################################
-# Clone Ax repo
-#
-if [ ! -d "$AXIOM_PATH" ]; then
-    echo -e "${BGreen}Installing Ax scripts...${Color_Off}"
-    git clone https://github.com/attacksurge/ax "$AXIOM_PATH"
-else
-    cd "$AXIOM_PATH" && git pull
-fi
-
-###########################################################################################################
-# unattended setup flag logic 
+# unattended setup flag logic
 #
 if [ -z ${config:+x} ]; then
 if [[ "$unattended" == "true" ]]; then
@@ -461,13 +529,14 @@ echo "Unattended setup"
 mkdir  -p "$HOME"/.axiom/accounts/
 
 else
+
 ###########################################################################################################
 # Default setup logic ( e.g. when --unattended and --config args are not used
 #
 mkdir -p "${HOME}/.axiom/tmp/"
+manage_auto_update
 echo -e "${BGreen}Configuring your cloud account...${Color_Off}"
 "$AXIOM_PATH"/interact/axiom-account-setup
-
 
 ###########################################################################################################
 # If axiom_rsa doesnt exist, create the SSH key and add to it Packer Builder and axiom.json
@@ -484,21 +553,22 @@ else
  jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"  >> /dev/null 2>&1
  cat ~/.ssh/axiom_rsa.pub >"$AXIOM_PATH"/configs/authorized_keys
 fi
-fi 
+fi
 
 else
+
 ###########################################################################################################
 # Config parsing logic
 #
  echo "Parsing config passed from command line"
 
  mkdir  -p "$HOME"/.axiom/accounts/
- 
+
  if test -f "$config"; then
 
   provider="$(cat "$config" | jq -r '.provider')"
   account=${provider}$(date +%s)
-  cp "$config" "$HOME"/.axiom/accounts/"$account".json  
+  cp "$config" "$HOME"/.axiom/accounts/"$account".json
 
  else
 
@@ -508,14 +578,14 @@ else
   echo "$config" > "$HOME"/.axiom/axiom.json
   echo -e "${BGreen}Cloud account configuration passed from command line...${Color_Off}"
  fi
-fi 
+fi
 export PATH="$PATH:$HOME/.axiom/interact"
 
 if [[ $unattended == "true" ]] ; then
 echo -e "${BWhite}Ax Framework install complete. Run ax account-setup to use!...${Color_Off}"
 echo -e "${BWhite}You may need to restart your shell: $SHELL${Color_Off}"
 if [[ $config_flag == "true" ]] ; then
-"$HOME"/.axiom/interact/axiom-account "$account"  
+"$HOME"/.axiom/interact/axiom-account "$account"
 fi
 exit 0
 fi
@@ -530,3 +600,4 @@ else
 echo -e "${BWhite}You may need to restart your shell: $SHELL${Color_Off}"
 "$HOME"/.axiom/interact/axiom-account "$account"
 fi
+

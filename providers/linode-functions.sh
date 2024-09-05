@@ -23,10 +23,20 @@ create_instance() {
 #
 delete_instance() {
     name="$1"
-        id="$(instance_id "$name")"
+    force="$2"
+    id="$(instance_id "$name")"
+    
+    if [ "$force" != "true" ]; then
+        read -p "Are you sure you want to delete instance '$name'? (y/N): " confirm
+        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+            echo "Instance deletion aborted."
+            return 1
+        fi
+    fi
+
+    echo "Deleting instance '$name' with ID: $id"
     linode-cli linodes delete "$id"
 }
-
 
 ###################################################################
 # Instances functions

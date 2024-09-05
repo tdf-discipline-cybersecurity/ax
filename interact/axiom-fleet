@@ -40,13 +40,14 @@ cycle_regions=false
 region_array=()
 gen_name=""
 provider="$(jq -r ".provider" "$AXIOM_PATH/axiom.json")"
-image_name="$(jq -r '.imageid' "$AXIOM_PATH"/axiom.json)"
+image="$(jq -r '.imageid' "$AXIOM_PATH"/axiom.json)"
 region="$(jq -r '.region' "$AXIOM_PATH"/axiom.json)"
 image_id=""
 instances=false
 time=320
 init_timeout=4
 init_sleep=4
+manual_image_id=false
 
 ###########################################################################################################
 # DO Region Transfer
@@ -58,7 +59,7 @@ if [[ "$provider" == "do" ]]; then
  requested_image_id_regions="$regionargs"
  if [[ "$avail_image_id_regions" != *"$requested_image_id_regions"* ]]; then
   echo -e "${Color_Off}]"
-  echo -e "${BYellow}instance ${BGreen}"$name"${BYellow} requested image in region ${BRed}$regionargs${BYellow}, however image ${BRed}$image_name${BYellow} only exists in ${BRed}$(echo $avail_image_id_regions | tr '\n' ',')"
+  echo -e "${BYellow}instance ${BGreen}"$name"${BYellow} requested image in region ${BRed}$regionargs${BYellow}, however image ${BRed}$image${BYellow} only exists in ${BRed}$(echo $avail_image_id_regions | tr '\n' ',')"
   echo -e "${BYellow}axiom will attempt to transfer image to new region, this can take a few minutes please be patient...${Color_Off}"
   doctl compute image-action transfer $image_id --region $regionargs --wait
    if [ $? -eq 0 ]; then
@@ -139,11 +140,18 @@ do
         fi
         if [[ "$arg" == "--image" ]] ; then
             n=$((i+1))
-            image_name=$(echo ${!n})
+            image=$(echo ${!n})
             set=true
             pass+=($i)
             pass+=($n)
 	fi
+        if [[ "$arg" == "--image-id" ]]; then
+            n=$((i+1))
+            manual_image_id=$(echo ${!n})
+            set=true
+            pass+=($i)
+            pass+=($n)
+        fi
         if  [[ "$set" != "true" ]]; then
             space=" "
             if [[ $arg =~ $space ]]; then
@@ -178,16 +186,38 @@ if [[ "$provider" == "linode" ]]; then
  init_sleep=6
 fi
 
+###########################################################################################################
+# Get image_id from $image ( default is from axiom.json ) or from user supplied manual image id param
+#
+if [ "$manual_image_id" != "false" ]
+then
+    image_id="$manual_image_id"
+else
+    image_id="$(get_image_id "$image")"
+    if [ -z "$image_id" ]; then
+        echo -e "${BRed}ERROR: image ${Color_Off}[ ${BBlue}$image ${Color_Off}]${BRed} not found. you may need to run ${Color_Off}[ ${BBlue}axiom-build --setup ${Color_Off}]${BRed} to build a new image."
+        echo -e "${BRed}if you've already built an image, list all images with ${Color_Off}[ ${BBlue}axiom-images ls ${Color_Off}]${BRed} and select it with ${Color_Off}[ ${BBlue}axiom-images select \$image_name${Color_Off}]"
+        echo -e "${BRed}exiting...${Color_Off}"
+        exit 1
+    fi
+fi
 
 ###########################################################################################################
-# Get image_id from $image ( default is from axiom.json ) or from user supplied --image param 
+# Check if ssh key is specified in axiom.json
 #
-image_id="$(get_image_id "$image_name")"
-if [ -z "$image_id" ]; then
-  echo -e "${BRed}Image $image_name not found in $region. Do you need to run 'axiom-build'?${Color_Off}"
-  echo -e "${BRed}Use 'axiom-image ls' to list all images. Select one with 'axiom-image set \$image_name'${Color_Off}"
-  exit 1
+if [ "$sshkey" == "" ] || [ "$sshkey" == "null" ]; then
+echo -e  "${BYellow}WARNING: sshkey not found in ~/axiom/axiom.json. Adding ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}key as a backup."
+echo -e  "${BYellow}If ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}was not used to build the initial image ${Color_Off}[ ${BBlue}$image_id ${Color_Off}]${BYellow}, you may have to manually edit ~/axiom/axiom.json to set the correct sshkey${Color_Off}"
+account_path=$(ls -la "$AXIOM_PATH"/axiom.json | rev | cut -d " " -f 1 | rev)
+ if [ -f ~/.ssh/axiom_rsa ] ; then
+  jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"
+
+ else
+  ssh-keygen -b 2048 -t rsa -f ~/.ssh/axiom_rsa -q -N ""
+  jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"  >> /dev/null 2>&1
+ fi
 fi
+
 
 ###########################################################################################################
 # Initialize fleet
@@ -196,7 +226,7 @@ if [[ "$cycle_regions" == "false" ]]; then
 
 # Chance to cancel initialization of fleet
 #
-echo -e "${BWhite}Initializing new fleet '${BGreen}$gen_name${BWhite}' with '${BGreen}$amount${BWhite}' instances using image '${BGreen}$image_name${BWhite}' in region '${BGreen}$region${BWhite}'${Color_Off}...${Color_Off}"
+echo -e "${BWhite}Initializing new fleet '${BGreen}$gen_name${BWhite}' with '${BGreen}$amount${BWhite}' instances using image '${BGreen}$image${BWhite}' in region '${BGreen}$region${BWhite}'${Color_Off}...${Color_Off}"
 echo -e "${BWhite}INITIALIZING IN 5 SECONDS, CTRL+C to quit... ${Color_Off}"
 sleep 5
 
@@ -238,7 +268,7 @@ if [[ "$cycle_regions" != "false" ]]; then
 ###########################################################################################################
 # Chance to cancel initialization of fleet
 #
-echo -e "${BWhite}Initializing new fleet '${BGreen}$gen_name${BWhite}' with '${BGreen}$amount${BWhite}' instances using image '${BGreen}$image_name${Color_Off}'...${Color_Off}"
+echo -e "${BWhite}Initializing new fleet '${BGreen}$gen_name${BWhite}' with '${BGreen}$amount${BWhite}' instances using image '${BGreen}$image${Color_Off}'...${Color_Off}"
 echo -e "${BWhite}Cycling through following regions:${BGreen}$cycle_regions${BWhite}...${Color_Off}"
 echo -e "${BWhite}INITIALIZING IN 5 SECONDS, CTRL+C to quit... ${Color_Off}"
 sleep 5

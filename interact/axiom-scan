@@ -921,6 +921,7 @@ uid="$module+$(date +%m-%d_%H-%M-%S-%1N)"
 tmp="$AXIOM_PATH/tmp/$uid"
 completed="$AXIOM_PATH/tmp/$uid/status/completed/"
 inprogress="$AXIOM_PATH/tmp/$uid/status/inprogress/"
+mkdir -p "$AXIOM_PATH/logs/" >> /dev/null 2>&1
 mkdir -p "$tmp/input"
 mkdir -p "$tmp/split"
 mkdir -p "$tmp/output"

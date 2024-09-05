@@ -1,3 +1,4 @@
+
 names=("aspen" "amir" "austin" "bango" "banzai" "bartik" "bassi" "batman" "beaver" "bell" "benz" "blink" "borg" "bose" "boyd" "buck" "cannon" "cerf" "chell" "clarke" "cohen" "colden" "cori" "cray" "ctbb" "darwin" "dawgyg" "diffie" "dirac" "elion" "ellis" "euler" "fermi" "fire" "fisher" "fox" "gates" "gauss" "ghost" "gould" "haddix" "haibt" "hertz" "hickey" "hoover" "hopper" "hugle" "hunt" "jang" "jarvis" "jepsen" "jobs" "joliot" "jones" "kalam" "kare" "keller" "kepler" "kilby" "kirch" "knox" "knuth" "lamar" "lamp" "lande" "leaky" "leder" "leman" "lewin" "liskov" "loka" "luke" "lupin" "martho" "mato" "max" "mayer" "mclean" "medin" "mendel" "merkle" "mog" "moore" "morse" "moser" "murdo" "nagli" "napier" "nash" "nat" "neum" "newton" "night" "nobel" "noyce" "octavian" "ofjaaah" "omnom" "pani" "pare" "pasa" "payne" "pdelteil" "perl" "pikpikcu" "poba" "pry" "raman" "rez" "rhodes" "rich" "ride" "robin" "rubin" "saha" "sammet" "sandeep" "securibee" "snyder" "stok" "stone" "suther" "swartz" "tesla" "thl" "thomp" "todayisnew" "tu" "turing" "victoni" "vince" "wright" "wu" "xpn")
 
 # Reset
@@ -22,4 +23,9 @@ export BBlue='\033[1;34m'        # Blue
 export BPurple='\033[1;35m'      # Purple
 export BCyan='\033[1;36m'        # Cyan
 export BWhite='\033[1;37m'       # White
+
+# Versions
+export GolangVersion='1.23.0'
+
+# Auto Update
 

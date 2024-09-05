@@ -355,7 +355,7 @@ if [[ $provisioner == "azure" ]]; then
     sed -i "/\"region\"/d" > $AXIOM_PATH/axiom.json
 fi
 
-if packer build -var-file "$AXIOM_PATH"/axiom.json -var "variant=$provisioner" -var "op_random_password=$op_ssh_password" -var "snapshot_name=$snapshot_name" "$image_path";
+if packer build -var-file "$AXIOM_PATH"/axiom.json -var "golang_version=${GolangVersion}" -var "variant=$provisioner" -var "op_random_password=$op_ssh_password" -var "snapshot_name=$snapshot_name" "$image_path";
 then
 	end_time=$(date +%s)
 	seconds="$(expr $end_time - $start_time)"

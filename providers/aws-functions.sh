@@ -28,7 +28,16 @@ create_instance() {
 delete_instance() {
     name="$1"
     id="$(instance_id "$name")"
-    echo "$id"
+
+    if [ "$force" != "true" ]; then
+        read -p "Are you sure you want to delete instance '$name'? (y/N): " confirm
+        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+            echo "Instance deletion aborted."
+            return 1
+        fi
+    fi
+
+    echo "Deleting instance '$name' with ID: $id"
     aws ec2 terminate-instances --instance-ids "$id" 2>&1 >> /dev/null
 }
 

@@ -240,6 +240,7 @@ fi
 #
 completed="$tmp/status/completed/"
 inprogress="$tmp/status/inprogress/"
+mkdir -p "$logs" >> /dev/null 2>&1
 mkdir -p "$tmp/input"
 mkdir -p "$tmp/split"
 mkdir -p "$tmp/output"
