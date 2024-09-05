@@ -316,15 +316,6 @@ usage
 exit
 fi
 
-if [ ! -d "$AXIOM_PATH" ]; then
-    echo -e "${BGreen}Installing Ax scripts...${Color_Off}"
-    git clone https://github.com/attacksurge/ax "$AXIOM_PATH"
-    AXIOM_PATH="$HOME/.axiom"
-     source "$AXIOM_PATH/interact/includes/vars.sh"
-else
-    cd "$AXIOM_PATH" && git pull
-fi
-
 if [ ! -z ${unattended:+x} ]; then
  echo -e "${BGreen}Hello! Welcome to the Ax Framework configuration :)"
  echo -e "${Green}Detected unattended option passed from command line...${Color_Off}"
@@ -485,6 +476,15 @@ if [[ $BASEOS == "Mac" ]]; then
          brew upgrade hashicorp/tap/packer
          source "${HOME}"/.zshrc >> /dev/null 2>&1
          SHELL=$(which zsh)
+fi
+
+if [ ! -d "$AXIOM_PATH" ]; then
+    echo -e "${BGreen}Installing Ax scripts...${Color_Off}"
+    git clone https://github.com/attacksurge/ax "$AXIOM_PATH"
+    AXIOM_PATH="$HOME/.axiom"
+    source "$AXIOM_PATH/interact/includes/vars.sh"
+else
+    cd "$AXIOM_PATH" && git pull
 fi
 
 if [[ $BASEOS == "Linux" ]] ; then
