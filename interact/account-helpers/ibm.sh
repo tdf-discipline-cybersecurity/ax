@@ -33,85 +33,79 @@ case $BASEOS in
 *) ;;
 esac
 
+installed_version=$(ibmcloud version | cut -d ' ' -f 2 | cut -d + -f 1)
 
-if [[ $BASEOS == "Linux" ]]; then
- if $(uname -a | grep -qi "Microsoft"); then
-  OS="UbuntuWSL"
- else
-   OS=$(lsb_release -i 2>/dev/null | awk '{ print $3 }')
-   if ! command -v lsb_release &> /dev/null; then
-            OS="unknown-Linux"
-            BASEOS="Linux"
- fi
- fi
- if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
-  echo "Needs Conversation"
-   elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]]; then
-     if ! [ -x "$(command -v ibmcloud)" ]; then
-      echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
-      curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-      echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
-      ibmcloud plugin install sl -q -f
-     fi
-elif [[ $OS == "Fedora" ]]; then
-  echo "Needs Conversation"
-	 elif [ $OS == "UbuntuWSL" ]; then
-     if ! [ -x "$(command -v ibmcloud)" ]; then
-      echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
-      curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-      echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
-      ibmcloud plugin install sl -q -f
-     fi
- fi
+# Check if the installed version matches the required version
+if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
+    echo "ibmcloud-cli version $installed_version does not match the required version $IBMCloudCliVersion."
+
+    if [[ $BASEOS == "Mac" ]]; then
+        # macOS installation/update
+        echo -e "${BGreen}Installing/updating ibmcloud-cli on macOS...${Color_Off}"
+        whereis brew
+        if [ ! $? -eq 0 ] || [[ ! -z ${AXIOM_FORCEBREW+x} ]]; then
+            echo -e "${BGreen}Installing Homebrew...${Color_Off}"
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        else
+            echo -e "${BGreen}Checking for Homebrew... already installed.${Color_Off}"
+        fi
+        echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
+        curl -fsSL https://clis.cloud.ibm.com/install/osx | sh
+        echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+        ibmcloud plugin install sl -q -f
+    elif [[ $BASEOS == "Linux" ]]; then
+        if uname -a | grep -qi "Microsoft"; then
+            OS="UbuntuWSL"
+        else
+            OS=$(lsb_release -i | awk '{ print $3 }')
+            if ! command -v lsb_release &> /dev/null; then
+                OS="unknown-Linux"
+                BASEOS="Linux"
+            fi
+        fi
+        if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
+            echo "Needs Conversation for Arch or ManjaroLinux"
+        elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
+            if ! [ -x "$(command -v ibmcloud)" ]; then
+                echo -e "${BGreen}Installing ibmcloud-cli on Linux...${Color_Off}"
+                curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+            fi
+            echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
+            ibmcloud plugin install sl -q -f
+        elif [[ $OS == "Fedora" ]]; then
+            echo "Needs Conversation for Fedora"
+        fi
+    fi
+
+    echo "ibmcloud-cli updated to version $IBMCloudCliVersion."
+else
+    echo "ibmcloud-cli is already at the required version $IBMCloudCliVersion."
 fi
 
-if [[ $BASEOS == "Mac" ]]; then
- whereis brew
-  if [ ! $? -eq 0 ] || [[ ! -z ${AXIOM_FORCEBREW+x} ]]; then
-   echo -e "${BGreen}Installing brew...${Color_Off}"
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  else
-   echo -e "${BGreen}Checking for brew... already installed, skipping installation.${Color_Off}"
-   echo -e "${BGreen}    Note: You can force brew installation by running${Color_Off}"
-   echo -e '    $ AXIOM_FORCEBREW=yes $HOME/.axiom/interact/axiom-configure'
-  fi
-   if ! [ -x "$(command -v ibmcloud)" ]; then
-    echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
-    curl -fsSL https://clis.cloud.ibm.com/install/osx | sh
-    echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
-    ibmcloud plugin install sl -q -f
-   fi
-fi
-
-#############################################################################################################
-# Change packer version for IBM
-#
+# Change Packer version for IBM Cloud
 mkdir -p /tmp/packer-ibm/
- if [[ ! -f /tmp/packer-ibm/packer ]]; then
-  if [[ $BASEOS == "Linux" ]]; then
-   wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip
-  elif [[ $BASEOS == "Darwin" ]]; then
-   wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip 
+if [[ ! -f /tmp/packer-ibm/packer ]]; then
+    if [[ $BASEOS == "Linux" ]]; then
+        wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip
+        cd /tmp/
+        unzip packer.zip
+        mv packer /tmp/packer-ibm/
+        rm /tmp/packer.zip
+    elif [[ $BASEOS == "Mac" ]]; then
+        wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip
+        cd /tmp/
+        unzip packer.zip
+        mv packer /tmp/packer-ibm/
+        rm /tmp/packer.zip
+    fi
 fi
 
-BASEOS="$(uname)"
-case $BASEOS in
-'Darwin')
-    PATH="/tmp/packer-ibm/:$(brew --prefix coreutils)/libexec/gnubin:$PATH"
-    ;;
-'Linux')
-    PATH="/tmp/packer-ibm:$PATH"
-    ;;
-*) ;;
-esac
-fi
-
-# packer plugin check
+# Packer check for IBM Cloud plugin
 if [[ ! -f "$HOME/.packer.d/plugins/packer-builder-ibmcloud" ]]; then
- echo -n -e "${BGreen}Installing IBM Cloud Packer Builder (https://github.com/IBM/packer-plugin-ibmcloud/):\n y/n >> ${Color_Off}"
- os="$(uname -s | tr '[:upper:]' '[:lower:]')"
- mkdir -p ~/.packer.d/plugins/
- wget https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_linux_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
+    echo -n -e "${BGreen}Installing IBM Cloud Packer Builder (https://github.com/IBM/packer-plugin-ibmcloud/):\n y/n >> ${Color_Off}"
+    os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    mkdir -p ~/.packer.d/plugins/
+    wget https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_linux_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
 fi
 
 function getUsernameAPIkey {

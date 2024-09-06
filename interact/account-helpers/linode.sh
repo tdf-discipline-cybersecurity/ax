@@ -30,6 +30,35 @@ case $BASEOS in
 *) ;;
 esac
 
+echo -e "${Green}Checking linode-cli version...\n${Color_Off}"
+
+# Get the currently installed version of linode-cli
+installed_version=$(linode-cli -version | grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
+
+# Check if the installed version matches the desired version
+if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
+    echo "linode-cli version $installed_version does not match the required version $LinodeCliVersion."
+    echo "Installing/updating linode-cli to version $LinodeCliVersion..."
+
+    # Try to install or upgrade linode-cli and handle externally-managed-environment
+    output=$(pip3 install linode-cli --upgrade 2>&1)
+
+    if echo "$output" | grep -q "externally-managed-environment"; then
+        echo "Detected an externally managed environment. Retrying with --break-system-packages..."
+        pip3 install linode-cli --upgrade --break-system-packages
+    else
+        echo "linode-cli updated successfully or no externally managed environment detected."
+    fi
+else
+    echo "linode-cli is already at the required version $LinodeCliVersion."
+fi
+
+if [[ $BASEOS == "Mac" ]]; then
+    echo -e "${BGreen}Installing linode packer plugin...${Color_Off}"
+    packer plugins install github.com/linode/linode
+fi
+
+
 function setuplinode(){
 echo -e "${BGreen}Sign up for an account using this link for \$100 free credit: https://www.linode.com/lp/refer/?r=71f79f7e02534d6f673cbc8a17581064e12ac27d\nObtain a personal access token from: https://cloud.linode.com/profile/tokens${Color_Off}"
 echo -e -n "${BGreen}Do you already have a Linode account? y/n ${Color_Off}"
