@@ -56,7 +56,7 @@ then
 
     if [[ $BASEOS == "Mac" ]]; then
         if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-            echo "doctl version $installed_version does not match the required version $DoctlVersion."
+            echo "doctl version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
             echo "Installing/updating doctl to version $DoctlVersion..."
             wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-darwin-amd64.tar.gz -qO- | tar -xzv -C /usr/local/bin/
             echo "doctl updated to version $DoctlVersion."
@@ -81,7 +81,7 @@ then
             sudo pacman -Syu doctl --noconfirm
         elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
             if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-                echo "doctl version $installed_version does not match the required version $DoctlVersion."
+                echo "doctl version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
                 echo "Installing/updating doctl to version $DoctlVersion..."
                 wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-linux-amd64.tar.gz -qO- | sudo tar -xzv -C /usr/local/bin/
                 echo "doctl updated to version $DoctlVersion."
@@ -110,7 +110,7 @@ if [[ "$provider" == "linode" ]]; then
 
     # Check if the installed version matches the desired version
     if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
-        echo "linode-cli version $installed_version does not match the required version $LinodeCliVersion."
+        echo "linode-cli version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
         echo "Installing/updating linode-cli to version $LinodeCliVersion..."
 
         # Try to install or upgrade linode-cli and handle externally-managed-environment
@@ -155,7 +155,7 @@ if [[ "$provider" == "ibm" ]]; then
 
     # Check if the installed version matches the required version
     if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
-        echo "ibmcloud-cli version $installed_version does not match the required version $IBMCloudCliVersion."
+        echo "ibmcloud-cli version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
 
         if [[ $BASEOS == "Mac" ]]; then
             # macOS installation/update
@@ -231,7 +231,7 @@ if [[ "$provider" == "azure" ]]; then
 
     # Check if the installed version matches the required version
     if [[ "$installed_version" != "$AzureCliVersion" ]]; then
-        echo "Azure CLI version $installed_version does not match the required version $AzureCliVersion."
+        echo "Azure CLI version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
 
         # Handle macOS installation/update
         if [[ $BASEOS == "Mac" ]]; then
@@ -331,8 +331,8 @@ if [[ "$provider" == "aws" ]]; then
     installed_version=$(aws --version 2>&1 | cut -d ' ' -f 1 | cut -d '/' -f 2)
 
     # Check if the installed version matches the required version
-    if [[ "$installed_version" != "$AWSCliVersion" ]]; then
-        echo "AWS CLI version $installed_version does not match the required version $AWSCliVersion."
+    if [[ "$installed_version" != $AWSCliVersion ]]; then
+        echo "AWS CLI version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
 
         # Determine the OS type and handle installation accordingly
         if [[ $BASEOS == "Mac" ]]; then
@@ -389,13 +389,13 @@ if [[ "$provider" == "aws" ]]; then
     fi
 
     # Use credentials from axiom.json if available
-    aws_access_key_id="$(jq -r '.aws_access_key_id' "$AXIOM_PATH"/axiom.json)"
+    aws_access_key="$(jq -r '.aws_access_key' "$AXIOM_PATH"/axiom.json)"
     aws_secret_access_key="$(jq -r '.aws_secret_access_key' "$AXIOM_PATH"/axiom.json)"
     aws_region="$(jq -r '.region' "$AXIOM_PATH"/axiom.json)"
 
-    if [[ -n "$aws_access_key_id" && -n "$aws_secret_access_key" ]]; then
+    if [[ -n "$aws_access_key" && -n "$aws_secret_access_key" ]]; then
         echo -e "${BGreen}Configuring AWS CLI with credentials from axiom.json...${Color_Off}"
-        aws configure set aws_access_key_id "$aws_access_key_id"
+        aws configure set aws_access_key "$aws_access_key"
         aws configure set aws_secret_access_key "$aws_secret_access_key"
         aws configure set region "$aws_region"
     else
@@ -411,7 +411,7 @@ if [[ "$provider" == "hetzner" ]]; then
 
     # Check if the installed version matches the required version
     if [[ "$installed_version" != "${HetznerCliVersion}" ]]; then
-        echo "hcloud-cli version $installed_version does not match the required version $HetznerCliVersion."
+        echo "hcloud-cli version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
 
         # Handle macOS installation/update
         if [[ $BASEOS == "Mac" ]]; then

@@ -31,6 +31,6 @@ export LinodeCliVersion='5.51.0'
 export IBMCloudCliVersion='2.27.0'
 export HetznerCliVersion='1.46.0'
 export AzureCliVersion="2.64.0"
-export AWSCliVersion="2.15.25"
+export AWSCliVersion="2\.1[0-9]*"
 
 # Auto Update

@@ -33,7 +33,7 @@ esac
 installed_version=$(aws --version 2>&1 | cut -d ' ' -f 1 | cut -d '/' -f 2)
 
 # Check if the installed version matches the required version
-if [[ "$installed_version" != "$AWSCliVersion" ]]; then
+if [[ "$installed_version" != $AWSCliVersion ]]; then
     echo "AWS CLI version $installed_version does not match the required version $AWSCliVersion."
 
     # Determine the OS type and handle installation accordingly
