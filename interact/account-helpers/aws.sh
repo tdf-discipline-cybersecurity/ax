@@ -30,28 +30,54 @@ case $BASEOS in
 *) ;;
 esac
 
+# Check if the installed version matches the required version
+if [[ "$installed_version" != "$AWSCliVersion" ]]; then
+    echo "AWS CLI version $installed_version does not match the required version $AWSCliVersion."
 
-install_aws_cli() {
-  echo -e "${BGreen}Installing aws cli...${Color_Off}"
-  if [[ $BASEOS == "Mac" ]]; then
-    curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
-    open AWSCLIV2.pkg
-  elif [[ $BASEOS == "Linux" ]]; then
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-    cd /tmp
-    unzip awscliv2.zip
-    sudo ./aws/install
-  fi
-}
+    # Determine the OS type and handle installation accordingly
+    if [[ $BASEOS == "Mac" ]]; then
+        echo -e "${BGreen}Installing/Updating AWS CLI on macOS...${Color_Off}"
+        curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+        sudo installer -pkg AWSCLIV2.pkg -target /
+        rm AWSCLIV2.pkg
 
-is_installed() {
-  command -v "$1" > /dev/null 2>&1
-}
+    elif [[ $BASEOS == "Linux" ]]; then
+        if uname -a | grep -qi "Microsoft"; then
+            OS="UbuntuWSL"
+        else
+            OS=$(lsb_release -i 2>/dev/null | awk '{ print $3 }')
+            if ! command -v lsb_release &> /dev/null; then
+                OS="unknown-Linux"
+                BASEOS="Linux"
+            fi
+        fi
 
-if is_installed "aws"; then
-  echo -e "${BGreen}aws cli is already installed${Color_Off}"
+        # Install AWS CLI based on specific Linux distribution
+        if [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
+            echo -e "${BGreen}Installing/Updating AWS CLI on $OS...${Color_Off}"
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+            cd /tmp
+            unzip awscliv2.zip
+            sudo ./aws/install
+            rm -rf /tmp/aws
+            rm /tmp/awscliv2.zip
+        elif [[ $OS == "Fedora" ]]; then
+            echo -e "${BGreen}Installing/Updating AWS CLI on Fedora...${Color_Off}"
+            sudo dnf install -y unzip
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+            cd /tmp
+            unzip awscliv2.zip
+            sudo ./aws/install
+            rm -rf /tmp/aws
+            rm /tmp/awscliv2.zip
+        else
+            echo -e "${BRed}Unsupported Linux distribution: $OS${Color_Off}"
+        fi
+    fi
+
+    echo "AWS CLI updated to version $AWSCliVersion."
 else
-  install_aws_cli
+    echo "AWS CLI is already at the required version $AWSCliVersion."
 fi
 
 function awssetup(){
@@ -76,19 +102,18 @@ aws configure set aws_access_key_id "$ACCESS_KEY"
 aws configure set aws_secret_access_key "$SECRET_KEY"
 
 default_region="us-west-2"
-echo -e -n "${Green}Please enter your default region: (Default '$default_region', press enter) \n>> ${Color_Off}"
+echo -e -n "${Green}Please enter your default region (you can always change this later with axiom-region select \$region): Default '$default_region', press enter \n>> ${Color_Off}"
 read region
 	if [[ "$region" == "" ]]; then
-	echo -e "${Blue}Selected default option '$default_region'${Color_Off}"
-	region="$default_region"
-fi
-
-echo -e -n "${Green}Please enter your default size: (Default 't2.medium', press enter) \n>> ${Color_Off}"
+	 echo -e "${Blue}Selected default option '$default_region'${Color_Off}"
+	 region="$default_region"
+        fi
+echo -e -n "${Green}Please enter your default size (you can always change this later with axiom-sizes select \$size): Default 't2.medium', press enter \n>> ${Color_Off}"
 read size
 	if [[ "$size" == "" ]]; then
-	echo -e "${Blue}Selected default option 't2.medium'${Color_Off}"
-        size="t2.medium"
-fi
+	 echo -e "${Blue}Selected default option 't2.medium'${Color_Off}"
+         size="t2.medium"
+        fi
 
 aws configure set default.region "$region"
 

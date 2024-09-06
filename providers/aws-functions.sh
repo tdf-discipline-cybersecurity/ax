@@ -1,7 +1,6 @@
 #!/bin/bash
 
 AXIOM_PATH="$HOME/.axiom"
-LOG="$AXIOM_PATH/log.txt"
 
 ###################################################################
 #  Create Instance is likely the most important provider function :)

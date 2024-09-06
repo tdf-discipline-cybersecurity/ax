@@ -157,14 +157,14 @@ ibmcloud login --apikey=$ibm_cloud_api_key --no-region
 function specs {
 echo -e -n "${Green}Printing available regions..\n${Color_Off}"
 ibmcloud sl  vs options --output json | jq .locations
-echo -e -n "${Green}Please enter your default region: (Default 'dal13', press enter) \n>> ${Color_Off}"
+echo -e -n "${BGreen}Please enter your default region (you can always change this later with axiom-region select \$region): Default 'dal13', press enter \n>> ${Color_Off}"
 read region
 if [[ "$region" == "" ]]; then
 
 	echo -e "${Blue}Selected default option 'dal13'${Color_Off}"
 	region="dal13"
 fi
-echo -e -n "${Green}Please enter your default size: (Default '2048', press enter) \n${Color_Off}"
+echo -e -n "${BGreen}Please enter your default RAM (you can always change this later with axiom-sizes select \$size): Default '2048', press enter \n>> ${Color_Off}"
 echo -e -n "${Blue}Options: 2048, 4096, 8192, 16384, 32768, 64512\n>> ${Color_Off}"
 read size
 if [[ "$size" == "" ]]; then

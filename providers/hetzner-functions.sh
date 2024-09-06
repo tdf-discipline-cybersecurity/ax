@@ -1,26 +1,51 @@
 #!/bin/bash
 
 AXIOM_PATH="$HOME/.axiom"
-LOG="$AXIOM_PATH/log.txt"
 
 ###################################################################
 #  Create Instance is likely the most important provider function :)
 #  needed for init and fleet
 #
 create_instance() {
-	name="$1"
-	image_id="$2"
-	size_slug="$3"
-	region="$4"
+    name="$1"
+    image_id="$2"
+    size_slug="$3"
+    region="$4"
 
-        sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
-        sshkey_fingerprint="$(ssh-keygen -l -E md5 -f ~/.ssh/$sshkey.pub | awk '{print $2}' | cut -d : -f 2-)"
-        keyid=$(hcloud ssh-key create --name $sshkey \
-         --public-key-from-file ~/.ssh/$sshkey.pub 2>/dev/null) ||
-         keyid=$(hcloud ssh-key list | grep "$sshkey_fingerprint" | awk '{ print $1 }')
+    # Retrieve SSH key name from axiom.json
+    sshkey="$(jq -r '.sshkey' "$AXIOM_PATH/axiom.json")"
 
-       hcloud server create  --type "$size_slug" --location "$region" --image "$image_id" --name "$name" --ssh-key "$keyid" --poll-interval 250s 2>&1 >> /dev/null
-       sleep 260
+    # Ensure the public key exists
+    pubkey_path="$HOME/.ssh/$sshkey.pub"
+    if [[ ! -f "$pubkey_path" ]]; then
+        echo "Error: Public key $pubkey_path not found."
+        return 1
+    fi
+
+    # Retrieve fingerprint
+    sshkey_fingerprint="$(ssh-keygen -l -E md5 -f "$pubkey_path" | awk '{print $2}' | cut -d : -f 2-)"
+
+    # Try to find the SSH key by its fingerprint
+    keyid=$(hcloud ssh-key list | grep "$sshkey_fingerprint" | awk '{ print $1 }')
+
+    # If key is not found, try to create it
+    if [[ -z "$keyid" ]]; then
+        keyid=$(hcloud ssh-key create --name "$sshkey" --public-key-from-file "$pubkey_path" 2>&1)
+
+        # If there was a uniqueness error create a key with random name and use that
+        if [[ "$keyid" == *"uniqueness_error"* ]]; then
+            sshkey="$sshkey+$RANDOM"
+            keyid=$(hcloud ssh-key create --name "$sshkey" --public-key-from-file "$pubkey_path" 2>&1)
+            return 1
+        fi
+    fi
+
+    # Create the server with the retrieved or created key
+    hcloud server create --type "$size_slug" --location "$region" --image "$image_id" \
+        --name "$name" --ssh-key "$keyid" --poll-interval 250s --quiet --without-ipv6 &
+
+    # Wait for the instance to start
+    sleep 260
 }
 
 ###################################################################
@@ -40,7 +65,8 @@ delete_instance() {
         fi
     fi
 
-    hcloud server delete "$id"
+    hcloud server delete "$id" --poll-interval 30s --quiet &
+    sleep 4
 }
 
 ###################################################################

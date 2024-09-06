@@ -62,13 +62,13 @@ while [[ "$token" == "" ]]; do
 	read token
 done
 
-echo -e -n "${Green}Please enter your default region: (Default 'us-east', press enter) \n>> ${Color_Off}"
+echo -e -n "${BGreen}Please enter your default region (you can always change this later with axiom-region select \$region): Default 'us-east', press enter \n>> ${Color_Off}"
 read region
 	if [[ "$region" == "" ]]; then
 	echo -e "${Blue}Selected default option 'us-east'${Color_Off}"
 	region="us-east"
 	fi
-	echo -e -n "${Green}Please enter your default size: (Default 'g6-standard-1', press enter) \n>> ${Color_Off}"
+	echo -e -n "${BGreen}Please enter your default size (you can always change this later with axiom-sizes select \$size): Default 'g6-standard-1', press enter \n>> ${Color_Off}"
 	read size
 	if [[ "$size" == "" ]]; then
 	echo -e "${Blue}Selected default option 'g6-standard-1'${Color_Off}"

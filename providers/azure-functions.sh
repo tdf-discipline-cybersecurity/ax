@@ -1,7 +1,6 @@
 #!/bin/bash
 
 AXIOM_PATH="$HOME/.axiom"
-LOG="$AXIOM_PATH/log.txt"
 resource_group="$(jq -r '.resource_group' "$AXIOM_PATH"/axiom.json)"
 subscription_id="$(jq -r '.subscription_id' "$AXIOM_PATH"/axiom.json)"
 

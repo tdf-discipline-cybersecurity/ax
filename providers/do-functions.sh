@@ -1,7 +1,6 @@
 #!/bin/bash
 
 AXIOM_PATH="$HOME/.axiom"
-LOG="$AXIOM_PATH/log.txt"
 
 ###################################################################
 #  Create many instance at a time

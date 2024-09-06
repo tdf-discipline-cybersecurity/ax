@@ -26,6 +26,11 @@ export BWhite='\033[1;37m'       # White
 
 # Versions
 export GolangVersion='1.23.0'
+export DoctlVersion='1.112.0'
+export LinodecliVersion='5.51.0'
+export IBMCloudcliVersion='2.27.0'
+export HetznerCliVersion='1.46.0'
+export AzureCliVersion="2.64.0"
+export AWSCliVersion="2.15.25"
 
 # Auto Update
-
