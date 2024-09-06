@@ -33,7 +33,7 @@ esac
 echo -e "${Green}Checking linode-cli version...\n${Color_Off}"
 
 # Get the currently installed version of linode-cli
-installed_version=$(linode-cli -version | grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
+installed_version=$(linode-cli --version | grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
 
 # Check if the installed version matches the desired version
 if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
