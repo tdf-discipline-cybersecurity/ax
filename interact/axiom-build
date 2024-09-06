@@ -314,9 +314,9 @@ fi
 ############################################################################################################
 # opportunity to cancel axiom-build
 #
-echo -e "${BRed}Now your account is setup, now running axiom-build"
-echo "A build will take about 25 minutes, spin up a temporary instance, and then snapshot it to use for our future boxes"
-echo -e "Starting Build in a 5 seconds... Ctrl+C to quit, remember, you can just type axiom-build at any time${Color_Off}"
+echo -e "${BRed}Now running ${Color_Off}[ ${BBlue}axiom-build $provisioner ${Color_Off}]${BRed}"
+echo "The Packer Build will take about 25 minutes, spin up a temporary instance, then take a snapshot and use it for our future instances"
+echo -e "Starting Packer Build in a 5 seconds... Ctrl+C to quit, remember, you can just run ${Color_Off}[ ${BBlue}axiom-build --setup ${Color_Off}] ${BRed}at any time${Color_Off}"
 sleep 8
 
 #############################################################################################################
@@ -348,7 +348,7 @@ fi
 # Execute the Packer binary to build the final image
 #
 counter=0
-echo -e "${BWhite}Building image $provisioner for provider $builder... This can take up to 25 minutes so please be patient!\nIf this fails, verify the account is properly configured and/or try a different region.${Color_Off}"
+echo -e "${BWhite}Building image ${Color_Off}[ ${BBlue}$provisioner ${Color_Off}]${BWhite} for provider ${Color_Off}[ ${BBlue}$builder ${Color_Off}]${BWhite} using Packer... This can take up to 25 minutes so please be patient!\nIf this fails, verify the account is properly configured and/or try a different region.${Color_Off}"
 
 if [[ $provisioner == "azure" ]]; then
     cp $AXIOM_PATH/axiom.json $AXIOM_PATH/axiom_bck.json

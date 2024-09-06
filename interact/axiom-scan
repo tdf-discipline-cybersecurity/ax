@@ -992,6 +992,7 @@ EOT
 #  Variables to display about the scan
 #
 input_file="$1"
+sed -i '/^$/d' "$input_file"
 total_instances="$(wc -l "$tmp/hosts" | awk '{ print $1 }')"
 lines="$(wc -l "$input_file" | awk '{ print $1 }')"
 total=$(wc -l "$tmp/selected.conf" | awk '{ print $1 }')

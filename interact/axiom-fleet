@@ -207,8 +207,8 @@ fi
 # Check if ssh key is specified in axiom.json
 #
 if [ "$sshkey" == "" ] || [ "$sshkey" == "null" ]; then
-echo -e  "${BYellow}WARNING: sshkey not found in ~/axiom/axiom.json. Adding ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}key as a backup."
-echo -e  "${BYellow}If ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}was not used to build the initial image ${Color_Off}[ ${BBlue}$image_id ${Color_Off}]${BYellow}, you may have to manually edit ~/axiom/axiom.json to set the correct sshkey${Color_Off}"
+echo -e  "${BYellow}WARNING: sshkey not found in ~/.axiom/axiom.json. Adding ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}key as a backup."
+echo -e  "${BYellow}If ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}was not used to build the initial image ${Color_Off}[ ${BBlue}$image_id ${Color_Off}]${BYellow}, you may have to manually edit ~/.axiom/axiom.json to set the correct sshkey${Color_Off}"
 account_path=$(ls -la "$AXIOM_PATH"/axiom.json | rev | cut -d " " -f 1 | rev)
  if [ -f ~/.ssh/axiom_rsa ] ; then
   jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"

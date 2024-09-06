@@ -177,7 +177,7 @@ fi
 
 
 function setprofile {
-data="$(echo "{\"sl_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm\",\"default_size\":\"$size\",\"cpu\":\"$cpu\",\"username\":\"$username\",\"base_image_id\":\"$base_image_id\"}")"
+data="$(echo "{\"sl_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm\",\"default_size\":\"$size\",\"cpu\":\"$cpu\",\"username\":\"$username\"}")"
 echo -e "${BGreen}Profile settings below: ${Color_Off}"
 echo $data | jq '.sl_key = "************************************************************************" | .ibm_cloud_api_key = "***************************************"'
 echo -e "${BWhite}Press enter if you want to save these to a new profile, type 'r' if you wish to start again.${Color_Off}"
