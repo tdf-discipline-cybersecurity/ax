@@ -37,7 +37,7 @@ installed_version=$(linode-cli --version | grep linode-cli | cut -d ' ' -f 2 | c
 
 # Check if the installed version matches the desired version
 if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
-    echo "linode-cli version $installed_version does not match the required version $LinodeCliVersion."
+    echo "linode-cli version $installed_version does not match the recommended version $LinodeCliVersion."
     echo "Installing/updating linode-cli to version $LinodeCliVersion..."
 
     # Try to install or upgrade linode-cli and handle externally-managed-environment
@@ -50,7 +50,7 @@ if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
         echo "linode-cli updated successfully or no externally managed environment detected."
     fi
 else
-    echo "linode-cli is already at the required version $LinodeCliVersion."
+    echo "linode-cli is already at the recommended version $LinodeCliVersion."
 fi
 
 if [[ $BASEOS == "Mac" ]]; then

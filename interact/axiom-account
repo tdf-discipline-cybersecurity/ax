@@ -52,20 +52,16 @@ then
 # check installed version of doclt and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
 #
  if [[ "$provider" == "do" ]]; then
-    installed_version=$(doctl version | grep version | cut -d ' ' -f 3 | cut -d '-' -f 1)
+    installed_version=$(doctl version  2>/dev/null| grep version | cut -d ' ' -f 3 | cut -d '-' -f 1)
+
+    # Compare installed version with desired version
+   if [[ "$(printf '%s\n' "$installed_version" "$DoctlVersion" | sort -V | head -n 1)" != "$DoctlVersion" ]]; then
+       echo "installed_version is lower than DoctlVersion $DoctlVersion ~/.axiom/interact/includes/vars.sh"
 
     if [[ $BASEOS == "Mac" ]]; then
-        if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-            echo "doctl version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
             echo "Installing/updating doctl to version $DoctlVersion..."
             wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-darwin-amd64.tar.gz -qO- | tar -xzv -C /usr/local/bin/
             echo "doctl updated to version $DoctlVersion."
-        else
-            echo "doctl is already at the required version $DoctlVersion."
-        fi
-        echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
-        packer plugins install github.com/digitalocean/digitalocean
-
     elif [[ $BASEOS == "Linux" ]]; then
         if uname -a | grep -qi "Microsoft"; then
             OS="UbuntuWSL"
@@ -76,41 +72,46 @@ then
                 BASEOS="Linux"
             fi
         fi
-
         if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
             sudo pacman -Syu doctl --noconfirm
         elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
-            if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-                echo "doctl version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
                 echo "Installing/updating doctl to version $DoctlVersion..."
                 wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-linux-amd64.tar.gz -qO- | sudo tar -xzv -C /usr/local/bin/
                 echo "doctl updated to version $DoctlVersion."
-            else
-                echo "doctl is already at the required version $DoctlVersion."
-            fi
-            echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
-            packer plugins install github.com/digitalocean/digitalocean
         elif [[ $OS == "Fedora" ]]; then
             echo "Needs Conversation"
         fi
+      fi
+  fi
+     echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
+        packer plugins install github.com/digitalocean/digitalocean
 
         # Validate and initialize DigitalOcean API token
         token="$(jq -r '.do_key' "$AXIOM_PATH"/accounts/"$1".json)"
+        if ! doctl auth list &> /dev/null; then
+         echo -e "${BRed}Doctl is not authenticated.${Color_Off} Running bootstrap..."
+         doctl auth init -t "$token" || bootstrap
+        else
+         echo -e "${BGreen}Doctl is authenticated.${Color_Off}"
+        fi
+        token="$(jq -r '.do_key' "$AXIOM_PATH"/accounts/"$1".json)"
         doctl auth init -t "$token" || bootstrap
-    fi # baseOS
+
  fi # provider do
 
 # check installed version of linode-cli and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
 #
 if [[ "$provider" == "linode" ]]; then
-    echo -e "${Green}Checking linode-cli version...\n${Color_Off}"
+  echo -e "${Green}Checking linode-cli version...${Color_Off}"
 
-    # Get the currently installed version of linode-cli
-    installed_version=$(linode-cli --version | grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
+  # Get the currently installed version of linode-cli
+  installed_version=$(linode-cli --version 2>/dev/null | grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
+
+  # Compare installed version with desired version
+  if [[ "$(printf '%s\n' "$installed_version" "$LinodeCliVersion" | sort -V | head -n 1)" != "$LinodeCliVersion" ]]; then
+   echo "installed_version is lower than LinodeCliVersion in ~/.axiom/interact/includes/vars.sh"
 
     # Check if the installed version matches the desired version
-    if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
-        echo "linode-cli version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
         echo "Installing/updating linode-cli to version $LinodeCliVersion..."
 
         # Try to install or upgrade linode-cli and handle externally-managed-environment
@@ -122,15 +123,12 @@ if [[ "$provider" == "linode" ]]; then
         else
             echo "linode-cli updated successfully or no externally managed environment detected."
         fi
-    else
-        echo "linode-cli is already at the required version $LinodeCliVersion."
-    fi
 
     if [[ $BASEOS == "Mac" ]]; then
         echo -e "${BGreen}Installing linode packer plugin...${Color_Off}"
         packer plugins install github.com/linode/linode
     fi
-
+   fi
     # Set up Linode CLI configuration
     token="$(jq -r '.linode_key' "$AXIOM_PATH"/accounts/"$1".json)"
     size="$(jq -r '.default_size' "$AXIOM_PATH"/accounts/"$1".json)"
@@ -145,28 +143,20 @@ if [[ "$provider" == "linode" ]]; then
     if [[ "$unauthed" == "1" ]]; then
         echo -e "Not authenticated to linode-cli"
         bootstrap
+    else
+        echo -e "${BGreen}Linode-CLI is authenticated.${Color_Off}"
     fi
 fi # provider linode
 
 # check installed version of ibmcloud cli and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
 #
 if [[ "$provider" == "ibm" ]]; then
-    installed_version=$(ibmcloud version | cut -d ' ' -f 2 | cut -d + -f 1)
+   installed_version=$(ibmcloud version  2>/dev/null| cut -d ' ' -f 2 | cut -d + -f 1)
+   if [[ "$(printf '%s\n' "$installed_version" "$IBMCloudCliVersion" | sort -V | head -n 1)" != "$IBMCloudCliVersion" ]]; then
 
     # Check if the installed version matches the required version
-    if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
-        echo "ibmcloud-cli version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
-
         if [[ $BASEOS == "Mac" ]]; then
             # macOS installation/update
-            echo -e "${BGreen}Installing/updating ibmcloud-cli on macOS...${Color_Off}"
-            whereis brew
-            if [ ! $? -eq 0 ] || [[ ! -z ${AXIOM_FORCEBREW+x} ]]; then
-                echo -e "${BGreen}Installing Homebrew...${Color_Off}"
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            else
-                echo -e "${BGreen}Checking for Homebrew... already installed.${Color_Off}"
-            fi
             echo -e "${BGreen}Installing ibmcloud-cli...${Color_Off}"
             curl -fsSL https://clis.cloud.ibm.com/install/osx | sh
             echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
@@ -196,10 +186,7 @@ if [[ "$provider" == "ibm" ]]; then
         fi
 
         echo "ibmcloud-cli updated to version $IBMCloudCliVersion."
-    else
-        echo "ibmcloud-cli is already at the required version $IBMCloudCliVersion."
-    fi
-
+   fi
     # Change Packer version for IBM Cloud
     mkdir -p /tmp/packer-ibm/
     if [[ ! -f /tmp/packer-ibm/packer ]]; then
@@ -226,12 +213,9 @@ fi # provider ibm
 # check installed version of azure cli and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
 #
 if [[ "$provider" == "azure" ]]; then
-    # Set the required Azure CLI version
-    installed_version=$(az version | jq -r '."azure-cli"')
-
-    # Check if the installed version matches the required version
-    if [[ "$installed_version" != "$AzureCliVersion" ]]; then
-        echo "Azure CLI version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
+   # Set the required Azure CLI version
+   installed_version=$(az version  2>/dev/null| jq -r '."azure-cli"')
+   if [[ "$(printf '%s\n' "$installed_version" "$AzureCliVersion" | sort -V | head -n 1)" != "$AzureCliVersion" ]]; then
 
         # Handle macOS installation/update
         if [[ $BASEOS == "Mac" ]]; then
@@ -285,21 +269,17 @@ if [[ "$provider" == "azure" ]]; then
                 esac
             fi
             curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
-            echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+#            echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
 
             sudo apt-get update -qq
+            sudo apt-get purge azure-cli -y -qq
             sudo apt-get install azure-cli -y -qq
-
+         
         elif [[ $OS == "Fedora" ]]; then
             echo "Needs Conversation for Fedora"
         fi
-
-        echo "Azure CLI updated to version $AzureCliVersion."
-    else
-        echo "Azure CLI is already at the required version $AzureCliVersion."
-    fi
-
-    # Authenticate using client credentials stored in axiom.json
+  fi 
+ # Authenticate using client credentials stored in axiom.json
     client_id="$(jq -r '.client_id' "$AXIOM_PATH"/axiom.json)"
     client_secret="$(jq -r '.client_secret' "$AXIOM_PATH"/axiom.json)"
     tenant_id="$(jq -r '.tenant_id' "$AXIOM_PATH"/axiom.json)"
@@ -308,6 +288,8 @@ if [[ "$provider" == "azure" ]]; then
 
     if [[ "$use_azure_cli_auth" == "true" ]]; then
         echo -e "${BGreen}Authenticating with Azure using Azure CLI...${Color_Off}"
+        sleep 3
+
         az login --service-principal --username "$client_id" --password "$client_secret" --tenant "$tenant_id" || bootstrap
         az account set --subscription "$subscription_id"
 
@@ -328,12 +310,8 @@ fi # provider azure
 # check installed version of aws cli and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
 #
 if [[ "$provider" == "aws" ]]; then
-    installed_version=$(aws --version 2>&1 | cut -d ' ' -f 1 | cut -d '/' -f 2)
-
-    # Check if the installed version matches the required version
-    if [[ "$installed_version" != $AWSCliVersion ]]; then
-        echo "AWS CLI version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
-
+   installed_version=$(aws --version  2>/dev/null | cut -d ' ' -f 1 | cut -d '/' -f 2)
+   if [[ "$(printf '%s\n' "$installed_version" "$AWSCliVersion" | sort -V | head -n 1)" != "$AWSCliVersion" ]]; then
         # Determine the OS type and handle installation accordingly
         if [[ $BASEOS == "Mac" ]]; then
             echo -e "${BGreen}Installing/Updating AWS CLI on macOS...${Color_Off}"
@@ -375,11 +353,7 @@ if [[ "$provider" == "aws" ]]; then
             fi
         fi
 
-        echo "AWS CLI updated to version $AWSCliVersion."
-    else
-        echo "AWS CLI is already at the required version $AWSCliVersion."
-    fi
-
+   fi
     # Check if AWS CLI is authenticated
     if ! aws sts get-caller-identity &> /dev/null; then
         echo -e "${BRed}AWS CLI is not authenticated.${Color_Off} Running bootstrap..."
@@ -407,12 +381,8 @@ fi # provider aws
 # Install hetzner if not already installed, check token is valid or kick off bootstrap
 #
 if [[ "$provider" == "hetzner" ]]; then
-    installed_version=$(hcloud version | cut -d ' ' -f 2)
-
-    # Check if the installed version matches the required version
-    if [[ "$installed_version" != "${HetznerCliVersion}" ]]; then
-        echo "hcloud-cli version $installed_version does not match the version in ~/.axiom/interact/includes/vars.sh"
-
+   installed_version=$(hcloud version 2>/dev/null| cut -d ' ' -f 2)
+   if [[ "$(printf '%s\n' "$installed_version" "$HetznerCliVersion" | sort -V | head -n 1)" != "$HetznerCliVersion" ]]; then
         # Handle macOS installation/update
         if [[ $BASEOS == "Mac" ]]; then
             whereis brew
@@ -422,12 +392,10 @@ if [[ "$provider" == "hetzner" ]]; then
             else
                 echo -e "${BGreen}Checking for Homebrew... already installed.${Color_Off}"
             fi
-            if ! [ -x "$(command -v hcloud)" ]; then
                 echo -e "${BGreen}Installing hetzner-cloud CLI (hcloud)...${Color_Off}"
                 brew install hcloud
                 echo -e "${BGreen}Installing Hetzner Packer plugin...${Color_Off}"
                 packer plugins install github.com/hetznercloud/hcloud
-            fi
 
         # Handle Linux installation/update
         elif [[ $BASEOS == "Linux" ]]; then
@@ -445,23 +413,18 @@ if [[ "$provider" == "hetzner" ]]; then
             if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
                 sudo pacman -Syu hcloud --noconfirm
             elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
-                if ! [ -x "$(command -v hcloud)" ]; then
                     echo -e "${BGreen}Installing hetzner-cloud CLI (hcloud)...${Color_Off}"
                     wget -q -O /tmp/hetzner-cli.tar.gz https://github.com/hetznercloud/cli/releases/download/v${HetznerCliVersion}/hcloud-linux-amd64.tar.gz && tar -xvzf /tmp/hetzner-cli.tar.gz -C /tmp && sudo mv /tmp/hcloud /usr/bin/hcloud && rm /tmp/hetzner-cli.tar.gz
-                fi
             elif [[ $OS == "Fedora" ]]; then
                 echo "Needs Conversation for Fedora"
             fi
         fi
 
-        echo "hcloud-cli updated to version $HetznerCliVersion."
-    else
-        echo "hcloud-cli is already at the required version $HetznerCliVersion."
     fi
-
     # Validate token and setup configuration
     token="$(jq -r '.hetzner_key' "$AXIOM_PATH"/accounts/"$1".json)"
     status_code=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $token" https://api.hetzner.cloud/v1/servers)
+    echo -e "${BGreen}Configuring Hetzner CLI with credentials from axiom.json...${Color_Off}"
 
     if [[ "$status_code" == "200" ]]; then
         mkdir -p "$HOME/.config/hcloud"

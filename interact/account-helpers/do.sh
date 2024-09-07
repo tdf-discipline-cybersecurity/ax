@@ -33,12 +33,12 @@ esac
 installed_version=$(doctl version | grep version | cut -d ' ' -f 3 | cut -d '-' -f 1)
 if [[ $BASEOS == "Mac" ]]; then
     if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-        echo "doctl version $installed_version does not match the required version $DoctlVersion."
+        echo "doctl version $installed_version does not match the recommended version $DoctlVersion."
         echo "Installing/updating doctl to version $DoctlVersion..."
         wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-darwin-amd64.tar.gz -qO- | tar -xzv -C /usr/local/bin/
         echo "doctl updated to version $DoctlVersion."
     else
-        echo "doctl is already at the required version $DoctlVersion."
+        echo "doctl is already at the recommended version $DoctlVersion."
     fi
     echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
     packer plugins install github.com/digitalocean/digitalocean
@@ -58,12 +58,12 @@ elif [[ $BASEOS == "Linux" ]]; then
         sudo pacman -Syu doctl --noconfirm
     elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
         if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-            echo "doctl version $installed_version does not match the required version $DoctlVersion."
+            echo "doctl version $installed_version does not match the recommended version $DoctlVersion."
             echo "Installing/updating doctl to version $DoctlVersion..."
             wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-linux-amd64.tar.gz -qO- | sudo tar -xzv -C /usr/local/bin/
             echo "doctl updated to version $DoctlVersion."
         else
-            echo "doctl is already at the required version $DoctlVersion."
+            echo "doctl is already at the recommended version $DoctlVersion."
         fi
         echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
         packer plugins install github.com/digitalocean/digitalocean

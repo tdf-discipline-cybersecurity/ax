@@ -82,7 +82,7 @@ instances() {
 # used by axiom-ls axiom-init
 instance_ip() {
 	name="$1"
-	instances | jq ".[] | select(.name ==\"$name\") | .public_net.ipv4.ip"
+	instances | jq -r ".[] | select(.name ==\"$name\") | .public_net.ipv4.ip"
 }
 
 # check if instance name is in .sshconfig

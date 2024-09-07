@@ -190,9 +190,22 @@ fi
 # clean_up
 #
 clean_up() {
-kill -0 $remotetailPID 2>  /dev/null && kill -9 $remotetailPID  &> /dev/null
-kill -0 $tailPID 2>  /dev/null && kill -9 $tailPID  &> /dev/null
-kill -0 $downloaderPID 2>  /dev/null && kill -9 $downloaderPID  &> /dev/null
+
+if kill -0 $remotetailPID &> /dev/null; then
+ kill -9 $remotetailPID &> /dev/null
+ wait $remotetailPID &> /dev/null
+fi
+
+if kill -0 $downloaderPID &> /dev/null; then
+ kill -9 $downloaderPID &> /dev/null
+ wait $downloaderPID &> /dev/null
+fi
+
+if kill -0 $tailPID &> /dev/null; then
+ kill -9 $tailPID &> /dev/null
+ wait $tailPID &> /dev/null
+fi
+
 echo -e "${BGreen}Killing remote processes in a backgroud job${Color_Off}"
 $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
 $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
@@ -200,9 +213,10 @@ mv "$tmp" "$logs">/dev/null 2>&1
 if [[ $keep_logs != true ]]; then
  rm -r $logs >/dev/null 2>&1
 fi
+rm -r $socket_tmp >/dev/null 2>&1
 stty sane
 tput init
-exit 
+exit
 }
 
 ###########################################################################################################
@@ -222,7 +236,7 @@ fi
 
 ###########################################################################################################
 # Store $args in $commands
-# 
+#
 commands="$args"
 
 ###########################################################################################################
@@ -349,10 +363,10 @@ $interlace_cmd_nobar -c "axiom-scp $tmp/command _target_:$scan_dir/command --cac
 function downloader () {
 while true; do
 sleep 2
-$interlace_cmd_nobar -c "axiom-scp _target_:$scan_dir/_target_ $tmp/status/inprogress/_target_ --cache -F=$sshconfig >/dev/null 2>&1" 
+$interlace_cmd_nobar -c "axiom-scp _target_:$scan_dir/_target_ $tmp/status/inprogress/_target_ --cache -F=$sshconfig >/dev/null 2>&1"
 for host in "$tmp/status/inprogress/"*
-do 
-  if [ -e "$host" ]; then  
+do
+  if [ -e "$host" ]; then
    echo "$(basename $host)" | tee -a "$tmp/status/completed/hosts" >/dev/null 2>&1
    sort -u "$tmp/status/completed/hosts" -o "$tmp/status/completed/hosts" >/dev/null 2>&1
   fi
@@ -364,17 +378,18 @@ if [[ "$(cat $tmp/status/downloader_instances)" -eq "0"  ]]; then
  sleep 2
  downloader
 fi
-downloader_cmd="$(which interlace) --no-bar --silent -tL $tmp/status/downloader_hosts -threads $(cat $tmp/status/downloader_instances)" 
+downloader_cmd="$(which interlace) --no-bar --silent -tL $tmp/status/downloader_hosts -threads $(cat $tmp/status/downloader_instances)"
 if [[ "$commands" =~ "_target_" ]]; then
-$downloader_cmd -c "axiom-scp _target_:$scan_dir/output/ $tmp/output/ --cache -F=$sshconfig >/dev/null 2>&1" 
+$downloader_cmd -c "axiom-scp _target_:$scan_dir/output/ $tmp/output/ --cache -F=$sshconfig >/dev/null 2>&1"
 else
 $downloader_cmd -c "axiom-scp _target_:$scan_dir/output $tmp/output/_target_.$ext --cache -F=$sshconfig >/dev/null 2>&1"
 fi
-mv $tmp/status/completed/hosts $tmp/status/completed/hosts.tmp
-cat $tmp/status/completed/hosts.tmp | sort -u >> $tmp/status/completed/hosts
+
+# make sure the list of hostnames files downloaded was the same list you started with
+sort -u "$tmp/status/completed/hosts" -o "$tmp/status/completed/hosts" >/dev/null 2>&1
  if cmp -s $tmp/status/completed/hosts $tmp/hosts ; then
   kill -9 $(cat $tmp/status/remotetailPID)  >> /dev/null 2>&1
-  wait $(cat $tmp/status/remotetailPID)  >> /dev/null 2>&1 
+  wait $(cat $tmp/status/remotetailPID)  >> /dev/null 2>&1
  break >> /dev/null 2>&1
  else
   downloader
@@ -384,12 +399,12 @@ done
 
 ###########################################################################################################
 #  interactive mode flag
-# 
+#
 if [[ "$quick_execution" == "false" ]]; then
 
 ###########################################################################################################
 #  dont tail if quiet is true
-# 
+#
 if [[ "$quiet" == "false" ]]; then
     tail -q -f $tmp/logs/* &
     tailPID=$!
@@ -416,11 +431,11 @@ else
 fi
 
 ###########################################################################################################
-#  interactive mode logic 
+#  interactive mode logic
 #
 else
 if [[ "$nobar" == "false" ]]; then
- $interlace_cmd -c "$ssh_command _target_ '$commands'" 
+ $interlace_cmd -c "$ssh_command _target_ '$commands'"
  pid=$!
 else
  $interlace_cmd_nobar -c "$ssh_command _target_  '$commands'"
@@ -429,27 +444,6 @@ fi
 fi
 
 ###########################################################################################################
-#  keep logs flag aka --logs
-#
-mv "$tmp" "$logs">/dev/null 2>&1
-if [[ $keep_logs != true ]]; then
- rm -r $logs >/dev/null 2>&1
-fi
-
-###########################################################################################################
-#  kill tmux sessions with any orphaned proceses
-#
-$interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
-$interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
-
-###########################################################################################################
 # house keeping
 #
-rm -r $socket_tmp >/dev/null 2>&1
-kill -0 $remotetailPID 2>  /dev/null && kill -9 $remotetailPID  &> /dev/null
-kill -0 $tailPID 2>  /dev/null && kill -9 $tailPID  &> /dev/null
-kill -0 $downloaderPID 2>  /dev/null && kill -9 $downloaderPID  &> /dev/null
-wait $tailPID 2>/dev/null
-wait $downloaderPID 2>/dev/null
-stty sane
-tput init
+clean_up

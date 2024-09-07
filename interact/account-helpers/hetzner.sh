@@ -32,9 +32,9 @@ esac
 
 installed_version=$(hcloud version | cut -d ' ' -f 2)
 
-# Check if the installed version matches the required version
+# Check if the installed version matches the recommended version
 if [[ "$installed_version" != "${HetznerCliVersion}" ]]; then
-    echo "hcloud-cli version $installed_version does not match the required version $HetznerCliVersion."
+    echo "hcloud-cli version $installed_version does not match the recommended version $HetznerCliVersion."
 
     # Handle macOS installation/update
     if [[ $BASEOS == "Mac" ]]; then
@@ -82,7 +82,7 @@ if [[ "$installed_version" != "${HetznerCliVersion}" ]]; then
 
     echo "hcloud-cli updated to version $HetznerCliVersion."
 else
-    echo "hcloud-cli is already at the required version $HetznerCliVersion."
+    echo "hcloud-cli is already at the recommended version $HetznerCliVersion."
 fi
 
 function hetznersetup(){

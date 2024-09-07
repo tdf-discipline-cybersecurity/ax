@@ -32,9 +32,9 @@ esac
 
 installed_version=$(aws --version 2>&1 | cut -d ' ' -f 1 | cut -d '/' -f 2)
 
-# Check if the installed version matches the required version
+# Check if the installed version matches the recommended version
 if [[ "$installed_version" != $AWSCliVersion ]]; then
-    echo "AWS CLI version $installed_version does not match the required version $AWSCliVersion."
+    echo "${Yellow}AWS CLI version $installed_version does not match the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
 
     # Determine the OS type and handle installation accordingly
     if [[ $BASEOS == "Mac" ]]; then
@@ -79,7 +79,7 @@ if [[ "$installed_version" != $AWSCliVersion ]]; then
 
     echo "AWS CLI updated to version $AWSCliVersion."
 else
-    echo "AWS CLI is already at the required version $AWSCliVersion."
+    echo "AWS CLI is already at the recommended version $AWSCliVersion."
 fi
 
 function awssetup(){

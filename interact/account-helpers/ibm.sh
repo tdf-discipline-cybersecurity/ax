@@ -35,9 +35,9 @@ esac
 
 installed_version=$(ibmcloud version | cut -d ' ' -f 2 | cut -d + -f 1)
 
-# Check if the installed version matches the required version
+# Check if the installed version matches the recommended version
 if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
-    echo "ibmcloud-cli version $installed_version does not match the required version $IBMCloudCliVersion."
+    echo "ibmcloud-cli version $installed_version does not match the recommended version $IBMCloudCliVersion."
 
     if [[ $BASEOS == "Mac" ]]; then
         # macOS installation/update
@@ -79,7 +79,7 @@ if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
 
     echo "ibmcloud-cli updated to version $IBMCloudCliVersion."
 else
-    echo "ibmcloud-cli is already at the required version $IBMCloudCliVersion."
+    echo "ibmcloud-cli is already at the recommended version $IBMCloudCliVersion."
 fi
 
 # Change Packer version for IBM Cloud

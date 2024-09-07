@@ -39,9 +39,9 @@ esac
 
 installed_version=$(az version | jq -r '."azure-cli"')
 
-# Check if the installed version matches the required version
+# Check if the installed version matches the recommended version
 if [[ "$installed_version" != "$AzureCliVersion" ]]; then
-    echo "Azure CLI version $installed_version does not match the required version $AzureCliVersion."
+    echo "Azure CLI version $installed_version does not match the recommended version $AzureCliVersion."
 
     # Handle macOS installation/update
     if [[ $BASEOS == "Mac" ]]; then
@@ -107,7 +107,7 @@ if [[ "$installed_version" != "$AzureCliVersion" ]]; then
 
     echo "Azure CLI updated to version $AzureCliVersion."
 else
-    echo "Azure CLI is already at the required version $AzureCliVersion."
+    echo "Azure CLI is already at the recommended version $AzureCliVersion."
 fi
 
 ###########################################################################################################
@@ -130,7 +130,7 @@ fi
 ###########################################################################################################
 # get the region or use user provided region
 #
-echo -e -n "${Green}Please enter your default region (you can always change this later with axiom-region select \$region): Default '$default_region', press enter \n>> ${Color_Off}"
+echo -e -n "${Green}Please enter your default region (you can always change this later with axiom-region select \$region): Default '$region', press enter \n>> ${Color_Off}"
 read region
 
 if [[ "$region" == "" ]]; then

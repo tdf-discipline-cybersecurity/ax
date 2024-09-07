@@ -169,9 +169,19 @@ clean_up() {
         wait $downloaderPID &> /dev/null
      fi
 
-     echo -e "${Green}CTRL+C Interrupt, cleaning up and downloading output..${Color_Off}."
-     $interlace_cmd_nobar -c "$ssh_command _target_ \
-      '[ -f $scan_dir/_target_ ] && echo _target_ scan finished || echo _target_ scan was still running but downloading partial results'  >> $tmp/logs/_target_ 2>&1 "
+    # Only display this message if Ctrl+C was pressed
+     if [ "$ctrl_c_pressed" = true ]; then
+      echo -e "${Green}CTRL+C Interrupt, cleaning up and downloading output..${Color_Off}."
+      scan_status=cancelled
+      $interlace_cmd_nobar -c "$ssh_command _target_ \
+       '[ -f $scan_dir/_target_ ] && echo _target_ scan finished || echo _target_ scan was still running but downloading partial results'  >> $tmp/logs/_target_ 2>&1 "
+      # download results
+      $interlace_cmd_nobar -c "axiom-scp _target_:$scan_dir/output $tmp/output/_target_ --cache -F=$sshconfig >/dev/null 2>&1"
+      merge_output
+
+     else
+      scan_status=completed
+     fi
 
      if kill -0 $tailPID &> /dev/null; then
         kill -9 $tailPID &> /dev/null
@@ -194,13 +204,6 @@ clean_up() {
       fi
     fi
 
-    # download results
-    $interlace_cmd_nobar -c "axiom-scp _target_:$scan_dir/output $tmp/output/_target_ --cache -F=$sshconfig >/dev/null 2>&1"
-    merge_output
-    echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
-    $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
-    $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
-
     #  If delete logs is set to true, execute delete_logs function. if remove_all_logs is set to true, even remove the output folder in log file
     if [[ "$keeplogs" == "false" ]]; then
      if [[ "$remove_all_logs" == "true" ]]; then
@@ -208,13 +211,18 @@ clean_up() {
      else
       delete_logs
      fi
+    else
+     echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
+     $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
+     $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
     fi
 
     mv "$AXIOM_PATH/tmp/$uid/" "$AXIOM_PATH/logs/"
+
     end=$(date +%s)
     runtime=$((end-begin))
     time=$(formatSeconds $runtime)
-    json_stats="{\"scan\":{\"$module\":{\"id\":\"$uid\",\"extra_args\":"$escaped_extra_args",\"instances\":\"$total_instances\",\"targets\":\"$lines\",\"results\":\"$output_lines\",\"runtime\":\"$time\",\"date\":\"$starttime\",\"command\":$escapedcommand,\"threads\":\"$threads\",\"local_logs\":\"$AXIOM_PATH/logs/$uid\",\"remote_logs\":\"/home/op/scan/$uid\",\"output\":\"$(realpath $outfile)\",\"status\":\"canceled\"}}}"
+    json_stats="{\"scan\":{\"$module\":{\"id\":\"$uid\",\"extra_args\":"$escaped_extra_args",\"instances\":\"$total_instances\",\"targets\":\"$lines\",\"results\":\"$output_lines\",\"runtime\":\"$time\",\"date\":\"$starttime\",\"command\":$escapedcommand,\"threads\":\"$threads\",\"local_logs\":\"$AXIOM_PATH/logs/$uid\",\"remote_logs\":\"/home/op/scan/$uid\",\"output\":\"$(realpath $outfile)\",\"status\":\"$scan_status\"}}}"
     if jq -e . >/dev/null 2>&1 <<<"$json_stats"; then
      echo -e "${BGreen}appending axiom-scan runtime statistics to:${Color_Off} [ ${BBlue}$AXIOM_PATH/stats.log${Color_Off} ]${BGreen} | ${Color_Off}"
      echo "$json_stats" | tee -a $AXIOM_PATH/stats.log  >> /dev/null 2>&1
@@ -238,31 +246,42 @@ clean_up() {
 #
 delete_logs() {
 if [[ "$1" != "all" ]]; then
- echo -e "${BBlue}deleting remote logs in a backgroud job${Color_Off}"
- $interlace_cmd_nobar -c "$ssh_command _target_ 'sudo rm -r /home/op/scan/${uid}/'" >/dev/null 2>&1
-  if [ -d "$AXIOM_PATH/tmp/$uid/" ]
-   then
-   echo -e "${BBlue}deleting local logs, except for${Color_Off} [${BGreen} $AXIOM_PATH/logs/$uid/output/ ${Color_Off}]"
-   start=$(pwd)
-   cd "$AXIOM_PATH/tmp/$uid/" || exit
-   ls | grep -v output | xargs rm -r >/dev/null 2>&1
-   cd "$start"
-  else
-    echo -e "${Red}error: local log folder does not exist.${Color_Off}"
-  fi
+
+echo -e "${BBlue}deleting remote logs in a backgroud job${Color_Off}"
+$interlace_cmd -c "$ssh_command _target_ 'sudo rm -r /home/op/scan/${uid}/'"
+
+echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
+$interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
+$interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
+
+ if [ -d "$AXIOM_PATH/tmp/$uid/" ]; then
+  echo -e "${BBlue}deleting local logs, except for${Color_Off} [${BGreen} $AXIOM_PATH/logs/$uid/output/ ${Color_Off}]"
+  start=$(pwd)
+  cd "$AXIOM_PATH/tmp/$uid/" || exit
+  ls | grep -v output | xargs rm -r >/dev/null 2>&1
+  cd "$start"
+ else
+  echo -e "${Red}error: local log folder does not exist.${Color_Off}"
+ fi
+
 else
+
  echo -e "${BBlue}deleting remote logs in a backgroud job${Color_Off}"
  $interlace_cmd_nobar -c "$ssh_command _target_ 'sudo rm -r /home/op/scan/${uid}/'"  >/dev/null 2>&1
-  if [ -d "$AXIOM_PATH/tmp/$uid/" ]
-   then
-   echo -e "${BBlue}deleting local logs, including ${Color_Off} [${BGreen} $AXIOM_PATH/logs/$uid/output/ ${Color_Off}]"
-   start=$(pwd)
-   cd "$AXIOM_PATH/tmp/$uid/" || exit
-   ls | xargs rm -r >/dev/null 2>&1
-   cd "$start"
-  else
-    echo -e "${Red}error: local log folder does not exist.${Color_Off}"
-  fi
+ echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
+
+ $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
+ $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
+
+ if [ -d "$AXIOM_PATH/tmp/$uid/" ] ; then
+  echo -e "${BBlue}deleting local logs, including ${Color_Off} [${BGreen} $AXIOM_PATH/logs/$uid/output/ ${Color_Off}]"
+  start=$(pwd)
+  cd "$AXIOM_PATH/tmp/$uid/" || exit
+  ls | xargs rm -r >/dev/null 2>&1
+  cd "$start"
+ else
+   echo -e "${Red}error: local log folder does not exist.${Color_Off}"
+ fi
 fi
 }
 
@@ -511,6 +530,7 @@ no_logs="false"
 track_finished="false"
 extra_args=""
 backwards_compatibility_nuclei_templates="false"
+ctrl_c_pressed="false"
 
 ###########################################################################################################
 #  Parse command line arguments
@@ -1021,7 +1041,7 @@ fi
 #  clean_up function called by trap when CTRL+C is pressed
 #
 stty -echoctl
-trap clean_up SIGINT SIGTERM
+trap 'ctrl_c_pressed=true; clean_up' SIGINT SIGTERM
 
 ###########################################################################################################
 #  Destination directory on the instances and the command used to SSH to them
@@ -1395,8 +1415,7 @@ if [[ "$rm_when_done" == "true" ]]; then
 fi
 
 # make sure the list of hostnames files downloaded was the same list you started with
-mv $tmp/status/completed/hosts $tmp/status/completed/hosts.tmp
-cat $tmp/status/completed/hosts.tmp | sort -u >> $tmp/status/completed/hosts
+sort -u "$tmp/status/completed/hosts" -o "$tmp/status/completed/hosts" >/dev/null 2>&1
  if cmp -s $tmp/status/completed/hosts $tmp/hosts ; then
   kill -9 $(cat $tmp/status/remotetailPID)  >> /dev/null 2>&1
   wait $(cat $tmp/status/remotetailPID)  >> /dev/null 2>&1
@@ -1549,57 +1568,6 @@ runtime=$((end-begin))
 time=$(formatSeconds $runtime)
 
 ###########################################################################################################
-#  kill tmux sessions with any orphaned proceses, unless --rm-when-done is used (since fleet should be deleted)
+# house keeping
 #
-if [[ "$rm_when_done" == "false" ]]; then
- $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
- $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
-fi
-
-###########################################################################################################
-#  If delete logs is set to true, execute delete_logs function. if 'remove_all_logs' is set to true, delete
-#  all logs, even the log output folder
-#
-if [[ "$keeplogs" == "false" ]]; then
- if [[ "$remove_all_logs" == "true" ]]; then
-  delete_logs all
- else
-  delete_logs
- fi
-fi
-
-###########################################################################################################
-#  Move downloaded raw results to log file
-#
-mv "$AXIOM_PATH/tmp/$uid/" "$AXIOM_PATH/logs/"
-
-###########################################################################################################
-#  Display exit stats about the scan such as log directory
-#  Normalize terminal
-#
-json_stats="{\"scan\":{\"$module\":{\"id\":\"$uid\",\"extra_args\":"$escaped_extra_args",\"instances\":\"$total_instances\",\"targets\":\"$lines\",\"results\":\"$output_lines\",\"runtime\":\"$time\",\"date\":\"$starttime\",\"command\":$escapedcommand,\"threads\":\"$threads\",\"local_logs\":\"$AXIOM_PATH/logs/$uid\",\"remote_logs\":\"/home/op/scan/$uid\",\"output\":\"$(realpath $outfile)\",\"status\":\"completed\"}}}"
-if jq -e . >/dev/null 2>&1 <<<"$json_stats"; then
- echo -e "${BGreen}appending axiom-scan runtime statistics to:${Color_Off} [ ${BBlue}$AXIOM_PATH/stats.log${Color_Off} ]${BGreen} | ${Color_Off}"
- echo "$json_stats" | tee -a $AXIOM_PATH/stats.log  >> /dev/null 2>&1
-else
- echo -e "${Red}error parsing json runtime statistics, not appending axiom-scan statistics to${Color_Off}${BGreen} : $AXIOM_PATH/stats.log${Color_Off}"
-fi
-echo -e "${BGreen}module: ${Color_Off}[${BBlue} $module ${Color_Off}]${BGreen} | ${BGreen}module args: ${Color_Off}[${BBlue} $args ${Color_Off}] ${BGreen}| ${BGreen}instances: ${Color_Off}[${BBlue} $total_instances ${Color_Off}]${BGreen} | ${BGreen}targets: ${Color_Off}[${BBlue} $lines targets ${Color_Off}]${BGreen} | ${BGreen}results: ${Color_Off}[${BBlue} $output_lines results ${Color_Off}]${BGreen} |"
-echo -e "${BGreen}runtime: ${Color_Off}[${BBlue} $time ${Color_Off}]${BGreen} | ${BGreen}date: ${Color_Off}[${BBlue} $starttime ${Color_Off}]${BGreen} | ${BGreen}id: ${Color_Off}[${BBlue} "$uid" ${Color_Off}]${BGreen} |"
-echo -e "${BGreen}output: ${Color_Off}[${BBlue} $(realpath $outfile) ${Color_Off}]${BGreen} | ${BGreen}log: ${Color_Off}[${BBlue} "$AXIOM_PATH/logs/$uid" ${Color_Off}]${BGreen} | ${BGreen}remote: ${Color_Off}[${BBlue} "/home/op/scan/$uid" ${Color_Off}] ${BGreen} |"
-echo -e "${BGreen}command: ${Color_Off}[${BBlue} $command ${Color_Off}]${BGreen} | ${BGreen}ext: ${Color_Off}[${BBlue} "$ext" ${Color_Off}]${BGreen} | ${BGreen}threads: ${Color_Off}[${BBlue} "$threads" ${Color_Off}]${BGreen}${Color_Off}"
-rm -r $socket_tmp >/dev/null 2>&1
-if kill -0 $remotetailPID &> /dev/null; then
- kill -9 $remotetailPID &> /dev/null
- wait $remotetailPID &> /dev/null
-fi
-if kill -0 $downloaderPID &> /dev/null; then
- kill -9 $downloaderPID &> /dev/null
- wait $downloaderPID &> /dev/null
-fi
-if kill -0 $tailPID &> /dev/null; then
- kill -9 $tailPID &> /dev/null
- wait $tailPID &> /dev/null
-fi
-stty sane
-tput init
+clean_up
