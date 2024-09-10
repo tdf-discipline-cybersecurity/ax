@@ -131,7 +131,7 @@ fi
 ###########################################################################################################
 # get the region or use user provided region
 #
-echo -e -n "${Green}Please enter your default region (you can always change this later with axiom-region select \$region): Default '$region', press enter \n>> ${Color_Off}"
+echo -e -n "${Green}Please enter your default region (you can always change this later with axiom-region select \$region): Default 'eastus', press enter \n>> ${Color_Off}"
 read region
 
 if [[ "$region" == "" ]]; then
