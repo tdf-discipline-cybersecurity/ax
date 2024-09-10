@@ -33,11 +33,11 @@ case $BASEOS in
 *) ;;
 esac
 
-installed_version=$(ibmcloud version | cut -d ' ' -f 2 | cut -d + -f 1)
+installed_version=$(ibmcloud version 2>/dev/null | cut -d ' ' -f 2 | cut -d + -f 1)
 
 # Check if the installed version matches the recommended version
 if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
-    echo "ibmcloud-cli version $installed_version does not match the recommended version $IBMCloudCliVersion."
+    echo -e "${Yellow}ibmcloud cli is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
 
     if [[ $BASEOS == "Mac" ]]; then
         # macOS installation/update
@@ -66,10 +66,8 @@ if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
         if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
             echo "Needs Conversation for Arch or ManjaroLinux"
         elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
-            if ! [ -x "$(command -v ibmcloud)" ]; then
-                echo -e "${BGreen}Installing ibmcloud-cli on Linux...${Color_Off}"
-                curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-            fi
+            echo -e "${BGreen}Installing ibmcloud-cli on Linux...${Color_Off}"
+            curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
             echo -e "${BGreen}Installing ibmcloud sl (SoftLayer) plugin...${Color_Off}"
             ibmcloud plugin install sl -q -f
         elif [[ $OS == "Fedora" ]]; then
@@ -79,7 +77,7 @@ if [[ "$installed_version" != "${IBMCloudCliVersion}" ]]; then
 
     echo "ibmcloud-cli updated to version $IBMCloudCliVersion."
 else
-    echo "ibmcloud-cli is already at the recommended version $IBMCloudCliVersion."
+    echo "ibmcloud-cli is already at or above the recommended version $IBMCloudCliVersion."
 fi
 
 # Change Packer version for IBM Cloud

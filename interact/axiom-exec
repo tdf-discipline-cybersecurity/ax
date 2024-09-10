@@ -207,7 +207,7 @@ if kill -0 $tailPID &> /dev/null; then
 fi
 
 echo -e "${BGreen}Killing remote processes in a backgroud job${Color_Off}"
-$interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
+$interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1 &
 $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
 mv "$tmp" "$logs">/dev/null 2>&1
 if [[ $keep_logs != true ]]; then

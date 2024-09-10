@@ -30,53 +30,48 @@ case $BASEOS in
 *) ;;
 esac
 
-installed_version=$(doctl version | grep version | cut -d ' ' -f 3 | cut -d '-' -f 1)
-if [[ $BASEOS == "Mac" ]]; then
-    if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-        echo "doctl version $installed_version does not match the recommended version $DoctlVersion."
-        echo "Installing/updating doctl to version $DoctlVersion..."
+installed_version=$(doctl version 2>/dev/null| grep version | cut -d ' ' -f 3 | cut -d '-' -f 1)
+# Check if the installed version matches the recommended version
+if [[ "$installed_version" != "$DoctlVersion" ]]; then
+    echo -e "${Yellow}Doctl CLI is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
+    echo "Installing/updating doctl to version $DoctlVersion..."
+
+    # Handle macOS installation/update
+
+    if [[ $BASEOS == "Mac" ]]; then
         wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-darwin-amd64.tar.gz -qO- | tar -xzv -C /usr/local/bin/
         echo "doctl updated to version $DoctlVersion."
-    else
-        echo "doctl is already at the recommended version $DoctlVersion."
-    fi
-    echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
-    packer plugins install github.com/digitalocean/digitalocean
-
-elif [[ $BASEOS == "Linux" ]]; then
-    if uname -a | grep -qi "Microsoft"; then
-        OS="UbuntuWSL"
-    else
-        OS=$(lsb_release -i | awk '{ print $3 }')
-        if ! command -v lsb_release &> /dev/null; then
-            OS="unknown-Linux"
-            BASEOS="Linux"
-        fi
-    fi
-
-    if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
-        sudo pacman -Syu doctl --noconfirm
-    elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
-        if [[ "$installed_version" != "${DoctlVersion}" ]]; then
-            echo "doctl version $installed_version does not match the recommended version $DoctlVersion."
-            echo "Installing/updating doctl to version $DoctlVersion..."
-            wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-linux-amd64.tar.gz -qO- | sudo tar -xzv -C /usr/local/bin/
-            echo "doctl updated to version $DoctlVersion."
-        else
-            echo "doctl is already at the recommended version $DoctlVersion."
-        fi
         echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
         packer plugins install github.com/digitalocean/digitalocean
-    elif [[ $OS == "Fedora" ]]; then
-        echo "Needs Conversation"
+
+    elif [[ $BASEOS == "Linux" ]]; then
+        if uname -a | grep -qi "Microsoft"; then
+            OS="UbuntuWSL"
+        else
+            OS=$(lsb_release -i | awk '{ print $3 }')
+         if ! command -v lsb_release &> /dev/null; then
+             OS="unknown-Linux"
+             BASEOS="Linux"
+         fi
     fi
-fi # baseOS
+    if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
+            sudo pacman -Syu doctl --noconfirm
+        elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
+            wget https://github.com/digitalocean/doctl/releases/download/v${DoctlVersion}/doctl-${DoctlVersion}-linux-amd64.tar.gz -qO- | sudo tar -xzv -C /usr/local/bin/
+            echo "doctl updated to version $DoctlVersion."
+            echo -e "${BGreen}Installing doctl packer plugin...${Color_Off}"
+            packer plugins install github.com/digitalocean/digitalocean
+        elif [[ $OS == "Fedora" ]]; then
+            echo "Needs Conversation"
+        fi
+    fi # baseOS
+fi
 
 function dosetup(){
 
 echo -e "${BGreen}Sign up for an account using this link for 200\$ free credit: https://m.do.co/c/541daa5b4786\nObtain personal access token from: https://cloud.digitalocean.com/account/api/tokens${Color_Off}"
 echo -e -n "${BGreen}Do you already have a DigitalOcean account? y/n ${Color_Off}"
-read acc 
+read acc
 
 if [[ "$acc" == "n" ]]; then
     echo -e "${BGreen}Launching browser with signup page...${Color_Off}"

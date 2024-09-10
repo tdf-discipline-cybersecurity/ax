@@ -30,11 +30,11 @@ case $BASEOS in
 *) ;;
 esac
 
-installed_version=$(hcloud version | cut -d ' ' -f 2)
+installed_version=$(hcloud version 2>/dev/null| cut -d ' ' -f 2)
 
 # Check if the installed version matches the recommended version
 if [[ "$installed_version" != "${HetznerCliVersion}" ]]; then
-    echo "hcloud-cli version $installed_version does not match the recommended version $HetznerCliVersion."
+    echo -e "${Yellow}hcloud-cli is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
 
     # Handle macOS installation/update
     if [[ $BASEOS == "Mac" ]]; then
@@ -82,7 +82,7 @@ if [[ "$installed_version" != "${HetznerCliVersion}" ]]; then
 
     echo "hcloud-cli updated to version $HetznerCliVersion."
 else
-    echo "hcloud-cli is already at the recommended version $HetznerCliVersion."
+    echo "hcloud-cli is already at or above the recommended version $HetznerCliVersion."
 fi
 
 function hetznersetup(){

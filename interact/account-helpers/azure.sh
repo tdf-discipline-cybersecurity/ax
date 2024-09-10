@@ -37,11 +37,11 @@ case $BASEOS in
 *) ;;
 esac
 
-installed_version=$(az version | jq -r '."azure-cli"')
+installed_version=$(az version 2>/dev/null | jq -r '."azure-cli"')
 
 # Check if the installed version matches the recommended version
 if [[ "$installed_version" != "$AzureCliVersion" ]]; then
-    echo "Azure CLI version $installed_version does not match the recommended version $AzureCliVersion."
+    echo -e "${Yellow}Azure CLI is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
 
     # Handle macOS installation/update
     if [[ $BASEOS == "Mac" ]]; then
@@ -62,6 +62,7 @@ if [[ "$installed_version" != "$AzureCliVersion" ]]; then
 
     # Handle Linux installation/update
     elif [[ $BASEOS == "Linux" ]]; then
+        echo -e "${BGreen}Installing Azure CLI (az)...${Color_Off}"
         sudo apt-get update -qq
         sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg -y -qq
 
@@ -107,7 +108,7 @@ if [[ "$installed_version" != "$AzureCliVersion" ]]; then
 
     echo "Azure CLI updated to version $AzureCliVersion."
 else
-    echo "Azure CLI is already at the recommended version $AzureCliVersion."
+    echo "Azure CLI is already at or above the recommended version $AzureCliVersion."
 fi
 
 ###########################################################################################################

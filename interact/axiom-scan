@@ -18,7 +18,7 @@ case $BASEOS in
 esac
 
 ###########################################################################################################
-# Functions
+# formatSeconds Function
 #
 function formatSeconds (){
         declare format='%02dh:%02dm:%02ds'         # time format hh:mm:sshconfig
@@ -42,7 +42,7 @@ function list_modules() {
 }
 
 ###########################################################################################################
-# Parsing the modules with jq.
+# Parsing the modules with jq
 #
 function parse_module() {
 	module="$1"
@@ -140,8 +140,8 @@ FLEET:
    --cache                     do not regenerate SSH config prior to scan, instead use cached config (located at ~/.axiom/.sshconfig)
    --fleet string[]            supply fleet prefix to use (default uses instances in ~/.axiom/selected.conf)
    --regions string[]          round-robin region distribution using comma-separated regions to cycle through (default is region in ~/.axiom/axiom.json)
-   --rm-when-done              delete instance when finished with its job
-   --shutdown-when-done        shutdown the selected instance after the scan completes
+   --rm-when-done              delete the instance when finished with its job (does not wait for all instances to complete)
+   --shutdown-when-done        shutdown the instance when finished with its job (does not wait for all instances to complete)
    --spinup int[]              number of instances to spin up prior to scanning (default uses instances in ~/.axiom/selected.conf)
 
 DEBUG:
@@ -155,7 +155,9 @@ EOF
 }
 
 ###########################################################################################################
-#  When CONTROL+C is pressed during a scan, perform exit housekeeping. Allow us to download and merge the available results after canceling
+# Kill 'remotetailPID' and 'downloaderPID'. If Ctrl+C was pressed, set scan status to cancelled and download results
+# Kill 'tailPid' and merge the results. --download --rm-logs and --no-logs logic
+# Kill remote tmux sessions and exit socket. Mv scan tmp to logs folder and display exit stats
 #
 clean_up() {
      trap exit SIGINT SIGTERM
@@ -175,9 +177,8 @@ clean_up() {
       scan_status=cancelled
       $interlace_cmd_nobar -c "$ssh_command _target_ \
        '[ -f $scan_dir/_target_ ] && echo _target_ scan finished || echo _target_ scan was still running but downloading partial results'  >> $tmp/logs/_target_ 2>&1 "
-      # download results
+      # Download results
       $interlace_cmd_nobar -c "axiom-scp _target_:$scan_dir/output $tmp/output/_target_ --cache -F=$sshconfig >/dev/null 2>&1"
-      merge_output
 
      else
       scan_status=completed
@@ -188,7 +189,10 @@ clean_up() {
         wait $tailPID &> /dev/null
      fi
 
-     #  If --download is used, download a user provided file from tmp scan working dir
+     # Merge the downloaded results
+     merge_output
+
+     # If --download is used, download a user provided file from tmp scan working dir
      if [[ "$download_user_arg" != "false" ]]; then
       if [ -e "$(basename $download_file_path)" ]; then
        new_download_file_path=$download_file_path+$RANDOM
@@ -204,7 +208,7 @@ clean_up() {
       fi
     fi
 
-    #  If delete logs is set to true, execute delete_logs function. if remove_all_logs is set to true, even remove the output folder in log file
+    # If delete logs is set to true, execute delete_logs function. if remove_all_logs is set to true, even remove the output folder in log file
     if [[ "$keeplogs" == "false" ]]; then
      if [[ "$remove_all_logs" == "true" ]]; then
       delete_logs all
@@ -212,16 +216,22 @@ clean_up() {
       delete_logs
      fi
     else
+
+     # Kill tmux sessions with any orphaned proceses
      echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
-     $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
+     $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1 &
      $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
     fi
 
+    # Move downloaded raw results to log file
     mv "$AXIOM_PATH/tmp/$uid/" "$AXIOM_PATH/logs/"
 
+    # Get some runtime stats
     end=$(date +%s)
     runtime=$((end-begin))
     time=$(formatSeconds $runtime)
+
+    # Display exit stats about the scan such as log directory, normalize terminal
     json_stats="{\"scan\":{\"$module\":{\"id\":\"$uid\",\"extra_args\":"$escaped_extra_args",\"instances\":\"$total_instances\",\"targets\":\"$lines\",\"results\":\"$output_lines\",\"runtime\":\"$time\",\"date\":\"$starttime\",\"command\":$escapedcommand,\"threads\":\"$threads\",\"local_logs\":\"$AXIOM_PATH/logs/$uid\",\"remote_logs\":\"/home/op/scan/$uid\",\"output\":\"$(realpath $outfile)\",\"status\":\"$scan_status\"}}}"
     if jq -e . >/dev/null 2>&1 <<<"$json_stats"; then
      echo -e "${BGreen}appending axiom-scan runtime statistics to:${Color_Off} [ ${BBlue}$AXIOM_PATH/stats.log${Color_Off} ]${BGreen} | ${Color_Off}"
@@ -1398,7 +1408,19 @@ else
  fi
 fi
 
-###########################################################################################################
+#  shutdown axiom instances as soon as ax see the instances $(hostname) file
+#  This doesnt wait until all scanners are finished before shutting down the instance
+#  The instance is shut down after the results are downloaded and the instance is finished with its job
+#
+if [[ "$shutdown_when_done" == "true" ]]; then
+    for instance in $(cat "$tmp/status/downloader_hosts");
+    do
+        "$AXIOM_PATH/interact/axiom-power" off "$instance"
+        sleep 5
+    done
+ preflight_function >> /dev/null 2>&1
+fi
+
 #  If --rm-when-done is in the command, delete the instance as soon as ax see the instances $(hostname) file
 #  This doesnt wait until all scanners are finished before deleting the instance
 #  The instance is deleted after the results are downloaded and the instance is finished with its job
@@ -1527,47 +1549,6 @@ if [[ "$rm_when_done" == "false" ]]; then
 fi
 
 ###########################################################################################################
-#  If --download is used, download a user provided file from tmp scan working dir
-#
-if [[ "$download_user_arg" != "false" ]]; then
- if [ -e "$(basename $download_file_path)" ]; then
-  new_download_file_path=$download_file_path+$RANDOM
-  echo -e "${BGreen}local file ${Color_Off}[ ${BBlue}$(basename $download_file_path) ${Color_Off} ] ${BGreen}already exists downloading arbitrary remote file ${BGreen}to${Color_Off}: ${Color_Off}[ ${BBlue}$(basename $new_download_file_path)${Color_Off} ]"
-  mkdir -p $(basename $new_download_file_path)
-  $interlace_cmd_nobar -c "$AXIOM_PATH/interact/axiom-scp _target_:$download_file_path $(basename $new_download_file_path)/_target_ --cache -F=$sshconfig >/dev/null 2>&1" | grep -v "Gen"
-  echo -e "${Green}arbitrary remote file downloaded successfully!${Color_Off}"
- else
-  echo -e "${BGreen}downloading arbitrary remote file ${BGreen}to${Color_Off}: ${Color_Off}[ ${BBlue}$(basename $download_file_path)${Color_Off} ]"
-  mkdir -p $(basename $download_file_path)
-  $interlace_cmd_nobar -c "$AXIOM_PATH/interact/axiom-scp _target_:$download_file_path $(basename $download_file_path)/_target_ --cache -F=$sshconfig >/dev/null 2>&1" | grep -v "Gen"
-  echo -e "${Green}arbitrary remote file downloaded successfully!${Color_Off}"
- fi
-fi
-
-###########################################################################################################
-#  After downloading all the results merge the output
-#
-merge_output
-
-###########################################################################################################
-#  shutdown axiom instances after scan completes if --shutdown-when-done is in the command
-#
-if [[ "$shutdown_when_done" == "true" ]]; then
-    for instance in $(cat "$tmp/selected.conf");
-    do
-        "$AXIOM_PATH/interact/axiom-power" off "$instance"
-        sleep 0.4
-    done
-fi
-
-###########################################################################################################
-#  get some runtime stats
-#
-end=$(date +%s)
-runtime=$((end-begin))
-time=$(formatSeconds $runtime)
-
-###########################################################################################################
-# house keeping
+# merge results, kill any orphened processes and perform exit house keeping
 #
 clean_up

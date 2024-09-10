@@ -33,11 +33,11 @@ esac
 echo -e "${Green}Checking linode-cli version...\n${Color_Off}"
 
 # Get the currently installed version of linode-cli
-installed_version=$(linode-cli --version | grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
+installed_version=$(linode-cli --version 2>/dev/null| grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
 
 # Check if the installed version matches the desired version
 if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
-    echo "linode-cli version $installed_version does not match the recommended version $LinodeCliVersion."
+    echo -e "${Yellow}linode-cli is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
     echo "Installing/updating linode-cli to version $LinodeCliVersion..."
 
     # Try to install or upgrade linode-cli and handle externally-managed-environment
@@ -50,7 +50,7 @@ if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
         echo "linode-cli updated successfully or no externally managed environment detected."
     fi
 else
-    echo "linode-cli is already at the recommended version $LinodeCliVersion."
+    echo "linode-cli is already at or above the recommended version $LinodeCliVersion."
 fi
 
 if [[ $BASEOS == "Mac" ]]; then
