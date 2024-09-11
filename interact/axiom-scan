@@ -34,11 +34,41 @@ function formatSeconds (){
 
 ###########################################################################################################
 # List path of all axiom modules and their commands axiom-scan --list
-#
 function list_modules() {
-	echo -e "${Green}Available Modules:${Color_Off}"
-	(echo "MODULE,COMMAND"; find "$AXIOM_PATH/modules" -name '*.json' -exec echo -n {}\` \; -exec jq -r '.[0].command' {} \; | sort -t/ | sed 's/\/$HOME\/.axiom\/modules\///g' | \
-         sed 's/\.json//g' ) | column -t -s\` | perl -pe '$_ = "\033[0;37m$_\033[0;34m" if($. % 2)'
+    echo -e "${BGreen}Printing available modules from ~/.axiom/modules${Color_Off}"
+
+    # header
+    printf "${BWhite}%-23s %-8s %s${Color_Off}\n" "MODULE" "EXT" "COMMAND"
+    echo "-----------------------------------------------------------------------------------------------------"
+
+    # format module list
+    find "$AXIOM_PATH/modules" -name '*.json' | sort | while read -r module_file; do
+        module_name=$(basename "$module_file" .json)
+
+        # truncate module_name if it's longer than 30 characters
+        if [[ ${#module_name} -gt 23 ]]; then
+            module_name="${module_name:0:20}..." # Keep the first X characters, then add "..."
+        fi
+
+        # loop through each command and extension
+        jq -c '.[]' "$module_file" | while read -r module_info; do
+            command=$(echo "$module_info" | jq -r '.command')
+            ext=$(echo "$module_info" | jq -r '.ext')
+
+            # set default extension to 'dir' if it's blank
+            [ -z "$ext" ] && ext="dir"
+
+            # check if the command contains '_target_' or '_safe-target_' to mark it as one-shot
+            if [[ "$command" == *"_target_"* || "$command" == *"_safe-target_"* ]]; then
+                one_shot="${BRed} (One-shot)${Color_Off}"
+            else
+                one_shot=""
+            fi
+
+            # Print the list
+            printf "${BYellow}%-23s ${BCyan}%-8s ${BWhite}%s${one_shot}${Color_Off}\n" "$module_name" "$ext" "$command"
+        done
+    done
 }
 
 ###########################################################################################################
@@ -226,8 +256,8 @@ clean_up() {
     else
 
      # Kill tmux sessions with any orphaned proceses
-     echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
-     $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1 &
+     echo -e "${BBlue}killing remote processes...please wait${Color_Off}"
+     $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
      $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
     fi
 
