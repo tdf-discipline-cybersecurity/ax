@@ -1,3 +1,6 @@
+AXIOM_PATH="$HOME/.axiom"
+
+# Random Names to Use for Fleet and Init
 names=("amir" "aspen" "austin" "bango" "banzai" "bartik" "bassi" "batman" "beaver" "bell" "benz" "blink" "borg" "bose" "boyd" "buck" "cannon" "cerf" "chell" "clarke" "cohen" "colden" "cori" "cray" "ctbb" "darwin" "dawgyg" "diffie" "dirac" "elion" "ellis" "euler" "fermi" "fire" "fisher" "fox" "gates" "gauss" "ghost" "gould" "haddix" "haibt" "hertz" "hickey" "hoover" "hopper" "hugle" "hunt" "jang" "jarvis" "jepsen" "jobs" "joliot" "jones" "kalam" "kare" "keller" "kepler" "kilby" "kirch" "knox" "knuth" "lamar" "lamp" "lande" "leaky" "leder" "leman" "lewin" "liskov" "loka" "luke" "lupin" "martho" "mato" "max" "mayer" "mclean" "medin" "mendel" "merkle" "mog" "moore" "morse" "moser" "murdo" "nagli" "napier" "nash" "nat" "neum" "newton" "night" "nobel" "noyce" "octavian" "ofjaaah" "omnom" "pani" "pare" "pasa" "payne" "pdelteil" "perl" "pikpikcu" "poba" "pry" "raman" "rez" "rhodes" "rich" "ride" "robin" "rubin" "rt-bast" "saha" "sammet" "sandeep" "securibee" "snyder" "stok" "stone" "suther" "swartz" "tesla" "thl" "thomp" "todayisnew" "tu" "turing" "victoni" "vince" "wright" "wu" "xpn")
 
 # Reset
@@ -32,4 +35,6 @@ export HetznerCliVersion='1.47.0'
 export AzureCliVersion="2.64.0"
 export AWSCliVersion="2.17.45"
 
-# Auto Update
+
+# Auto Update Option
+[ -f $AXIOM_PATH/interact/includes/.auto_update ] && source $AXIOM_PATH/interact/includes/.auto_update

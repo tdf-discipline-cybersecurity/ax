@@ -52,24 +52,15 @@ manage_auto_update() {
         done
     fi
 
-    # If auto_update is true, add the auto_update_one_liner if it's not already present
+    # If auto_update is true, add the auto_update_one_liner to .auto_update
     if [[ "$auto_update" == "yes" ]]; then
-        if ! grep -Fq "$auto_update_one_liner" "$AXIOM_PATH/interact/includes/vars.sh"; then
-            echo "$auto_update_one_liner" >> "$AXIOM_PATH/interact/includes/vars.sh"
-            echo "Auto-update has been enabled."
-        else
-            echo "Auto-update is already enabled."
-        fi
-    # If auto_update is false, remove the auto_update_one_liner if present
+         echo "$auto_update_one_liner" > "$AXIOM_PATH/interact/includes/.auto_update"
+         echo "Auto-update has been enabled."
+
+    # If auto_update is false, delete .auto_update
     elif [[ "$auto_update" == "no" ]]; then
-        if grep -Fq "$auto_update_one_liner" "$AXIOM_PATH/interact/includes/vars.sh"; then
-            # Use grep and sed to remove the line from the file
-            grep -vF "$auto_update_one_liner" "$AXIOM_PATH/interact/includes/vars.sh" > "$AXIOM_PATH/interact/includes/vars_tmp.sh"
-            mv "$AXIOM_PATH/interact/includes/vars_tmp.sh" "$AXIOM_PATH/interact/includes/vars.sh"
-            echo "Auto-update has been disabled."
-        else
-            echo "Auto-update is already disabled."
-        fi
+        rm -f "$AXIOM_PATH/interact/includes/.auto_update"
+        echo "Auto-update has been disabled."
     else
         echo "Invalid value for auto_update. Please use 'yes' or 'no'."
     fi

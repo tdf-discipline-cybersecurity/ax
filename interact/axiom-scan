@@ -201,30 +201,36 @@ clean_up() {
         wait $downloaderPID &> /dev/null
      fi
 
+     if kill -0 $tailPID &> /dev/null; then
+        kill -9 $tailPID &> /dev/null
+        wait $tailPID &> /dev/null
+     fi
+
      # Check if Ctrl+C was pressed or rm_when_done is "false"
      if [ "$ctrl_c_pressed" = true ]; then
       echo ""
-      echo -e "${Green}CTRL+C Interrupt, cleaning up and downloading output..${Color_Off}."
+      echo -e "${Green}CTRL+C Interrupt, cleaning up and downloading output, please wait...${Color_Off}"
       scan_status=cancelled
      else
       scan_status=completed
      fi
+
+     # Check if any instance can not be reached. If it can't be reached, exit the socket
+     warn_log=$(mktemp)
+     $interlace_cmd_nobar -c "$ssh_check_command _target_ 2> /dev/null \
+      && (timeout $preflight_timeout $ssh_command_preflight _target_ exit \
+      || { $ssh_exit_command _target_ 2>/dev/null; echo _target_ unable to reconnect, relying on results already downloaded; } ) >> $warn_log 2>&1"
 
      # Execute the commands if Ctrl+C was pressed or rm_when_done is "false"
      if [ "$ctrl_c_pressed" = true ] || [ "$rm_when_done" = "false" ]; then
 
       # Warn if any instance didn't create their $(hostname) file
       $interlace_cmd_nobar -c "$ssh_command _target_ \
-       '[ -f $scan_dir/_target_ ] && echo _target_ scan finished || echo _target_ scan was still running but downloading partial results'  >> $tmp/logs/_target_ 2>&1" &
+       '[ -f $scan_dir/_target_ ] && echo _target_ scan finished || echo _target_ scan was still running but downloading partial results'  >> $warn_log 2>&1"
+      cat $warn_log | sort -n
 
       # Download the results
       $interlace_cmd_nobar -c "axiom-scp _target_:$scan_dir/output $tmp/output/_target_ --cache -F=$sshconfig >/dev/null 2>&1"
-     fi
-
-
-     if kill -0 $tailPID &> /dev/null; then
-        kill -9 $tailPID &> /dev/null
-        wait $tailPID &> /dev/null
      fi
 
      # Merge the downloaded results
@@ -1381,17 +1387,21 @@ fi
 #
 echo -e "${BGreen}module: ${Color_Off}[${BBlue} $module ${Color_Off}]${BGreen} | ${BGreen}module args: ${Color_Off}[${BBlue} $args ${Color_Off}] ${BGreen}| ${BGreen}input: ${Color_Off}[${BBlue} $lines lines ${Color_Off}]${BGreen} |"
 echo -e "${BGreen}instances: ${BBlue} $total_instances  ${Color_Off}[${BBlue} $(echo $instances | tr '\n' ' ')${Color_Off}]${BGreen} |"
-echo -e "${BGreen}command: ${Color_Off}[${BBlue} $command ${Color_Off}]${BGreen} | ${BGreen}ext: ${Color_Off}[${BBlue} "$ext" ${Color_Off}]${BGreen} | ${BGreen}threads: ${Color_Off}[${BBlue} "$threads" ${Color_Off}]${BGreen}"
+echo -e "${BGreen}command: ${Color_Off}[${BBlue} $command ${Color_Off}]${BGreen} | ${BGreen}ext: ${Color_Off}[${BBlue} "$ext" ${Color_Off}]${BGreen} | ${BGreen}threads: ${Color_Off}[${BBlue} "$threads" ${Color_Off}]${BGreen} |${Color_Off}"
 
 ###########################################################################################################
 #  split target list or copy target list  (--dont-split)
 #  delete expanded_input if --expand-cidr is used
 #
 if [[ "$split" == "true" ]]; then
-    echo -e "${BBlue}spliting and distributing input file...${Color_Off}"
+    echo -e "${BGreen}split: ${Color_Off}[ ${BBlue}spliting input file with${BGreen} $lines lines${BBlue} and distributing file across${BGreen} $total_instances${BBlue} instances ${Color_Off}]${BGreen}...${Color_Off}"
     split_file "$input_file" "$total_instances" "$tmp"
     else
-    echo -e "${BBlue}copying input file to every instance...${Color_Off}"
+    echo -e "${BGreen}copy: ${Color_Off}[ ${BBlue}copying input file with${BGreen} $lines lines${BBlue} and uploading file to ${BGreen}$total_instances${BBlue} instances ${Color_Off}]${BGreen}...${Color_Off}"
+
+#    echo -e "${BGreen}copy: ${BBlue}copying input file with ${Color_Off}[${BGreen} $lines lines ${Color_Off}]${BBlue} and uploading file to ${Color_Off}[${BGreen} $total_instances ${Color_Off}]${BBlue} instances...${Color_Off}"
+
+#    echo -e "${BBlue}copying input file to every instance...${Color_Off}"
     for i in $(echo $instances); do cp "$input_file" $tmp/input/$i ; done
 fi
 
