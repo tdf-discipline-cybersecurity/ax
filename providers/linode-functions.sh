@@ -54,19 +54,6 @@ instance_ip() {
 	instances | jq -r ".[] | select(.label==\"$name\") | .ipv4[0]"
 }
 
-# check if instance name is in .sshconfig
-# used by axiom-scan
-instance_ip_cache() {
-	name="$1"
-    config="$2"
-    ssh_config="$AXIOM_PATH/.sshconfig"
-
-    if [[ "$config" != "" ]]; then
-        ssh_config="$config"
-    fi
-    cat "$ssh_config" | grep -A 1 "$name" | awk '{ print $2 }' | tail -n 1
-}
-
 # used by axiom-select axiom-ls
 instance_list() {
 	instances | jq -r '.[].label'
@@ -163,41 +150,6 @@ query_instances() {
 
         if [[ "$query" ]]; then
                 selected="$selected $(echo $droplets | jq -r '.[].label' | grep -w "$query")"
-        else
-                if [[ ! "$selected" ]]; then
-                        echo -e "${Red}No instance supplied, use * if you want to delete all instances...${Color_Off}"
-                        exit
-                fi
-        fi
-
-        selected=$(echo "$selected" | tr ' ' '\n' | sort -u)
-        echo -n $selected
-}
-
-###################################################################
-# 
-# used by axiom-scan axiom-exec axiom-scp
-query_instances_cache() {
-        selected=""
-    ssh_conf="$AXIOM_PATH/.sshconfig"
-
-        for var in "$@"; do
-        if [[ "$var" =~ "-F=" ]]; then
-            ssh_conf="$(echo "$var" | cut -d "=" -f 2)"
-        elif [[ "$var" =~ "*" ]]; then
-                        var=$(echo "$var" | sed 's/*/.*/g')
-            selected="$selected $(cat "$ssh_conf" | grep "Host " | awk '{ print $2 }' | grep "$var")"
-                else
-                        if [[ $query ]]; then
-                                query="$query\|$var"
-                        else
-                                query="$var"
-                        fi
-                fi
-        done
-
-        if [[ "$query" ]]; then
-        selected="$selected $(cat "$ssh_conf" | grep "Host " | awk '{ print $2 }' | grep -w "$query")"
         else
                 if [[ ! "$selected" ]]; then
                         echo -e "${Red}No instance supplied, use * if you want to delete all instances...${Color_Off}"

@@ -206,7 +206,7 @@ clean_up() {
         wait $tailPID &> /dev/null
      fi
 
-     # Check if Ctrl+C was pressed or rm_when_done is "false"
+     # Check if Ctrl+C was pressed, if it was set scan_status to cancelled
      if [ "$ctrl_c_pressed" = true ]; then
       echo ""
       echo -e "${Green}CTRL+C Interrupt, cleaning up and downloading output, please wait...${Color_Off}"
@@ -261,7 +261,7 @@ clean_up() {
      fi
     else
 
-     # Kill tmux sessions with any orphaned proceses
+     # Kill tmux sessions with any orphaned proceses, exit all multiplexed SSH connections
      echo -e "${BBlue}killing remote processes...please wait${Color_Off}"
      $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
      $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
@@ -290,7 +290,7 @@ clean_up() {
     rm -r $socket_tmp >/dev/null 2>&1
     stty sane
     tput init
-    exit $1
+    exit
 }
 
 ###########################################################################################################
@@ -554,7 +554,6 @@ fleet=""
 threads=""
 interactive=""
 uid="$module+$(date +%m-%d_%H-%M-%S-%1N)"
-#outfile="$start/scan+$(date +%m-%d_%H-%M-%S-%1N)"
 sshconfig="$AXIOM_PATH/.sshconfig"
 rm_when_done="false"
 spinup=0
@@ -954,8 +953,8 @@ fi
 #  Exit if the first command line argument doesnt not contain a target list
 #
 if [[ ! -f $input ]]; then
-        echo -e "${BRed}Input file does not exist, please specify one as the first argument... ${Color_Off}"
-        exit 1
+ echo -e "${BRed}Input file does not exist, please specify one as the first argument... ${Color_Off}"
+ exit 1
 fi
 
 ###########################################################################################################
@@ -963,8 +962,8 @@ fi
 #
 if [[ "$*" != *-m* ]]
 then
-  echo -e "${Red}No module for axiom-scan defined. Pass one with -m.${Color_Off}"
-        exit 1
+ echo -e "${Red}No module for axiom-scan defined. Pass one with -m.${Color_Off}"
+ exit 1
 fi
 
 ###########################################################################################################
@@ -989,7 +988,7 @@ fi
 #  Create temporary directories and set tmp path to be used for logs
 #
 if [ -z "$outfile" ] ; then
-outfile="$start/$module+$(date +%m-%d_%H-%M-%S-%1N)"
+ outfile="$start/$module+$(date +%m-%d_%H-%M-%S-%1N)"
 fi
 uid="$module+$(date +%m-%d_%H-%M-%S-%1N)"
 tmp="$AXIOM_PATH/tmp/$uid"
@@ -1244,7 +1243,7 @@ fi
 #  If -wL (wordlist-local) is present in the command line, upload a user provided wordlist to use.
 #
 if [[ -f "$local_wordlist" ]]; then
-echo -e "${BGreen}uploading local wordlist${Color_Off}${BBlue} : $local_wordlist_filename${Color_Off} to ${BBlue}$destination_wordlist...${Color_Off}"
+    echo -e "${BGreen}uploading local wordlist${Color_Off}${BBlue} : $local_wordlist_filename${Color_Off} to ${BBlue}$destination_wordlist...${Color_Off}"
     interlace --no-bar --silent -threads $total_instances -tL "$tmp/selected.conf" -c "$AXIOM_PATH/interact/axiom-scp $local_wordlist  _target_:$destination_wordlist --cache -F=$sshconfig >> /dev/null"
     echo -e "${Green}wordlist uploaded successfully!${Color_Off}"
 fi
@@ -1270,14 +1269,14 @@ fi
 #  If --local-folder is present in the command line, upload a user provider folder to use.
 #
 if [[ "$local_folder" != "false" ]]; then
-if [[ -d "$local_folder" ]]; then
+ if [[ -d "$local_folder" ]]; then
         local_folder_filename="$(echo "$local_folder" | tr '/' ' ' | awk '{ print $NF }')"
         destination_folder="/home/op/scan/$uid/$local_folder_filename"
         folder="$destination_folder"
         echo -e "${BGreen}uploading local folder ${Color_Off}: ${BBlue} $local_folder${Color_Off} to ${BBlue}$destination_folder...${Color_Off}"
         interlace --no-bar --silent -threads $total_instances -tL "$tmp/selected.conf" -c "$AXIOM_PATH/interact/axiom-scp $local_folder _target_:$destination_folder/ --cache -F=$sshconfig >> /dev/null"
         echo -e "${Green}custom folder uploaded successfully!${Color_Off}"
-fi
+ fi
 fi
 
 ###########################################################################################################
@@ -1336,7 +1335,7 @@ fi
 #  If extra command line args are supplied, combine commands in the module with the arguments passed from the command line into final command (i.e. add_extra_args)
 #  If explicit_exta_args is supplied, add explicit exta args to final command
 #  If a wordlist, folder or config is specified add it to the command
-#  Create escaped command variable to use in $HOME/.axiom/stats.log file
+#  Create escaped command and escaped extra args variables to use in $HOME/.axiom/stats.log file
 #
 [[ ! -z "$args" ]] && command="$(add_extra_args "$command" "$args")"
 
@@ -1396,12 +1395,8 @@ echo -e "${BGreen}command: ${Color_Off}[${BBlue} $command ${Color_Off}]${BGreen}
 if [[ "$split" == "true" ]]; then
     echo -e "${BGreen}split: ${Color_Off}[ ${BBlue}spliting input file with${BGreen} $lines lines${BBlue} and distributing file across${BGreen} $total_instances${BBlue} instances ${Color_Off}]${BGreen}...${Color_Off}"
     split_file "$input_file" "$total_instances" "$tmp"
-    else
+else
     echo -e "${BGreen}copy: ${Color_Off}[ ${BBlue}copying input file with${BGreen} $lines lines${BBlue} and uploading file to ${BGreen}$total_instances${BBlue} instances ${Color_Off}]${BGreen}...${Color_Off}"
-
-#    echo -e "${BGreen}copy: ${BBlue}copying input file with ${Color_Off}[${BGreen} $lines lines ${Color_Off}]${BBlue} and uploading file to ${Color_Off}[${BGreen} $total_instances ${Color_Off}]${BBlue} instances...${Color_Off}"
-
-#    echo -e "${BBlue}copying input file to every instance...${Color_Off}"
     for i in $(echo $instances); do cp "$input_file" $tmp/input/$i ; done
 fi
 
@@ -1500,10 +1495,10 @@ done
 #  display STDOUT only flag (--stdout). default displays stdout & stderr
 #
 if [[ "$stdout_only" == "true" ]]; then
-stderr_log="/dev/null"
-tail_suppress_headers="-q"
+    stderr_log="/dev/null"
+    tail_suppress_headers="-q"
 else
-stderr_log="stderr.log"
+    stderr_log="stderr.log"
 fi
 
 ###########################################################################################################
@@ -1523,7 +1518,7 @@ if [[ "$no_logs" == "true" ]]; then
     log_redirect="/dev/null"
     keeplogs="false"
     remove_all_logs="true"
-     else
+else
     log_redirect="$tmp/logs/_target_"
 fi
 
