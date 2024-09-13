@@ -288,11 +288,10 @@ if [[ "$provider" == "azure" ]]; then
 
     if [[ "$use_azure_cli_auth" == "true" ]]; then
         echo -e "${BGreen}Authenticating with Azure using Azure CLI...${Color_Off}"
-        sleep 3
 
         az login --service-principal --username "$client_id" --password "$client_secret" --tenant "$tenant_id" || bootstrap
         az account set --subscription "$subscription_id"
-
+        sleep 3
         # Check if the correct subscription is set and accessible
         az account show &> /dev/null
         if [[ $? -ne 0 ]]; then

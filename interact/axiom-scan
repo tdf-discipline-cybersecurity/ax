@@ -60,7 +60,7 @@ function list_modules() {
 
             # check if the command contains '_target_' or '_safe-target_' to mark it as one-shot
             if [[ "$command" == *"_target_"* || "$command" == *"_safe-target_"* ]]; then
-                one_shot="${BRed} (One-shot)${Color_Off}"
+                one_shot="${BRed} (One-Shot)${Color_Off}"
             else
                 one_shot=""
             fi
@@ -299,44 +299,33 @@ clean_up() {
 #  If the first argument passed to the delete_logs functions is 'all', everything pertaining to the scan deleted ('all' is passed to delete_logs and '--no-logs' option is used
 #
 delete_logs() {
-if [[ "$1" != "all" ]]; then
+    if [[ -z "$uid" || ! "$uid" =~ ^[a-zA-Z0-9_+-]+$ ]]; then
+        echo -e "${Red}Error: Invalid or empty UID provided. Exiting.${Color_Off}"
+        exit 1
+    fi
 
-echo -e "${BBlue}deleting remote logs in a backgroud job${Color_Off}"
-$interlace_cmd -c "$ssh_command _target_ 'sudo rm -r /home/op/scan/${uid}/'"
+    echo -e "${BBlue}Deleting remote logs for UID: ${uid}${Color_Off}"
 
-echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
-$interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
-$interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
+    $interlace_cmd_nobar -c "$ssh_command _target_ 'if [ -d /home/op/scan/${uid} ]; then cd /home/op/scan/${uid} && sudo rm -r *; else echo Remote directory does not exist; fi'" >/dev/null 2>&1
 
- if [ -d "$AXIOM_PATH/tmp/$uid/" ]; then
-  echo -e "${BBlue}deleting local logs, except for${Color_Off} [${BGreen} $AXIOM_PATH/logs/$uid/output/ ${Color_Off}]"
-  start=$(pwd)
-  cd "$AXIOM_PATH/tmp/$uid/" || exit
-  ls | grep -v output | xargs rm -r >/dev/null 2>&1
-  cd "$start"
- else
-  echo -e "${Red}error: local log folder does not exist.${Color_Off}"
- fi
+    echo -e "${BBlue}Killing remote processes for UID: ${uid}${Color_Off}"
+    $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'" >/dev/null 2>&1
+    $interlace_cmd_nobar -c "$ssh_exit_command _target_" >/dev/null 2>&1
 
-else
+    if [ -d "$AXIOM_PATH/tmp/$uid/" ]; then
+        echo -e "${BBlue}Changing to local directory: $AXIOM_PATH/tmp/$uid/${Color_Off}"
+        cd "$AXIOM_PATH/tmp/$uid/" || { echo -e "${Red}Error: Failed to change directory. Exiting.${Color_Off}"; exit 1; }
 
- echo -e "${BBlue}deleting remote logs in a backgroud job${Color_Off}"
- $interlace_cmd_nobar -c "$ssh_command _target_ 'sudo rm -r /home/op/scan/${uid}/'"  >/dev/null 2>&1
- echo -e "${BBlue}killing remote processes in a backgroud job${Color_Off}"
-
- $interlace_cmd_nobar -c "$ssh_command _target_ 'tmux kill-session -t $uid'"  >/dev/null 2>&1
- $interlace_cmd_nobar -c "$ssh_exit_command _target_ " >/dev/null 2>&1
-
- if [ -d "$AXIOM_PATH/tmp/$uid/" ] ; then
-  echo -e "${BBlue}deleting local logs, including ${Color_Off} [${BGreen} $AXIOM_PATH/logs/$uid/output/ ${Color_Off}]"
-  start=$(pwd)
-  cd "$AXIOM_PATH/tmp/$uid/" || exit
-  ls | xargs rm -r >/dev/null 2>&1
-  cd "$start"
- else
-   echo -e "${Red}error: local log folder does not exist.${Color_Off}"
- fi
-fi
+        if [[ "$1" == "all" ]]; then
+            echo -e "${BBlue}Deleting all local logs, including ${Color_Off}[ ${BGreen}$AXIOM_PATH/logs/$uid/output/${Color_Off} ]"
+            find . -exec rm -r {} + >/dev/null 2>&1  # Delete everything, including output and status
+        else
+            echo -e "${BBlue}Deleting local logs, except for ${Color_Off} [${BGreen}$AXIOM_PATH/logs/$uid/output/${Color_Off} ]"
+            ls | grep -v output | xargs rm -r >/dev/null 2>&1
+        fi
+    else
+        echo -e "${Red}Error: Local log folder does not exist.${Color_Off}"
+    fi
 }
 
 ###########################################################################################################
