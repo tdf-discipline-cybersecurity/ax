@@ -18,6 +18,7 @@ account_path=$(ls -la $AXIOM_PATH/axiom.json | rev | cut -d " " -f 1 | rev)
 provider="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.provider')"
 BASEOS="$(uname)"
 custom_ssh_key=false
+extension=pkr.hcl
 
 ###########################################################################################################
 #  Display axiom banner and authors
@@ -54,8 +55,9 @@ banner
 # 
 function help() {
         echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  axiom-build combines the cloud providers builder file (~/.axiom/images/builders) with a provisioner file (~/.axiom/images/provisioners)"
-        echo -e "  into a Packer JSON file (located ~/.axiom/images/axiom.json)"
+        echo -e "  axiom-build combines the cloud providers builder file (~/.axiom/images/\$format/builders) with a provisioner file (~/.axiom/images/\$format/provisioners)"
+        echo -e "  into a Packer file (located ~/.axiom/images/\$format/axiom.json)"
+        echo -e "  axiom-build supports legcay Packer JSONs and the new pkr.hcl format"
         echo -e "  axiom-build uses Packer to create an image with tools installed (defined by the provisioner)"
         echo -e "  choose between multiple provisioners (barebones, default, reconftw, and extras) or bring your own (custom)"
         echo -e "${BWhite}Examples:${Color_Off}"
@@ -68,6 +70,8 @@ function help() {
         echo -e "    Name of provisioner to build, options are barebones, default, reconftw, extras or custom (provisioner must be located in ~/.axiom/images/provisioners)"
         echo -e "  --setup (optional)"
         echo -e "    Start axiom-build setup wizard"
+        echo -e "  --legacy (optional)"
+        echo -e "    Use legacy Packer json Builder and Provisioner instead of pkr.hcl"
         echo -e "  --ssh-key <file to pub key> (optional)"
         echo -e "    Build the image using a custom SSH key (instead of using the default ssh key axiom creates ~/.ssh/axiom_ssh.pub)"
         echo -e "  --debug (optional)"
@@ -110,6 +114,11 @@ do
             set=true
             pass+=($i)
         fi
+        if [[ "$arg" == "--legacy" ]]; then
+         extension=json
+         set=true
+         pass+=($i)
+        fi
         if [[ "$arg" == "--ssh-key" ]]|| [[ "$arg" == "--sshkey" ]] ; then
             n=$((i+1))
             custom_ssh_key=$(echo ${!n})
@@ -133,72 +142,82 @@ if [ -z "$provisioner" ]; then
     echo -e "${Green}ReconFTW: includes all tools in ReconFTW and works with most modules. Recommended for ReconFTW.${Color_Off}"
     echo -e "${Yellow}Barebones: a decently secure base install, comes with Docker, Go-lang, Interlace and nmap installed. Recommended for templating.${Color_Off}"
     echo -e "${Green}Extras: more tools installed compared to default${Color_Off}"
-    echo -e "${Yellow}Custom: custom Packer JSON you provide.${Color_Off}"
+    echo -e "${Yellow}Custom: custom Packer provisioner you provide.${Color_Off}"
     echo -e -n "${BGreen}Which axiom provisioner would you like to use: default, reconftw, barebones, custom? (option: press enter to select Default) \n>>${Color_Off}"
 
     read ans
     if [[ $ans == "default" ]] || [[ $ans == "Default" ]]; then 
               echo -e "${Green}Selected provisioner option 'Default'${Color_Off}"
               provisioner="default"
-    fi
-    if [[ $ans == "reconftw" ]] ||  [[ $ans == "Reconftw" ]] ||  [[ $ans == "ReconFTW" ]]; then
+    elif [[ $ans == "reconftw" ]] ||  [[ $ans == "Reconftw" ]] ||  [[ $ans == "ReconFTW" ]]; then
                echo -e "${Green}Selected provisioner option 'ReconFTW'${Color_Off}"
                provisioner="reconftw"
-    fi
-    if [[ $ans == "barebones" ]] || [[ $ans == "Barebones" ]]; then
+
+    elif [[ $ans == "barebones" ]] || [[ $ans == "Barebones" ]]; then
                echo -e "${Green}Selected provisioner option 'Barebones'${Color_Off}"
                provisioner="barebones"
-    fi
-    if [[ $ans == "Extras" ]] || [[ $ans == "extras" ]] || [[ $ans == "extra" ]]; then
+    elif [[ $ans == "Extras" ]] || [[ $ans == "extras" ]] || [[ $ans == "extra" ]]; then
                echo -e "${Green}Selected provisioner option 'Extras'${Color_Off}"
                provisioner="extras"
-    fi
-    if [[ $ans == "custom" ]] || [[ $ans == "Custom" ]]; then
-               echo -e "${Red}Your Packer JSON must be located in "$AXIOM_PATH/images/provisioners/". Make sure to move it.${Color_Off}"
-               echo -e "${Green}Listing all provisioners available in "$AXIOM_PATH/images/provisioners/" ...${Color_Off}"
-               ls -1 $AXIOM_PATH/images/provisioners/ | sort -u | sed -e 's/\.json$//' | grep -v -w 'ibm-base-image-create.sh' 
+    elif [[ $ans == "custom" ]] || [[ $ans == "Custom" ]]; then
+               echo -e "${Red}Your Packer provosioner must be located in "$AXIOM_PATH/images/$extension/provisioners/". Make sure to move it.${Color_Off}"
+               echo -e "${Green}Listing all provisioners available in "$AXIOM_PATH/images/$extension/provisioners/" ...${Color_Off}"
+               ls -1 $AXIOM_PATH/images/$extension/provisioners/ | sort -u | sed -e 's/\.json$//' |  sed -e 's/\.pkr.hcl$//'
                echo -e -n "${Green}Enter the provisioner filename. \n>>${Color_Off}"
                read ans
                provisioner=$ans
                echo -e "${Green}Selected provisioner option 'Custom', using $ans ${Color_Off}"
-    fi
-    if [[ $ans == "" ]]; then
-	       echo -e "${Green}Selected default provisioner option 'Default'${Color_Off}"
+    elif [[ $ans == "" ]]; then
+               echo -e "${Green}Selected default provisioner option 'Default'${Color_Off}"
                provisioner="default"
+    else
+               provisioner=$ans
     fi
 fi
 
+
 ############################################################################################################
-# check the provisioner and bulder exist 
+# check the provisioner and bulder exist
 #
-#if [ ! -z $provisioner ]
-#then
-#	provisioner="$1"
-#fi
-prov_path="$AXIOM_PATH/images/provisioners/$provisioner.json"
-builder_path="$AXIOM_PATH/images/builders/$builder.json"
-if [ ! -f "$prov_path" ]
-then
-        echo -e  ""
-	echo -e "${Red}Error: unfortunately, can not find provisioner path $args.."
-        echo -e "${Red}Make sure your provisioner is located in $AXIOM_PATH/images/provisioners/$provisioners.json and run again"
+packer_provisioner_path="$AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
+packer_builder_path="$AXIOM_PATH/images/$extension/builders/$builder.$extension"
+if [ ! -f "$packer_provisioner_path" ]; then
+        echo -e ""
+        echo -e "${Red}Error: unfortunately, can not find Packer Provisioner.."
+        echo -e "${Red}Make sure your provisioner is located in $AXIOM_PATH/images/$extension/provisioners/$arg.$extension and run again"
         echo -e "${Red}exiting..${Color_Off}"
-	exit
+        exit
 fi
-if [ ! -f "$builder_path" ]
-then
-        echo -e  ""
-	echo -e "${Red}Error: unfortunately, can not find builder path...${Color_Off}"
-	exit
+
+if [ ! -f "$packer_builder_path" ]; then
+
+ if [ ! -f "$AXIOM_PATH/images/$extension/builders/$builder.json" ]; then
+ extension=json
+ else
+        echo -e ""
+        echo -e "${Red}Error: unfortunately, can not find Packer Builder...${Color_Off}"
+        echo -e "${Red}Make sure your Packer Builder is located in $AXIOM_PATH/images/$extension/builders/$builder.$extension and run again"
+        echo -e "${Red}exiting..${Color_Off}"
+        exit
+ fi
 fi
 
 ############################################################################################################
 # Generate the Packer final provisioner by combining the Cloud Provider builder and provisioner file
 #
 snapshot_name=axiom-$provisioner-$(date +%s)
-image_path="$AXIOM_PATH/images/axiom.json"
+image_path="$AXIOM_PATH/images/$extension/axiom.$extension"
 $AXIOM_PATH/interact/axiom-provider "$provider"
-"$AXIOM_PATH"/interact/generate_packer "$builder" "$provisioner"
+mv $image_path $image_path.tmp > /dev/null 2>&1
+"$AXIOM_PATH"/interact/generate_packer "$builder" "$provisioner" "$extension"
+if [ ! -f "$image_path" ]; then
+ echo -e "${Red}Error: axiom build failed to generate final Packer provsioner...${Color_Off}"
+ echo -e "${Red}exiting..${Color_Off}"
+ mv $image_path.tmp $image_path > /dev/null 2>&1
+ exit
+else
+ rm $image_path.tmp > /dev/null 2>&1
+fi
 
 #############################################################################################################
 # Add SSH Key in account.json to $AXIOM_PATH/configs/authorized_keys
@@ -279,36 +298,34 @@ if [[ "$provider" == "aws" ]]; then
  cat "$account_path" | jq '.aws_secret_access_key = "*************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
-fi
 
-if [[ "$provider" == "azure" ]]; then
+elif [[ "$provider" == "azure" ]]; then
  cat "$account_path" | jq '.client_secret = "*************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
-fi
 
-if [[ "$provider" == "do" ]]; then
+elif [[ "$provider" == "do" ]]; then
  cat "$account_path" | jq '.do_key = "************************************************************************"'| \
  jq '.op = "***************************************************************************************************************************"' | \
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
-fi
 
-if [[ "$provider" == "ibm" ]]; then
+elif [[ "$provider" == "ibm" ]]; then
  cat "$account_path" | jq '.sl_key = "************************************************************************" | .ibm_cloud_api_key = "***************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
-fi
 
-if [[ "$provider" == "linode" ]]; then
+elif [[ "$provider" == "linode" ]]; then
  cat "$account_path" | jq '.linode_key = "*******************************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
-fi
 
-if [[ "$provider" == "hetzner" ]]; then
+elif [[ "$provider" == "hetzner" ]]; then
  cat "$account_path" |jq '.hetzner_key =  "****************************************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+
+else
+ cat "$account_path"
 fi
 
 ############################################################################################################
@@ -323,25 +340,28 @@ sleep 8
 # Change packer version for IBM
 #
 if [[ "$provider" == "ibm" ]]; then
-mkdir -p /tmp/packer-ibm/
- if [[ ! -f /tmp/packer-ibm/packer ]]; then
-  if [[ $BASEOS == "Linux" ]]; then
-   wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip
-  elif [[ $BASEOS == "Darwin" ]]; then
-   wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip 
-  fi
- fi
+ if [[ "$extension" == "json" ]]; then
 
-BASEOS="$(uname)"
-case $BASEOS in
-'Darwin')
-    PATH="/tmp/packer-ibm/:$(brew --prefix coreutils)/libexec/gnubin:$PATH"
-    ;;
-'Linux')
-    PATH="/tmp/packer-ibm:$PATH"
-    ;;
-*) ;;
-esac
+  mkdir -p /tmp/packer-ibm/
+  if [[ ! -f /tmp/packer-ibm/packer ]]; then
+   if [[ $BASEOS == "Linux" ]]; then
+    wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip
+   elif [[ $BASEOS == "Darwin" ]]; then
+    wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip
+   fi
+  fi
+
+  BASEOS="$(uname)"
+  case $BASEOS in
+  'Darwin')
+   PATH="/tmp/packer-ibm/:$(brew --prefix coreutils)/libexec/gnubin:$PATH"
+   ;;
+  'Linux')
+   PATH="/tmp/packer-ibm:$PATH"
+   ;;
+  *) ;;
+  esac
+ fi
 fi
 
 # ###########################################################################################################

@@ -381,9 +381,9 @@ if [[ $BASEOS == "Linux" ]]; then
     fi
     if [[ $OS == "Arch" ]] || [[ $OS == "ManjaroLinux" ]]; then
         echo -e "${BGreen}Congrats, you run arch..."
-        echo -e "${BGreen}Installing git ruby curl jq packer rsync...${Color_Off}"
+        echo -e "${BGreen}Installing git curl jq packer rsync...${Color_Off}"
         # Stated dependencies in the Github-wiki
-        sudo pacman -Syu git ruby curl jq packer rsync --noconfirm
+        sudo pacman -Syu git curl jq packer rsync --noconfirm
         # Other dependencies
         sudo pacman -Syu go python-pip net-tools unzip libxslt bc --noconfirm
         echo -e "${BGreen}Installing Interlace...${Color_Off}"
@@ -399,8 +399,8 @@ if [[ $BASEOS == "Linux" ]]; then
         ln -fs /usr/share/zoneinfo/$(curl ipinfo.io/"$ip" | jq -r .timezone) /etc/localtime
         dpkg-reconfigure --frontend noninteractive tzdata
        fi
-       echo -e "${BGreen}Installing fail2ban ufw jq git ruby python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server...${Color_Off}"
-       DEBIAN_FRONTEND=noninteractive sudo apt-get update && sudo apt-get install ufw git ruby python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server fail2ban jq -y 
+       echo -e "${BGreen}Installing fail2ban ufw jq git python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server...${Color_Off}"
+       DEBIAN_FRONTEND=noninteractive sudo apt-get update && sudo apt-get install ufw git python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server fail2ban jq -y 
        echo -e "${BGreen}Installing packer...${Color_Off}"
        wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.8.1/packer_1.8.1_linux_amd64.zip && cd /tmp/ && unzip packer.zip && sudo mv packer /usr/bin/ && rm /tmp/packer.zip 
        echo -e "${BGreen}Installing Interlace...${Color_Off}"
@@ -409,8 +409,8 @@ if [[ $BASEOS == "Linux" ]]; then
        cd /tmp/interlace && sudo python3 setup.py install
 
     elif [[ $OS == "Fedora" ]]; then
-       echo -e "${BGreen}Installing fail2ban mmv bc fzf git rubypick python3-pip curl net-tools unzip util-linux...${Color_Off}"
-       sudo dnf update && sudo dnf -y install mmv bc fzf git rubypick python3-pip curl net-tools unzip util-linux fail2ban
+       echo -e "${BGreen}Installing fail2ban mmv bc fzf git python3-pip curl net-tools unzip util-linux...${Color_Off}"
+       sudo dnf update && sudo dnf -y install mmv bc fzf git python3-pip curl net-tools unzip util-linux fail2ban
        echo -e "${BGreen}Installing jq...${Color_Off}"
        sudo wget -q -O /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && sudo chmod +x /usr/bin/jq
        echo -e "${BGreen}Installing packer...${Color_Off}"

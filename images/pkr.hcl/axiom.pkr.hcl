@@ -1,14 +1,83 @@
-{
-  "builders": [],
-  "provisioners": [
-    {
-      "type": "file",
-      "source": "./configs",
-      "destination":"/tmp/configs"
-    },
-    {
-      "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
-      "inline": [
+variable "default_size" {
+  type = string
+
+}
+
+variable "imageid" {
+  type = string
+
+}
+
+variable "linode_key" {
+  type = string
+
+}
+
+variable "op" {
+  type = string
+
+}
+
+variable "provider" {
+  type = string
+
+}
+
+variable "provisioner" {
+  type = string
+
+}
+
+variable "region" {
+  type = string
+
+}
+
+variable "sshkey" {
+  type = string
+
+}
+
+variable "golang_version" {
+  type = string
+}
+
+variable "variant" {
+  type = string
+}
+
+variable "op_random_password" {
+  type = string
+}
+
+variable "snapshot_name" {
+  type = string
+}
+
+source "linode" "packer" {
+  ssh_username     = "root"
+  image_label      = var.snapshot_name
+  instance_label   = var.snapshot_name
+  image_description = "Axiom image"
+  linode_token     = var.linode_key
+  image            = "linode/ubuntu20.04"
+  region           = var.region
+  instance_type    = var.default_size
+}
+
+build {
+  sources = [
+    "source.linode.packer"
+  ]
+
+  provisioner "file" {
+    source      = "./configs"
+    destination = "/tmp/configs"
+  }
+
+  provisioner "shell" {
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
+    inline = [
         "echo 'Waiting for cloud-init to finish, this can take a few minutes please be patient...'",
         "/usr/bin/cloud-init status --wait",
 
@@ -34,9 +103,9 @@
         "touch /home/op/.sudo_as_admin_successful",
         "touch /home/op/.cache/motd.legal-displayed",
         "chown -R op:users /home/op",
-        "echo 'op:{{ user `op_random_password` }}' | chpasswd",
-        "echo 'ubuntu:{{ user `op_random_password` }}' | chpasswd",
-        "echo 'root:{{ user `op_random_password` }}' | chpasswd",
+        "echo 'op:${var.op_random_password}' | chpasswd",
+        "echo 'ubuntu:${var.op_random_password}' | chpasswd",
+        "echo 'root:${var.op_random_password}' | chpasswd",
 
         "echo 'Moving Config files'",
         "mv /tmp/configs/sudoers /etc/sudoers",
@@ -52,8 +121,8 @@
         "sudo service sshd restart",
         "chmod +x /etc/update-motd.d/00-header",
 
-        "echo 'Installing Golang {{ user `golang_version` }}'",
-        "wget -q https://golang.org/dl/go{{ user `golang_version` }}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go{{ user `golang_version` }}.linux-amd64.tar.gz && rm go{{ user `golang_version` }}.linux-amd64.tar.gz",
+        "echo 'Installing Golang ${var.golang_version}'",
+        "wget -q https://golang.org/dl/go${var.golang_version}.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go${var.golang_version}.linux-amd64.tar.gz && rm go${var.golang_version}.linux-amd64.tar.gz",
         "export GOPATH=/home/op/go",
 
         "echo 'Installing Docker'",
@@ -196,7 +265,7 @@
 	"/bin/su -l op -c 'wget https://nmap.org/dist/nmap-7.94-1.x86_64.rpm -O /home/op/recon/nmap.rpm && cd /home/op/recon/ && sudo alien ./nmap.rpm && sudo dpkg -i ./nmap*.deb'",
 
         "echo 'Installing nuclei'",
-        "/bin/su -l op -c 'GO111MODULE=on /usr/local/go/bin/go install github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest && /home/op/go/bin/nuclei'",
+        "/bin/su -l op -c 'GO111MODULE=on /usr/local/go/bin/go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && /home/op/go/bin/nuclei'",
 
         "echo 'Installing OpenRedireX'",
         "/bin/su -l op -c 'docker image build - < /home/op/lists/axiom-dockerfiles/openredirex/Dockerfile -t axiom/openredirex'",
@@ -241,8 +310,7 @@
         "touch /home/op/.z",
         "chown -R op:users /home/op",
         "chown root:root /etc/sudoers /etc/sudoers.d -R"
-      ], "inline_shebang": "/bin/sh -x",
-	  "type": "shell"
-    }
-  ]
+    ]
+    inline_shebang = "/bin/sh -x"
+  }
 }

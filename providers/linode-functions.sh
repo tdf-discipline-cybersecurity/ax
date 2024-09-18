@@ -71,9 +71,9 @@ instance_pretty() {
 #  totalPrice=$(( "$price * $linodes" | bc))
 totalPrice=$(awk "BEGIN {print $price * $linodes}")
 
-  header="Instance,Primary Ip,Backend Ip,Region,Memory,Status,\$/M"
+  header="Instance,Primary Ip,Backend Ip,Region,Size,Status,\$/M"
   totals="_,_,_,Instances,$linodes,Total,\$$totalPrice"
-  fields=".[] | [.label,.ipv4[0],.ipv4[1],.region,.specs.memory,.status, \"$price\"]| @csv"
+  fields=".[] | [.label,.ipv4[0],.ipv4[1],.region,.type,.status, \"$price\"]| @csv"
   #printing part
   #sort -k1 sorts all data by label/instance/linode name
   (echo "$header" && echo $data|(jq -r "$fields" |sort -k1) && echo "$totals") | sed 's/"//g' | column -t -s, 
@@ -247,5 +247,5 @@ instance_id() {
 #  Used by ax sizes
 #
 sizes_list() {
-   linode-cli linodes types
+   linode-cli linodes types --text
 }
