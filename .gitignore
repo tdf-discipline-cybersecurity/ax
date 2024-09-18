@@ -12,6 +12,8 @@ boxes/*
 archive/*
 tmp/*
 axiom.json
+images/json/axiom.json
+images/pkr.hcl/axiom.json
 images/axiom.json
 interact/includes/functions.sh
 selected.conf
