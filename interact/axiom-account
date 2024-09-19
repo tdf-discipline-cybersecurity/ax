@@ -124,11 +124,10 @@ if [[ "$provider" == "linode" ]]; then
             echo "linode-cli updated successfully or no externally managed environment detected."
         fi
 
-    if [[ $BASEOS == "Mac" ]]; then
-        echo -e "${BGreen}Installing linode packer plugin...${Color_Off}"
-        packer plugins install github.com/linode/linode
-    fi
-   fi
+  fi
+    echo -e "${BGreen}Installing linode packer plugin...${Color_Off}"
+    packer plugins install github.com/linode/linode
+
     # Set up Linode CLI configuration
     token="$(jq -r '.linode_key' "$AXIOM_PATH"/accounts/"$1".json)"
     size="$(jq -r '.default_size' "$AXIOM_PATH"/accounts/"$1".json)"
@@ -187,23 +186,8 @@ if [[ "$provider" == "ibm" ]]; then
 
         echo "ibmcloud-cli updated to version $IBMCloudCliVersion."
    fi
-    # Change Packer version for IBM Cloud
-    mkdir -p /tmp/packer-ibm/
-    if [[ ! -f /tmp/packer-ibm/packer ]]; then
-        if [[ $BASEOS == "Linux" ]]; then
-            wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip
-        elif [[ $BASEOS == "Mac" ]]; then
-            wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip && cd /tmp/ && unzip packer.zip && mv packer /tmp/packer-ibm/ && rm /tmp/packer.zip
-        fi
-    fi
-
-    # Packer check for IBM Cloud plugin
-    if [[ ! -f "$HOME/.packer.d/plugins/packer-builder-ibmcloud" ]]; then
-        echo -n -e "${BGreen}Installing IBM Cloud Packer Builder (https://github.com/IBM/packer-plugin-ibmcloud/):\n y/n >> ${Color_Off}"
-        os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-        mkdir -p ~/.packer.d/plugins/
-        wget https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_linux_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
-    fi
+    echo -e "${BGreen}Installing IBM Cloud packer plugin...${Color_Off}"
+    packer plugins install github.com/IBM/ibmcloud
 
     # Validate Token
     token="$(jq -r '.ibm_cloud_api_key' "$AXIOM_PATH"/accounts/"$1".json)"
@@ -274,12 +258,15 @@ if [[ "$provider" == "azure" ]]; then
             sudo apt-get update -qq
             sudo apt-get purge azure-cli -y -qq
             sudo apt-get install azure-cli -y -qq
-         
+
         elif [[ $OS == "Fedora" ]]; then
             echo "Needs Conversation for Fedora"
         fi
   fi 
  # Authenticate using client credentials stored in axiom.json
+    echo -e "${BGreen}Installing Azure packer plugin...${Color_Off}"
+    packer plugins install github.com/hashicorp/azure
+
     client_id="$(jq -r '.client_id' "$AXIOM_PATH"/axiom.json)"
     client_secret="$(jq -r '.client_secret' "$AXIOM_PATH"/axiom.json)"
     tenant_id="$(jq -r '.tenant_id' "$AXIOM_PATH"/axiom.json)"
@@ -353,13 +340,9 @@ if [[ "$provider" == "aws" ]]; then
         fi
 
    fi
-    # Check if AWS CLI is authenticated
-    if ! aws sts get-caller-identity &> /dev/null; then
-        echo -e "${BRed}AWS CLI is not authenticated.${Color_Off} Running bootstrap..."
-        bootstrap
-    else
-        echo -e "${BGreen}AWS CLI is authenticated.${Color_Off}"
-    fi
+
+    echo -e "${BGreen}Installing AWS packer plugin...${Color_Off}"
+    packer plugins install github.com/hashicorp/amazon
 
     # Use credentials from axiom.json if available
     aws_access_key="$(jq -r '.aws_access_key' "$AXIOM_PATH"/axiom.json)"
@@ -375,6 +358,15 @@ if [[ "$provider" == "aws" ]]; then
         echo -e "${BRed}No AWS credentials found in axiom.json. Please set them manually.${Color_Off}"
         bootstrap
     fi
+
+    # Check if AWS CLI is authenticated
+    if ! aws sts get-caller-identity &> /dev/null; then
+        echo -e "${BRed}AWS CLI is not authenticated.${Color_Off} Running bootstrap..."
+        bootstrap
+    else
+        echo -e "${BGreen}AWS CLI is authenticated.${Color_Off}"
+    fi
+
 fi # provider aws
 
 # check installed version of gcloud cli and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
@@ -413,15 +405,18 @@ if [[ "$provider" == "gcp" ]]; then
         fi
     fi
 
+    echo -e "${BGreen}Installing GCP packer plugin...${Color_Off}"
+    packer plugins install github.com/hashicorp/googlecompute
+
     # Configure gcloud using service account credentials from axiom.json
     echo -e "${BGreen}Configuring gcloud CLI with credentials from axiom.json...${Color_Off}"
     service_account_key="$(jq -r '.service_account_key' "$AXIOM_PATH"/accounts/"$1".json)"
-    
+
     if [[ -n "$service_account_key" ]]; then
         gcloud auth activate-service-account --key-file="$service_account_key"
         gcloud config set project "$(jq -r '.project' "$AXIOM_PATH"/accounts/"$1".json)"
-        gcloud config set compute/region "$(jq -r '.region' "$AXIOM_PATH"/accounts/"$1".json)"
-        gcloud config set compute/zone "$(jq -r '.zone' "$AXIOM_PATH"/accounts/"$1".json)"
+        gcloud config set compute/region "$(jq -r '.physical_region' "$AXIOM_PATH"/accounts/"$1".json)"
+        gcloud config set compute/zone "$(jq -r '.region' "$AXIOM_PATH"/accounts/"$1".json)"
 
         # Check if gcloud is authenticated
         if ! gcloud auth list --filter=status:ACTIVE &> /dev/null; then
@@ -480,6 +475,10 @@ if [[ "$provider" == "hetzner" ]]; then
         fi
 
     fi
+
+    echo -e "${BGreen}Installing GCP packer plugin...${Color_Off}"
+    packer plugins install github.com/hetznercloud/hcloud
+
     # Validate token and setup configuration
     token="$(jq -r '.hetzner_key' "$AXIOM_PATH"/accounts/"$1".json)"
     status_code=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $token" https://api.hetzner.cloud/v1/servers)

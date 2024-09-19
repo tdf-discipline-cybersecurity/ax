@@ -242,13 +242,13 @@ function omz_shell(){
 function usage() {
         echo -e "${BWhite}Description:"
         echo -e "${BWhite}Examples:${Color_Off}"
-        echo -e "  ${BGreen}axiom-configure --setup${Color_Off} # kick off Ax configuration wizard"
+        echo -e "  ${BGreen}axiom-configure --run${Color_Off} # kick off Ax configuration wizard"
         echo -e "  ${BGreen}axiom-configure --shell zsh${Color_Off} # Set default shell to zsh via command line"
         echo -e "  ${BGreen}axiom-configure --config <personal.json file>${Color_Off} # Use personal.json from a file for account setup"
         echo -e "  ${BGreen}axiom-configure --config <personal.json string>${Color_Off} # Use personal.json data supplied by command-line for account setup (must be vaild personal.json data wrapped in single quotes)"
         echo -e "  ${BGreen}axiom-configure --shell bash --unattended --config <path to personal.json file> ${Color_Off} # Use bash for default shell, do not promot, use personal.json data from file for axiom setup"
         echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  --setup (optional)"
+        echo -e "  --run (optional)"
         echo -e "    Start axiom-configure wizard, install dependencies, kick off axiom-account-setup and axiom-build"
         echo -e "  --config <axiom.json data>"
         echo -e "    Setup account with data from file or supplied from the command line (must be vaild data from a personal.json axiom file)"
@@ -294,7 +294,7 @@ do
             pass+=($i)
             pass+=($n)
        fi
-       if [[ "$arg" == "--setup" ]]; then
+       if [[ "$arg" == "--run" ]] || [[ "$arg" == "--setup" ]]; then
             setup=true
             set=true
             pass+=($i)
@@ -402,7 +402,9 @@ if [[ $BASEOS == "Linux" ]]; then
        echo -e "${BGreen}Installing fail2ban ufw jq git python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server...${Color_Off}"
        DEBIAN_FRONTEND=noninteractive sudo apt-get update && sudo apt-get install ufw git python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server fail2ban jq -y 
        echo -e "${BGreen}Installing packer...${Color_Off}"
-       wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.8.1/packer_1.8.1_linux_amd64.zip && cd /tmp/ && unzip packer.zip && sudo mv packer /usr/bin/ && rm /tmp/packer.zip 
+       curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+       sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" -y
+       sudo apt-get update && sudo apt-get install packer
        echo -e "${BGreen}Installing Interlace...${Color_Off}"
        sudo rm -fr /tmp/interlace
        git clone https://github.com/codingo/Interlace.git /tmp/interlace
@@ -642,7 +644,7 @@ fi
 if [ -z ${config+x} ]; then
 echo -e "${BWhite}Beginning first packer build...${Color_Off}"
 cd "$AXIOM_PATH"/ || exit
-"$AXIOM_PATH"/interact/axiom-build --setup
+"$AXIOM_PATH"/interact/axiom-build --run
 cd || exit
 echo -e "${BWhite}You may need to restart your shell: $SHELL${Color_Off}"
 else

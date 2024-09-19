@@ -177,9 +177,9 @@ function setprofile {
         $0
         exit
     fi
-    echo -e -n "${BWhite}Please enter your profile name (e.g. 'personal'):\n>> ${Color_Off}"
+    echo -e -n "${BWhite}Please enter your profile name (e.g. 'ibm'):\n>> ${Color_Off}"
     read title
-    title=${title:-personal}
+    title=${title:-ibm}
     echo $data | jq > "$AXIOM_PATH/accounts/$title.json"
     echo -e "${BGreen}Saved profile '$title' successfully!${Color_Off}"
     $AXIOM_PATH/interact/axiom-account $title

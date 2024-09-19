@@ -3,6 +3,7 @@
 # Set the AXIOM_PATH
 AXIOM_PATH="$HOME/.axiom"
 AXIOM_JSON="$AXIOM_PATH/axiom.json"
+source "$AXIOM_PATH/interact/includes/vars.sh"
 
 # Get builder and provisioner from arguments
 builder=$1
@@ -49,5 +50,5 @@ EOF
 
  fi
 else
-  echo "Builder does not exist"
+  echo -e "${Red}Builder does not exist at $packer_builder_path${Color_Off}"
 fi

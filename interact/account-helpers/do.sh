@@ -122,12 +122,12 @@ then
     exit
 fi
 
-echo -e -n "${BWhite}Please enter your profile name (e.g 'personal', must be all lowercase/no specials)\n>> ${Color_Off}"
+echo -e -n "${BWhite}Please enter your profile name (e.g 'do', must be all lowercase/no specials)\n>> ${Color_Off}"
 read title
 
 if [[ "$title" == "" ]]; then
-    title="personal"
-    echo -e "${BGreen}Named profile 'personal'${Color_Off}"
+    title="do"
+    echo -e "${BGreen}Named profile 'do'${Color_Off}"
 fi
 
 echo $data | jq > "$AXIOM_PATH/accounts/$title.json"

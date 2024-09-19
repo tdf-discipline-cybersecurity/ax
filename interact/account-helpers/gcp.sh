@@ -84,6 +84,8 @@ if [[ "$(printf '%s\n' "$installed_version" "$GCloudCliVersion" | sort -V | head
     # Update package list and install Google Cloud SDK
     sudo apt-get update -qq
     sudo apt-get install google-cloud-sdk -y -qq
+    echo "Installing Packer Plugin..."
+    packer plugins install github.com/hashicorp/googlecompute
 fi
 
 # Function to check billing and API enablement after authentication
@@ -101,7 +103,8 @@ function check_gcp_billing_and_apis() {
     fi
 
     # Check if necessary APIs are enabled
-    echo "Checking if Cloud Resource Manager and Compute API are enabled..."
+    echo "Checking if Cloud Resource Manager, Compute and Storage APIs are enabled..."
+    gcloud services enable storage-api.googleapis.com
     gcloud services enable cloudresourcemanager.googleapis.com
     gcloud services enable compute.googleapis.com
 
@@ -111,7 +114,7 @@ function check_gcp_billing_and_apis() {
 # Function to check and set project ID
 function set_project_id() {
     project_id=$(jq -r .project_id "$service_account_key")
-    
+
     if [[ "$project_id" == "null" || -z "$project_id" ]]; then
         echo -e "${BRed}Project ID is missing in the service account key. Please enter the project ID manually:${Color_Off}"
         read -p "Enter Project ID: " project_id
@@ -127,7 +130,9 @@ function set_project_id() {
     fi
 }
 
-function gcp_setup() {
+# Function not currently used
+# TODO implement different auth options
+function auth_type() {
     echo -e "${BGreen}Please select the authentication method you would like to use for GCP:${Color_Off}"
     echo "1) Service Account Key File"
     echo "2) OAuth2 User Authentication"
@@ -168,6 +173,23 @@ function gcp_setup() {
             exit 1
             ;;
     esac
+}
+
+function gcp_setup() {
+    # Service Account Key File
+    echo -e -n "${Green}Please enter the path to your service account key (required): \n>> ${Color_Off}"
+    read service_account_key
+      while [[ ! -f "$service_account_key" ]]; do
+      echo -e "${BRed}Please provide a valid service account key file path.${Color_Off}"
+      echo -e -n "${Green}Please enter the path to your service account key (required): \n>> ${Color_Off}"
+      read service_account_key
+    done
+
+    # Activate service account
+    gcloud auth activate-service-account --key-file="$service_account_key"
+
+    # Set the project ID using the key file
+    set_project_id
 
     # Check if billing is enabled and APIs are activated after authentication
     check_gcp_billing_and_apis
@@ -195,12 +217,17 @@ function gcp_setup() {
         echo -e "${Blue}Selected default option '${default_zone}'${Color_Off}"
         zone="${default_zone}"
     fi
-   echo -e "${BGreen}Available GCP machine types (this can take a few moments):${Color_Off}"
+    echo -e "${BGreen}Available GCP machine types for zone: $zone${Color_Off}"
+
+    # look for default machine-type
+    default_size_search=$(gcloud compute machine-types list --zones $zone \
+     --filter="guestCpus=1 AND (memoryMb=3840 OR memoryMb=4096)" \
+     --format="value(name)" | head -n 1)
 
     # List available machine types in the selected zone
-    gcloud compute machine-types list --format="table(name, description)" | tee /tmp/gcp-machine-types.txt
+    gcloud compute machine-types list --zones us-east5-a --format="table(name, description)" | tee /tmp/gcp-machine-types.txt
 
-    echo -e -n "${BWhite}Please enter the machine type (e.g. 'n1-standard-1'): ${Color_Off}"
+    echo -e -n "${BWhite}Please enter the machine type (e.g. '$default_size_search'): ${Color_Off}"
     read machine_type
 
     # Validate the machine type
@@ -212,8 +239,8 @@ function gcp_setup() {
 
     # Save the selected machine type in axiom.json
     if [[ "$machine_type" == "" ]]; then
-        echo -e "${Blue}Selected default option '$machine_type'${Color_Off}"
-        machine_type="n1-standard-1"
+        echo -e "${Blue}Selected default option 'n1-standard-1'${Color_Off}"
+        machine_type="$default_size_search"
     else
         echo -e "${BGreen}Selected machine type: $machine_type${Color_Off}"
     fi
@@ -221,7 +248,7 @@ function gcp_setup() {
     check_and_create_firewall_rule
 
     # Generate the profile data with the correct keys
-    data="$(echo "{\"service_account_key\":\"$service_account_key\",\"project\":\"$project_id\",\"region\":\"$region\",\"default_size\":\"$machine_type\",\"zone\":\"$zone\",\"provider\":\"gcp\"}")"
+    data="$(echo "{\"service_account_key\":\"$service_account_key\",\"project\":\"$project_id\",\"physical_region\":\"$region\",\"default_size\":\"$machine_type\",\"region\":\"$zone\",\"provider\":\"gcp\"}")"
 
     echo -e "${BGreen}Profile settings below: ${Color_Off}"
     echo "$data" | jq '.gcp_service_account_key = "**********************"'
@@ -233,12 +260,12 @@ function gcp_setup() {
         exit
     fi
 
-    echo -e -n "${BWhite}Please enter your profile name (e.g. 'gcp-personal', must be all lowercase/no specials)\n>> ${Color_Off}"
+    echo -e -n "${BWhite}Please enter your profile name (e.g. 'gcp', must be all lowercase/no specials)\n>> ${Color_Off}"
     read title
 
     if [[ "$title" == "" ]]; then
-        title="gcp-personal"
-        echo -e "${BGreen}Named profile 'gcp-personal'${Color_Off}"
+        title="gcp"
+        echo -e "${BGreen}Named profile 'gcp'${Color_Off}"
     fi
 
     # Save the profile data in axiom.json

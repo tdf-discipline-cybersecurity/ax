@@ -131,12 +131,12 @@ then
     exit
 fi
 
-echo -e -n "${BWhite}Please enter your profile name (e.g 'personal', must be all lowercase/no specials)\n>> ${Color_Off}"
+echo -e -n "${BWhite}Please enter your profile name (e.g 'hetzner', must be all lowercase/no specials)\n>> ${Color_Off}"
 read title
 
 if [[ "$title" == "" ]]; then
-    title="personal"
-    echo -e "${BGreen}Named profile 'personal'${Color_Off}"
+    title="hetzner"
+    echo -e "${BGreen}Named profile 'hetzner'${Color_Off}"
 fi
 
 echo -e "${BGreen}Creating hetzner context and config file in ${Color_Off}'${BGreen}$HOME/.config/hcloud/cli.toml${Color_Off}'"

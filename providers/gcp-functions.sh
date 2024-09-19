@@ -10,15 +10,14 @@ create_instance() {
     name="$1"
     image_id="$2"
     machine_type="$3"
-    region="$4"
+    zone="$4"
     key="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.service_account_key')"
-    zone="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.zone')"
     gcloud auth activate-service-account --key-file="$key"
 
     gcloud compute instances create "$name" \
         --image "$image_id" \
         --machine-type "$machine_type" \
-        --zone "$zone" \
+        --zone "$4" \
         --tags "axiom-ssh"
 }
 
@@ -29,10 +28,20 @@ create_instance() {
 delete_instance() {
     name="$1"
     force="$2"
+
+    instance_info=$(instances | jq -r --arg name "$name" '.[] | select(.name == $name)')
+
+    if [ -z "$instance_info" ]; then
+        echo "Instance '$name' not found."
+        return 1
+    fi
+
+    instance_zone=$(echo "$instance_info" | jq -r '.zone' | awk -F/ '{print $NF}')
+
     if [ "$force" == "true" ]; then
-        gcloud compute instances delete "$name" --quiet
+        gcloud compute instances delete "$name" --zone="$instance_zone" --quiet
     else
-        gcloud compute instances delete "$name"
+        gcloud compute instances delete "$name" --zone="$instance_zone"
     fi
 }
 
@@ -60,14 +69,21 @@ instance_pretty() {
     data=$(instances)
 
     # Number of instances
-    instances_count=$(echo $data | jq -r '.[] | .name' | wc -l)
+    instances_count=$(echo "$data" | jq -r '.[] | .name' | wc -l)
 
     totalPrice=0
-    header="Instance,External IP,Internal IP,Zone,Machine Type,Status"
+    header="Instance,External IP,Internal IP,Zone,Size,Status"
 
-    fields=".[] | [.name, .networkInterfaces[0].accessConfigs[0].natIP, .networkInterfaces[0].networkIP, .zone, .machineType, .status] | @csv"
-    data=$(echo $data | jq -r "$fields")
-    totals="_,_,_,Instances,$instances_count"
+    # Modify jq fields to extract just the relevant part of the zone and machine type
+    fields=".[] | [.name,
+                   .networkInterfaces[0].accessConfigs[0].natIP,
+                   .networkInterfaces[0].networkIP,
+                   (.zone | split(\"/\")[-1]),
+                   (.machineType | split(\"/\")[-1]),
+                   .status] | @csv"
+
+    data=$(echo "$data" | jq -r "$fields")
+    totals="_,_,_,_,Instances,$instances_count"
 
     (echo "$header" && echo "$data" && echo "$totals") | sed 's/"//g' | column -t -s,
 }

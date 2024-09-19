@@ -15,15 +15,15 @@ variable "snapshot_name" {
 }
 
 source "googlecompute" "packer" {
-  project_id           = var.gcp_project
-  region               = var.gcp_region
-  zone                 = var.gcp_zone
-  machine_type         = var.gcp_machine_type
+  project_id           = var.project
+  region               = var.physical_region
+  zone                 = var.region
+  machine_type         = var.default_size
   image_name           = var.snapshot_name
   image_family         = "axiom-images"
   source_image_family  = "ubuntu-2004-lts"
   ssh_username         = "root"
-  account_file         = var.gcp_service_account_key
+  credentials_file     = var.service_account_key
   network              = "default"    # Specify your network or use the default
   subnetwork           = "default"    # Specify your subnetwork if required
   use_internal_ip      = false        # Disable internal IP to avoid networking issues

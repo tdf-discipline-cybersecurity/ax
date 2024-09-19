@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 ###########################################################################################################
 # Header
@@ -56,19 +56,19 @@ banner
 function help() {
         echo -e "${BWhite}Description:${Color_Off}"
         echo -e "  axiom-build combines the cloud providers builder file (~/.axiom/images/\$format/builders) with a provisioner file (~/.axiom/images/\$format/provisioners)"
-        echo -e "  into a Packer file (located ~/.axiom/images/\$format/axiom.json)"
-        echo -e "  axiom-build supports legcay Packer JSONs and the new pkr.hcl format"
+        echo -e "  into a Packer file (~/.axiom/images/\$format/axiom.json)"
+        echo -e "  axiom-build supports legacy Packer JSONs and the new pkr.hcl format"
         echo -e "  axiom-build uses Packer to create an image with tools installed (defined by the provisioner)"
         echo -e "  choose between multiple provisioners (barebones, default, reconftw, and extras) or bring your own (custom)"
         echo -e "${BWhite}Examples:${Color_Off}"
+        echo -e "  ${BGreen}axiom-build --run ${Color_Off}# Kick off interactive build wizard"
         echo -e "  ${BGreen}axiom-build default${Color_Off} # Build a new Packer image using the Default provisioner"
         echo -e "  ${BGreen}axiom-build barebones --debug ${Color_Off}# Build a new Packer image using the barebones provisioner, run with --debug"
-        echo -e "  ${BGreen}axiom-build --setup ${Color_Off}# Kick off interactive build wizard"
         echo -e "  ${BGreen}axiom-build --ssh-key ~/.ssh/id_rsa.pub ${Color_Off}# Set a custom SSH key (default is SSH key in ~/.ssh/axiom_ssh.pub)"
         echo -e "${BWhite}Usage:${Color_Off}"
         echo -e "  <provisioner> (optional)"
         echo -e "    Name of provisioner to build, options are barebones, default, reconftw, extras or custom (provisioner must be located in ~/.axiom/images/provisioners)"
-        echo -e "  --setup (optional)"
+        echo -e "  --run (optional)"
         echo -e "    Start axiom-build setup wizard"
         echo -e "  --legacy (optional)"
         echo -e "    Use legacy Packer json Builder and Provisioner instead of pkr.hcl"
@@ -100,6 +100,7 @@ do
         set=false
         if [[ "$arg" == "--debug" ]]; then
             set -xv
+            export PACKER_LOG=1
             set=true
             pass+=($i)
         fi
@@ -109,7 +110,7 @@ do
             set=true
             pass+=($i)
         fi
-        if [[ "$arg" == "--setup" ]]; then
+       if [[ "$arg" == "--run" ]] || [[ "$arg" == "--setup" ]]; then
             setup=true
             set=true
             pass+=($i)
@@ -333,7 +334,7 @@ fi
 #
 echo -e "${Red}Now running ${Color_Off}[ ${BBlue}axiom-build $provisioner ${Color_Off}]${Red}"
 echo "The Packer Build will take about 25 minutes, spin up a temporary instance, then take a snapshot and use it for our future instances"
-echo -e "Starting Packer Build in a 5 seconds... Ctrl+C to quit, remember, you can just run ${Color_Off}[ ${BBlue}axiom-build --setup ${Color_Off}] ${Red}at any time${Color_Off}"
+echo -e "Starting Packer Build in a 5 seconds... Ctrl+C to quit, remember, you can just run ${Color_Off}[ ${BBlue}axiom-build --run ${Color_Off}] ${Red}at any time${Color_Off}"
 sleep 8
 
 #############################################################################################################
@@ -408,6 +409,7 @@ else
    echo -e "${Yellow}Verify the account is properly configured and/or try a different region.${Color_Off}"
    echo -e "${Yellow}For support, take a screenshot of the last 20 lines and open a issue at https://github.com/attacksurge/ax/issues${Color_Off}"
    echo -e "${Green}Sometimes just running axiom-build again can work, so please try at least once: 'axiom-build', thanks!${Color_Off}"
+   echo -e "${Green}To debug Packer run again with ${Color_Off}[ ${BBlue}axiom-build $provisioner --debug ${Color_Off}]"
    "$NOTIFY_CMD" "Axiom Info" "Build failed :("
    exit 1
 fi
