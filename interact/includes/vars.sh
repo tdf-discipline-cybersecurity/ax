@@ -34,7 +34,7 @@ export IBMCloudCliVersion='2.27.0'
 export HetznerCliVersion='1.47.0'
 export AzureCliVersion="2.64.0"
 export AWSCliVersion="2.17.45"
-
+export GCloudCliVersion="493.0.0"
 
 # Auto Update Option
 [ -f $AXIOM_PATH/interact/includes/.auto_update ] && source $AXIOM_PATH/interact/includes/.auto_update

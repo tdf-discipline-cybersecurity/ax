@@ -36,7 +36,7 @@ echo -e "${Green}Checking linode-cli version...\n${Color_Off}"
 installed_version=$(linode-cli --version 2>/dev/null| grep linode-cli | cut -d ' ' -f 2 | cut -d v -f 2-)
 
 # Check if the installed version matches the desired version
-if [[ "$installed_version" != "${LinodeCliVersion}" ]]; then
+if [[ "$(printf '%s\n' "$installed_version" "$LinodeCliVersion" | sort -V | head -n 1)" != "$LinodeCliVersion" ]]; then
     echo -e "${Yellow}linode-cli is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
     echo "Installing/updating linode-cli to version $LinodeCliVersion..."
 

@@ -33,7 +33,7 @@ esac
 installed_version=$(aws --version 2>/dev/null | cut -d ' ' -f 1 | cut -d '/' -f 2)
 
 # Check if the installed version matches the recommended version
-if [[ "$installed_version" != $AWSCliVersion ]]; then
+if [[ "$(printf '%s\n' "$installed_version" "$AWSCliVersion" | sort -V | head -n 1)" != "$AWSCliVersion" ]]; then
     echo -e "${Yellow}AWS CLI is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
 
     # Determine the OS type and handle installation accordingly

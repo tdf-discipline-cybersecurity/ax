@@ -219,11 +219,6 @@ get_image_id() {
 # used for axiom-images
 #
 # get JSON data for snapshots
-snapshots() {
-        hcloud image list -t snapshot -o json
-}
-
-# only displays private images
 # axiom-images
 snapshots() {
         hcloud image list -t snapshot -o json

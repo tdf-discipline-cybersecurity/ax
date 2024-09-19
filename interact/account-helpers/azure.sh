@@ -40,7 +40,7 @@ esac
 installed_version=$(az version 2>/dev/null | jq -r '."azure-cli"')
 
 # Check if the installed version matches the recommended version
-if [[ "$installed_version" != "$AzureCliVersion" ]]; then
+if [[ "$(printf '%s\n' "$installed_version" "$AzureCliVersion" | sort -V | head -n 1)" != "$AzureCliVersion" ]]; then
     echo -e "${Yellow}Azure CLI is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
 
     # Handle macOS installation/update

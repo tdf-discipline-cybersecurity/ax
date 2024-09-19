@@ -32,7 +32,7 @@ esac
 
 installed_version=$(doctl version 2>/dev/null| grep version | cut -d ' ' -f 3 | cut -d '-' -f 1)
 # Check if the installed version matches the recommended version
-if [[ "$installed_version" != "$DoctlVersion" ]]; then
+if [[ "$(printf '%s\n' "$installed_version" "$DoctlVersion" | sort -V | head -n 1)" != "$DoctlVersion" ]]; then
     echo -e "${Yellow}Doctl CLI is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
     echo "Installing/updating doctl to version $DoctlVersion..."
 

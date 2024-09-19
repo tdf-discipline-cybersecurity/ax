@@ -377,6 +377,66 @@ if [[ "$provider" == "aws" ]]; then
     fi
 fi # provider aws
 
+# check installed version of gcloud cli and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
+#
+if [[ "$provider" == "gcp" ]]; then
+    echo -e "${Green}Checking gcloud version...${Color_Off}"
+
+    # Get the currently installed version of gcloud
+    installed_version=$(gcloud version 2>/dev/null | grep 'Google Cloud SDK' | cut -d ' ' -f 4)
+
+    # Compare installed version with desired version (set in vars.sh)
+    if [[ "$(printf '%s\n' "$installed_version" "$GCloudCliVersion" | sort -V | head -n 1)" != "$GCloudCliVersion" ]]; then
+        echo "Installed version of gcloud is lower than required GCloudCliVersion in ~/.axiom/interact/includes/vars.sh"
+
+        # Install or update gcloud based on the OS
+        if [[ $BASEOS == "Mac" ]]; then
+            echo -e "${BGreen}Installing/Updating gcloud CLI on macOS...${Color_Off}"
+            curl https://sdk.cloud.google.com | bash
+            exec -l $SHELL
+        elif [[ $BASEOS == "Linux" ]]; then
+            if uname -a | grep -qi "Microsoft"; then
+                OS="UbuntuWSL"
+            else
+                OS=$(lsb_release -i 2>/dev/null | awk '{ print $3 }')
+                if ! command -v lsb_release &> /dev/null; then
+                    OS="unknown-Linux"
+                    BASEOS="Linux"
+                fi
+            fi
+
+            echo -e "${BGreen}Installing/Updating gcloud CLI on Linux...${Color_Off}"
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            sudo apt-get install apt-transport-https ca-certificates gnupg -y -qq
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg > /dev/null
+            sudo apt-get update -qq && sudo apt-get install google-cloud-sdk -y -qq
+        fi
+    fi
+
+    # Configure gcloud using service account credentials from axiom.json
+    echo -e "${BGreen}Configuring gcloud CLI with credentials from axiom.json...${Color_Off}"
+    service_account_key="$(jq -r '.service_account_key' "$AXIOM_PATH"/accounts/"$1".json)"
+    
+    if [[ -n "$service_account_key" ]]; then
+        gcloud auth activate-service-account --key-file="$service_account_key"
+        gcloud config set project "$(jq -r '.project' "$AXIOM_PATH"/accounts/"$1".json)"
+        gcloud config set compute/region "$(jq -r '.region' "$AXIOM_PATH"/accounts/"$1".json)"
+        gcloud config set compute/zone "$(jq -r '.zone' "$AXIOM_PATH"/accounts/"$1".json)"
+
+        # Check if gcloud is authenticated
+        if ! gcloud auth list --filter=status:ACTIVE &> /dev/null; then
+            echo -e "${BRed}gcloud is not authenticated. Running bootstrap...${Color_Off}"
+            bootstrap
+        else
+            echo -e "${BGreen}gcloud is authenticated.${Color_Off}"
+        fi
+    else
+        echo -e "${BRed}No service account key found in axiom.json. Please set it manually.${Color_Off}"
+        bootstrap
+    fi
+fi # provider gcp
+
+
 # Install hetzner if not already installed, check token is valid or kick off bootstrap
 #
 if [[ "$provider" == "hetzner" ]]; then
