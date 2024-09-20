@@ -225,9 +225,9 @@ function gcp_setup() {
      --format="value(name)" | head -n 1)
 
     # List available machine types in the selected zone
-    gcloud compute machine-types list --zones us-east5-a --format="table(name, description)" | tee /tmp/gcp-machine-types.txt
+    gcloud compute machine-types list --zones $zone --format="table(name, description)" | tee /tmp/gcp-machine-types.txt
 
-    echo -e -n "${BWhite}Please enter the machine type (e.g. '$default_size_search'): ${Color_Off}"
+    echo -e -n "${BWhite}Please enter the machine type: Default '$default_size_search', press enter \n>> ${Color_Off}"
     read machine_type
 
     # Validate the machine type
