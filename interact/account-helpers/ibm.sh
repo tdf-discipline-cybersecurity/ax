@@ -81,38 +81,10 @@ else
     echo "ibmcloud-cli is already at or above the recommended version $IBMCloudCliVersion."
 fi
 
-# Install/Update Packer
-mkdir -p /tmp/packer-ibm/
-if [[ ! -f /tmp/packer-ibm/packer ]]; then
-    echo -e "${BGreen}Downloading and installing Packer...${Color_Off}"
-    if [[ $BASEOS == "Linux" ]]; then
-        wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip
-    elif [[ $BASEOS == "Mac" ]]; then
-        wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip
-    fi
-    unzip /tmp/packer.zip -d /tmp/packer-ibm/
-    rm /tmp/packer.zip
-    echo -e "${BGreen}Packer installed successfully.${Color_Off}"
-fi
 
 # Install IBM Cloud Packer Plugin
-if [[ ! -f "$HOME/.packer.d/plugins/packer-builder-ibmcloud" ]]; then
-    echo -e "${BGreen}Installing IBM Cloud Packer Builder Plugin (v3.2.6)...${Color_Off}"
-    os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-    mkdir -p ~/.packer.d/plugins/
-    if [[ $os == "linux" ]]; then
-        wget https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v3.2.6/packer-plugin-ibmcloud_v3.2.6_x5.0_linux_amd64.zip -O /tmp/packer-plugin-ibmcloud.zip
-        unzip /tmp/packer-plugin-ibmcloud.zip -d ~/.packer.d/plugins/
-        rm /tmp/packer-plugin-ibmcloud.zip
-    elif [[ $os == "darwin" ]]; then
-        wget https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v3.2.6/packer-plugin-ibmcloud_v3.2.6_x5.0_darwin_amd64.zip -O /tmp/packer-plugin-ibmcloud.zip
-        unzip /tmp/packer-plugin-ibmcloud.zip -d ~/.packer.d/plugins/
-        rm /tmp/packer-plugin-ibmcloud.zip
-    fi
-    echo -e "${BGreen}IBM Cloud Packer Builder Plugin v3.2.6 installed successfully.${Color_Off}"
-else
-    echo -e "${BGreen}IBM Cloud Packer Builder Plugin is already installed.${Color_Off}"
-fi
+echo -e "${BGreen}Installing IBM Cloud Packer Builder Plugin${Color_Off}"
+packer plugins install github.com/IBM/ibmcloud
 
 # Functions to handle IBM Cloud API keys and configurations
 function getUsernameAPIkey {
