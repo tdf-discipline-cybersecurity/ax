@@ -448,8 +448,6 @@ if [[ "$provider" == "hetzner" ]]; then
             fi
                 echo -e "${BGreen}Installing hetzner-cloud CLI (hcloud)...${Color_Off}"
                 brew install hcloud
-                echo -e "${BGreen}Installing Hetzner Packer plugin...${Color_Off}"
-                packer plugins install github.com/hetznercloud/hcloud
 
         # Handle Linux installation/update
         elif [[ $BASEOS == "Linux" ]]; then
@@ -476,7 +474,7 @@ if [[ "$provider" == "hetzner" ]]; then
 
     fi
 
-    echo -e "${BGreen}Installing GCP packer plugin...${Color_Off}"
+    echo -e "${BGreen}Installing Hetzner packer plugin...${Color_Off}"
     packer plugins install github.com/hetznercloud/hcloud
 
     # Validate token and setup configuration

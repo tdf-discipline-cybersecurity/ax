@@ -94,7 +94,7 @@ During the initial installation, running [`ax configure`](https://github.com/att
 
 This will create a docker container, initiate the install and setup flow, then drop you out of the docker container. Once the Packer image is successfully created with [`ax build`](https://github.com/attacksurge/ax/blob/master/interact/axiom-build), you will have to re-exec into your docker container `docker exec -it $container_id zsh`. 
 ```
-docker exec -it $(docker run -d -it --platform linux/amd64 ubuntu:20.04) sh -c "apt update && apt install git -y && git clone https://github.com/attacksurge/ax/ ~/.axiom/ && cd && .axiom/interact/axiom-configure --setup"
+docker exec -it $(docker run -d -it --platform linux/amd64 ubuntu:latest) sh -c "apt update && apt install git -y && git clone https://github.com/attacksurge/ax/ ~/.axiom/ && cd && .axiom/interact/axiom-configure --run"
 ```
 
 ## Easy Install
@@ -102,7 +102,7 @@ docker exec -it $(docker run -d -it --platform linux/amd64 ubuntu:20.04) sh -c "
 You should use an OS that supports our [easy install](https://ax-framework.gitbook.io/wiki/overview/installation-guide#operating-systems-supported). <br>
 For Linux systems you will also need to install the newest versions of all packages beforehand `sudo apt dist-upgrade`. <br>
 ```
-bash <(curl -s https://raw.githubusercontent.com/attacksurge/ax/master/interact/axiom-configure) --setup
+bash <(curl -s https://raw.githubusercontent.com/attacksurge/ax/master/interact/axiom-configure) --run
 ```
 
 If you have any problems with this installer, or if using an unsupported OS please refer to [Installation](https://ax-framework.gitbook.io/wiki/overview/installation-guide#operating-systems-supported).
