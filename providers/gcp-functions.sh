@@ -12,13 +12,15 @@ create_instance() {
     machine_type="$3"
     zone="$4"
     key="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.service_account_key')"
-    gcloud auth activate-service-account --key-file="$key"
 
     gcloud compute instances create "$name" \
         --image "$image_id" \
         --machine-type "$machine_type" \
         --zone "$4" \
-        --tags "axiom-ssh"
+        --tags "axiom-ssh" \
+        --verbosity=error \
+        --quiet 2> >(grep -v '^Created \[' >&2) > /dev/null
+        sleep 260
 }
 
 ###################################################################

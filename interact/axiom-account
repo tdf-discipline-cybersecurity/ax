@@ -48,6 +48,20 @@ then
         provider="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.provider')"
         "$AXIOM_PATH"/interact/axiom-provider "$provider"
 
+installed_packer_version=$(packer version | cut -d ' ' -f 2 | cut -d v -f2-)
+if [[ "$(printf '%s\n' "$installed_packer_version" "$PackerVersion" | sort -V | head -n 1)" != "$PackerVersion" ]]; then
+ echo -e "${Yellow}Packer is either not installed or version is lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
+ echo "Installing/updating Packer version to version $PackerVersion..."
+ if [[ $BASEOS == "Mac" ]]; then
+   brew tap hashicorp/tap
+   brew install hashicorp/tap/packer
+   brew upgrade hashicorp/tap/packer
+  else
+   curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+   sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" -y
+   sudo apt-get update && sudo apt-get install packer -y
+ fi
+fi
 
 # check installed version of doclt and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
 #

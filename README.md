@@ -14,7 +14,9 @@ Whichever [Packer](https://www.packer.io/) Provisioner you select, Ax installs y
 
 Various [Ax Utility Scripts](https://ax-framework.gitbook.io/wiki/fundamentals/ax-utility-scripts) streamline tasks like spinning up and deleting fleets of instances, parallel command execution and file transfers, instance and image backups, and many other operations.
 
-With the power of ephemeral infrastructure, most of which is automated, you can easily create many disposable instances. Ax enables the distribution of scanning operations for arbitrary binaries and scripts (the full list varies based on your chosen [Provisioner](https://github.com/attacksurge/ax/tree/master/images/provisioners)). Once installed and configured, Ax allows you to initialize and distribute a large scan across 50-100+ instances within minutes, delivering rapid results. This process is known as [ax scan](https://ax-framework.gitbook.io/wiki/fundamentals/scans).
+Ax Framework leverages the power of ephemeral, automated infrastructure to make cloud-based scanning operations fast and efficient. With Ax, you can quickly spin up disposable cloud instances, distribute your scanning workloads, and manage large-scale operations with ease. The framework supports running arbitrary binaries and scripts, determined by the specific Packer Provisioner you select and [Module](https://ax-framework.gitbook.io/wiki/fundamentals/scans/modules) you use.
+
+Once Ax is set up and configured, you can deploy a fleet of 50-100+ instances in just minutes, enabling highly parallelized scans that deliver rapid, reliable results. This functionality is known as [ax scan](https://ax-framework.gitbook.io/wiki/fundamentals/scans).
 
 Ax attempts to follow the Unix philosophy by providing building blocks that allow users to easily orchestrate one or many cloud instances. This flexibility enables the creation of continuous scanning pipelines and the execution of general, one-off, highly parallelized workloads.
 

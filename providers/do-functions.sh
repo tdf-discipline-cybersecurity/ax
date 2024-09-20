@@ -5,7 +5,7 @@ AXIOM_PATH="$HOME/.axiom"
 ###################################################################
 #  Create many instance at a time
 #
-#  needed for axiom-fleet
+#  Currently not used by Ax framework
 create_instances() {
 	start="$1"
 	end="$2"

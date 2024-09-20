@@ -26,8 +26,11 @@ export BPurple='\033[1;35m'      # Purple
 export BCyan='\033[1;36m'        # Cyan
 export BWhite='\033[1;37m'       # White
 
-# Versions
+# Required Go Version - gets interpolated during axiom-build and axiom-configure
 export GolangVersion='1.23.0'
+
+# Recommended Cloud provider CLI versions
+# Only updates if the installed version is lower than recommended version
 export DoctlVersion='1.112.0'
 export LinodeCliVersion='5.51.0'
 export IBMCloudCliVersion='2.27.0'
@@ -35,6 +38,7 @@ export HetznerCliVersion='1.47.0'
 export AzureCliVersion="2.64.0"
 export AWSCliVersion="2.17.45"
 export GCloudCliVersion="493.0.0"
+export PackerVersion="1.11.2"
 
 # Auto Update Option
 [ -f $AXIOM_PATH/interact/includes/.auto_update ] && source $AXIOM_PATH/interact/includes/.auto_update
