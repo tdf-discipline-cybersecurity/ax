@@ -183,11 +183,27 @@ fi
 packer_provisioner_path="$AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
 packer_builder_path="$AXIOM_PATH/images/$extension/builders/$builder.$extension"
 if [ ! -f "$packer_provisioner_path" ]; then
-        echo -e ""
-        echo -e "${Red}Error: unfortunately, can not find Packer Provisioner.."
-        echo -e "${Red}Make sure your provisioner is located in $AXIOM_PATH/images/$extension/provisioners/$arg.$extension and run again"
-        echo -e "${Red}exiting..${Color_Off}"
-        exit
+        echo -e "${Yellow}Warning: cant find HCL Packer Provisioner in $AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
+        echo -e "Checking for legacy Packer JSON Provisioner in $AXIOM_PATH/images/json/provisioners/$provisioner.json${Color_Off}"
+        if [ -f "$AXIOM_PATH/images/json/provisioners/$provisioner.json" ]; then
+         echo -e "${BGreen}Found $AXIOM_PATH/images/json/provisioners/$provisioner.json!${Color_Off}"
+         packer_provisioner_path="$AXIOM_PATH/images/json/provisioners/$provisioner.json"
+         extension=json
+        else
+         echo -e "${Yellow}Warning: can not find legacy Packer JSON in $AXIOM_PATH/images/$extension/provisioners/$provisioner.json"
+         echo -e "${Yellow}Looking in $AXIOM_PATH/images/provisioners/$provisioner.json just in case...${Color_Off}"
+          if [ -f "$AXIOM_PATH/images/provisioners/$provisioner.json" ]; then
+           echo -e "${BGreen}Provisioner found! Moving it to $AXIOM_PATH/images/json/provisioners/$provisioner.json${Color_Off}"
+           mv $AXIOM_PATH/images/provisioners/$provisioner.json $AXIOM_PATH/images/json/provisioners/$provisioner.json
+           packer_provisioner_path="$AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
+           extension=json
+          else
+           echo -e "${Red}Error: unfortunately, can not find Packer Provisioner.."
+           echo -e "${Red}Make sure your provisioner is located in $AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension and run again"
+           echo -e "${Red}exiting..${Color_Off}"
+           exit
+          fi
+        fi
 fi
 
 if [ ! -f "$packer_builder_path" ]; then
