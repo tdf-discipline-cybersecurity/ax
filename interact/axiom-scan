@@ -942,7 +942,7 @@ fi
 #  Exit if the first command line argument doesnt not contain a target list
 #
 if [[ ! -f $input ]]; then
- echo -e "${BRed}Input file does not exist, please specify one as the first argument... ${Color_Off}"
+ echo -e "${BRed}Error: Input file does not exist, please specify one as the first argument... ${Color_Off}"
  exit 1
 fi
 
@@ -951,7 +951,7 @@ fi
 #
 if [[ "$*" != *-m* ]]
 then
- echo -e "${Red}No module for axiom-scan defined. Pass one with -m.${Color_Off}"
+ echo -e "${Red}Error: No module for axiom-scan defined. Pass one with -m.${Color_Off}"
  exit 1
 fi
 
@@ -971,6 +971,15 @@ fi
 if ! jq -e . >/dev/null 2>&1 <<< "$(cat $AXIOM_PATH/modules/$module.json)"; then
  echo -e "${Red}error parsing json module $AXIOM_PATH/modules/$module.json, not properly formatted json.. exiting${Color_Off}"
  exit 1
+fi
+
+###########################################################################################################
+# Check to make sure Interlace is installed
+#
+if ! command -v interlace &> /dev/null; then
+   echo -e "${Red}Error: Interlace is not installed.${Color_Off}"
+   echo -e "${Red}Please install Interlace by following the instructions at: https://github.com/codingo/Interlace${Color_Off}"
+   exit 1
 fi
 
 ###########################################################################################################

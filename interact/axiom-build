@@ -183,18 +183,18 @@ fi
 packer_provisioner_path="$AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
 packer_builder_path="$AXIOM_PATH/images/$extension/builders/$builder.$extension"
 if [ ! -f "$packer_provisioner_path" ]; then
-        echo -e "${Yellow}Warning: cant find HCL Packer Provisioner in $AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
+        echo -e "${Yellow}Warning: cant find $extension Packer Provisioner in $AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
         echo -e "Checking for legacy Packer JSON Provisioner in $AXIOM_PATH/images/json/provisioners/$provisioner.json${Color_Off}"
         if [ -f "$AXIOM_PATH/images/json/provisioners/$provisioner.json" ]; then
-         echo -e "${BGreen}Found $AXIOM_PATH/images/json/provisioners/$provisioner.json!${Color_Off}"
+         echo -e "${BGreen}Provisioner found! $AXIOM_PATH/images/json/provisioners/$provisioner.json!${Color_Off}"
          packer_provisioner_path="$AXIOM_PATH/images/json/provisioners/$provisioner.json"
          extension=json
         else
-         echo -e "${Yellow}Warning: can not find legacy Packer JSON in $AXIOM_PATH/images/$extension/provisioners/$provisioner.json"
+         echo -e "${Yellow}Warning: can not find legacy Packer JSON in $AXIOM_PATH/images/json/provisioners/$provisioner.json"
          echo -e "${Yellow}Looking in $AXIOM_PATH/images/provisioners/$provisioner.json just in case...${Color_Off}"
           if [ -f "$AXIOM_PATH/images/provisioners/$provisioner.json" ]; then
-           echo -e "${BGreen}Provisioner found! Moving it to $AXIOM_PATH/images/json/provisioners/$provisioner.json${Color_Off}"
-           mv $AXIOM_PATH/images/provisioners/$provisioner.json $AXIOM_PATH/images/json/provisioners/$provisioner.json
+           echo -e "${BGreen}Provisioner found! Copying it to $AXIOM_PATH/images/json/provisioners/$provisioner.json${Color_Off}"
+           cp $AXIOM_PATH/images/provisioners/$provisioner.json $AXIOM_PATH/images/json/provisioners/$provisioner.json
            packer_provisioner_path="$AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
            extension=json
           else

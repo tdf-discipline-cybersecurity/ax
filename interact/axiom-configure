@@ -392,6 +392,7 @@ if [[ $BASEOS == "Linux" ]]; then
         cd /tmp/interlace && sudo python3 setup.py install
 
     elif [[ $OS == "Ubuntu" ]] || [[ $OS == "Debian" ]] || [[ $OS == "Linuxmint" ]] || [[ $OS == "Parrot" ]] || [[ $OS == "Kali" ]] || [[ $OS == "unknown-Linux" ]] || [[ $OS == "UbuntuWSL" ]]; then
+
        if ! command -v sudo &> /dev/null; then
         export DEBIAN_FRONTEND=noninteractive
         apt-get update && apt-get install sudo curl jq tzdata software-properties-common -y -qq
@@ -399,12 +400,30 @@ if [[ $BASEOS == "Linux" ]]; then
         ln -fs /usr/share/zoneinfo/$(curl ipinfo.io/"$ip" | jq -r .timezone) /etc/localtime
         dpkg-reconfigure --frontend noninteractive tzdata
        fi
+
        echo -e "${BGreen}Installing fail2ban ufw jq git python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server...${Color_Off}"
        DEBIAN_FRONTEND=noninteractive sudo apt-get update && sudo apt-get install ufw git python3-pip curl iputils-ping net-tools unzip xsltproc bc rsync sudo wget nano bsdmainutils openssh-server fail2ban jq -y 
        echo -e "${BGreen}Installing packer...${Color_Off}"
        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" -y
-       sudo apt-get update && sudo apt-get install packer -y
+       sudo apt-get update
+       sudo apt-get install packer -y || \
+
+        # Check if the apt install failed or the version is still incorrect
+        installed_packer_version=$(packer version 2>/dev/null | cut -d ' ' -f 2 | cut -d v -f2-)
+        PackerVersion=1.11.2
+        if [[ "$(printf '%s\n' "$installed_packer_version" "$PackerVersion" | sort -V | head -n 1)" != "$PackerVersion" ]]; then
+         echo -e "${Yellow}Failed to install Packer via package manager or verion version is still lower than the recommended version in ~/.axiom/interact/includes/vars.sh${Color_Off}"
+         key_id=$(sudo apt-key list | grep -B 1 'HashiCorp' | grep 'pub' | awk '{print $2}' | cut -d '/' -f 2)
+         sudo apt-key del "$key_id"
+         echo -e "${Green}Downloading Packer binary instead, version $PackerVersion${Color_Off}"
+         # Backup to installing Packer binary
+         wget -q https://releases.hashicorp.com/packer/${PackerVersion}/packer_${PackerVersion}_linux_amd64.zip -P /tmp
+         unzip -o /tmp/packer_${PackerVersion}_linux_amd64.zip -d /tmp
+         sudo mv /tmp/packer /usr/bin/
+         rm /tmp/packer_${PackerVersion}_linux_amd64.zip
+        fi
+
        echo -e "${BGreen}Installing Interlace...${Color_Off}"
        sudo rm -fr /tmp/interlace
        git clone https://github.com/codingo/Interlace.git /tmp/interlace
@@ -443,16 +462,32 @@ if [[ $BASEOS == "Mac" ]]; then
     brew install wget
     mkdir -p "${HOME}/go"
     export GOPATH=$HOME/go
-    echo "export GOPATH=\$HOME/go" >>~/.zshrc
-    echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >>~/.zshrc
 
-    echo -e "${Green}You're running ZSH! Installing Ax to \$PATH...${Color_Off}"
-    echo "export PATH=\"\$PATH:\$HOME/.axiom/interact\"" >>~/.zshrc
+    echo -e "${BGreen}Enter bash or zsh to add Ax to .bashrc/.zshrc.${Color_Off}"
+    read -r shell_choice
+
+    if [[ "$shell_choice" == "zsh" ]]; then
+     echo "export GOPATH=\$HOME/go" >>~/.zshrc
+     echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >>~/.zshrc
+     echo -e "${BGreen}You're running ZSH! Installing Ax to \$PATH...${Color_Off}"
+     echo "export PATH=\"\$PATH:\$HOME/.axiom/interact\"" >>~/.zshrc
+     echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc
+
+    elif [[ "$shell_choice" == "bash" ]]; then
+     echo "export GOPATH=\$HOME/go" >>~/.bashrc
+     echo "export PATH=\$GOPATH/bin:/usr/local/go/bin:\$PATH:\$HOME/.local/bin" >>~/.bashrc
+     echo -e "${BGreen}You're running Bash! Installing Ax to \$PATH...${Color_Off}"
+     echo "export PATH=\"\$PATH:\$HOME/.axiom/interact\"" >>~/.bashrc
+     echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.bashrc
+
+    else
+     echo -e "${Red}Invalid choice. Please select either 'zsh' or 'bash'.${Color_Off}"
+    fi
+
     echo -e "${BGreen}Installing jq...${Color_Off}"
     brew install jq
     echo -e "${BGreen}Installing coreutils...${Color_Off}"
     brew install coreutils
-    echo "source $HOME/.axiom/interact/includes/ax-completion.sh" >> ~/.zshrc
 
     if [[ "$unattended" == "true" ]]; then
         echo -e "${BGreen}Installing Python3...${Color_Off}"
