@@ -463,7 +463,7 @@ if [[ $BASEOS == "Mac" ]]; then
     mkdir -p "${HOME}/go"
     export GOPATH=$HOME/go
 
-    echo -e "${BGreen}Enter bash or zsh to add Ax to .bashrc/.zshrc.${Color_Off}"
+    echo -n -e "${BGreen}Enter bash or zsh to add Ax to .bashrc/.zshrc.\n>> ${Color_Off}"
     read -r shell_choice
 
     if [[ "$shell_choice" == "zsh" ]]; then
