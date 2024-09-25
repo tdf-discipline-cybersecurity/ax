@@ -407,7 +407,7 @@ if [[ $BASEOS == "Linux" ]]; then
        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" -y
        sudo apt-get update
-       sudo apt-get install packer -y || \
+       sudo apt-get install packer -y
 
         # Check if the apt install failed or the version is still incorrect
         installed_packer_version=$(packer version 2>/dev/null | cut -d ' ' -f 2 | cut -d v -f2-)
@@ -417,7 +417,6 @@ if [[ $BASEOS == "Linux" ]]; then
          key_id=$(sudo apt-key list | grep -B 1 'HashiCorp' | grep 'pub' | awk '{print $2}' | cut -d '/' -f 2)
          sudo apt-key del "$key_id"
          echo -e "${Green}Downloading Packer binary instead, version $PackerVersion${Color_Off}"
-         # Backup to installing Packer binary
          wget -q https://releases.hashicorp.com/packer/${PackerVersion}/packer_${PackerVersion}_linux_amd64.zip -P /tmp
          unzip -o /tmp/packer_${PackerVersion}_linux_amd64.zip -d /tmp
          sudo mv /tmp/packer /usr/bin/
