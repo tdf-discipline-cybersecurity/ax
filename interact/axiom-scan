@@ -80,9 +80,13 @@ function parse_module() {
 
 	if [[ -f "$AXIOM_PATH/modules/$module.json" ]]; then
 		if [[ "$ext" != "" ]]; then
-			cat "$AXIOM_PATH/modules/$module.json" | jq -r ".[] | select(.ext==\"$ext\")"
-		else
-			cat "$AXIOM_PATH/modules/$module.json" | jq -r ".[0]"
+                 if [[ "$ext" == "dir" ]]; then
+                  cat "$AXIOM_PATH/modules/$module.json" | jq -r '(.[] | select(.ext=="'$ext'")) // (.[] | select(.ext==""))'
+                 else
+                  cat "$AXIOM_PATH/modules/$module.json" | jq -r ".[] | select(.ext==\"$ext\")"
+                 fi
+                else
+	         cat "$AXIOM_PATH/modules/$module.json" | jq -r ".[0]"
 		fi
 	else
 		echo -e "${BRed}Module '$module' does not exist...${Color_Off}"
@@ -523,8 +527,8 @@ merge_output() {
         mkdir -p "$tmp/dbs/"
         $interlace_cmd_nobar -c "axiom-scp _target_:$scan_dir/gowitness.sqlite3 $tmp/dbs/_target_.sqlite3 --cache -F=$sshconfig>> /dev/null"
         echo "Merging databases..."
-        gowitness merge --input-path "$tmp/" -o "$outfile/gowitness.sqlite3"
-        echo -e "${Green}RUN: '${BBlue}gowitness server -D $outfile/gowitness.sqlite3 -P $outfile/${Color_Off}' for reporting"
+        gowitness report merge --source-path "$tmp/" --output-file  "$outfile/gowitness.sqlite3"
+        echo -e "${Green}RUN: '${BBlue}gowitness report server --db-uri sqlite://$outfile/gowitness.sqlite3 --screenshot-path $outfile/${Color_Off}' for reporting"
         fi
     fi
 }
