@@ -487,6 +487,8 @@ if [[ $BASEOS == "Mac" ]]; then
     brew install jq
     echo -e "${BGreen}Installing coreutils...${Color_Off}"
     brew install coreutils
+    echo -e "${BGreen}Installing gnu-sed...${Color_Off}"
+    brew install gnu-sed
 
     if [[ "$unattended" == "true" ]]; then
         echo -e "${BGreen}Installing Python3...${Color_Off}"

@@ -12,7 +12,7 @@ start="$(pwd)"
 BASEOS="$(uname)"
 case $BASEOS in
 'Darwin')
-    PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
+    PATH="$(brew --prefix coreutils)/libexec/gnubin:$(brew --prefix gnu-sed)/libexec/gnubin:$PATH"
     ;;
 *) ;;
 esac
