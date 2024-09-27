@@ -55,15 +55,18 @@ banner
 # 
 function help() {
         echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  axiom-build supports legacy Packer JSONs Provisioners as well as the new HCL format"
-        echo -e "  axiom-build combines a cloud providers Builder (~/.axiom/images/\$format/builders) with a Provisioner (~/.axiom/images/\$format/provisioners)"
-        echo -e "  and builds the final Packer file (~/.axiom/images/\$format/axiom.\$format)"
-        echo -e "  axiom-build uses Packer to create an image with tools installed (defined by the Provisioner)"
+        echo -e "  axiom-build supports both legacy ${BGreen}Packer JSON${Color_Off} files as well as the new ${BGreen}HCL format${Color_Off}"
+        echo -e "  axiom-build combines a cloud provider's ${BGreen}Builder${Color_Off} (~/.axiom/images/\$format/builders) with a ${BGreen}Provisioner ${Color_Off}(~/.axiom/images/\$format/provisioners)"
+        echo -e "  to generate the final ${BGreen}Packer file${Color_Off} (~/.axiom/images/\$format/axiom.\$format)"
+        echo -e "  using ${BGreen}Packer${Color_Off}, axiom-build creates an image with the tools pre-installed, as defined by the chosen Provisioner"
         echo -e "  choose between multiple Provisioners (barebones, default, reconftw, and extras) or bring your own (custom)"
+        echo -e ""
+        echo -e "  axiom-build bakes in your${BGreen} SSH key${Color_Off}, allowing you to connect to instances created using the image"
+        echo -e "  by default, it uses the SSH key located at ~/.ssh/axiom_ssh.pub, but you can specify a ${BGreen}custom SSH key${Color_Off} if needed"
         echo -e "${BWhite}Examples:${Color_Off}"
-        echo -e "  ${BGreen}axiom-build --run ${Color_Off}# Kick off interactive build wizard"
+        echo -e "  ${BGreen}axiom-build --run ${Color_Off}# Kick off the interactive build wizard"
         echo -e "  ${BGreen}axiom-build default${Color_Off} # Build a new Packer image using the Default Provisioner"
-        echo -e "  ${BGreen}axiom-build barebones --debug ${Color_Off}# Build a new Packer image using the barebones Provisioner, run with --debug"
+        echo -e "  ${BGreen}axiom-build barebones --debug ${Color_Off}# Build a new Packer image using the Barebones Provisioner, run with --debug"
         echo -e "  ${BGreen}axiom-build --ssh-key ~/.ssh/id_rsa.pub ${Color_Off}# Set a custom SSH key (default is SSH key in ~/.ssh/axiom_ssh.pub)"
         echo -e "${BWhite}Usage:${Color_Off}"
         echo -e "  <provisioner> (optional)"
@@ -71,7 +74,7 @@ function help() {
         echo -e "  --run (optional)"
         echo -e "    Start axiom-build setup wizard"
         echo -e "  --legacy (optional)"
-        echo -e "    Use legacy Packer json Builder and Provisioner instead of pkr.hcl"
+        echo -e "    Use legacy Packer JSON Builder and Provisioner instead of pkr.hcl"
         echo -e "  --ssh-key <file to pub key> (optional)"
         echo -e "    Build the image using a custom SSH key (instead of using the default ssh key axiom creates ~/.ssh/axiom_ssh.pub)"
         echo -e "  --debug (optional)"
@@ -82,7 +85,7 @@ function help() {
 
 
 ###########################################################################################################
-# Parse command line arguments 
+# Parse command line arguments
 #
 if [[ "$@" == "--help" ]] || [[ "$@" == "-h" ]] || [[ "$@" == "" ]]; then
 help

@@ -16,7 +16,7 @@ Various [Ax Utility Scripts](https://ax-framework.gitbook.io/wiki/fundamentals/a
 
 Ax Framework leverages the power of ephemeral, automated infrastructure to make cloud-based scanning operations fast and efficient. With Ax, you can quickly spin up disposable cloud instances, distribute your scanning workloads, and manage large-scale operations with ease. The framework supports running arbitrary binaries and scripts, determined by the specific Packer Provisioner you select and [Module](https://ax-framework.gitbook.io/wiki/fundamentals/scans/modules) you use.
 
-Once Ax is set up and configured, you can deploy a fleet of 50-100+ instances in just minutes, enabling highly parallelized scans that deliver rapid, reliable results. This functionality is known as [ax scan](https://ax-framework.gitbook.io/wiki/fundamentals/scans).
+Once Ax is set up and configured, you can deploy a fleet of 50-100+ instances in just minutes, distribute a highly parallelized scan against a large scope of targets, and deliver rapid, reliable results. This functionality is known as [ax scan](https://ax-framework.gitbook.io/wiki/fundamentals/scans).
 
 Ax attempts to follow the Unix philosophy by providing building blocks that allow users to easily orchestrate one or many cloud instances. This flexibility enables the creation of continuous scanning pipelines and the execution of general, one-off, highly parallelized workloads.
 
