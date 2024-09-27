@@ -44,7 +44,7 @@ echo '
  "𝓶𝓲𝓰𝓱𝓽 𝓪𝓼 𝔀𝓮𝓵𝓵 𝓫𝓮 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
  "𝓪𝓵𝓻𝓲𝓰𝓱𝓽, 𝔂𝓸𝓾 𝓰𝓸𝓽 𝓶𝓮, 𝓲𝓽𝓼 𝓳𝓾𝓼𝓽 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
  "𝓼𝓽𝓸𝓵𝓮𝓷 𝓯𝓻𝓸𝓶: 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
- ' | xargs shuf -n1 -e 
+ ' | xargs shuf -n1 -e
 echo ''
 
 }
@@ -52,17 +52,17 @@ banner
 
 ###########################################################################################################
 # Help Menu:
-# 
+#
 function help() {
         echo -e "${BWhite}Description:${Color_Off}"
         echo -e "  axiom-build supports both legacy ${BGreen}Packer JSON${Color_Off} files as well as the new ${BGreen}HCL format${Color_Off}"
         echo -e "  axiom-build combines a cloud provider's ${BGreen}Builder${Color_Off} (~/.axiom/images/\$format/builders) with a ${BGreen}Provisioner ${Color_Off}(~/.axiom/images/\$format/provisioners)"
         echo -e "  to generate the final ${BGreen}Packer file${Color_Off} (~/.axiom/images/\$format/axiom.\$format)"
-        echo -e "  using ${BGreen}Packer${Color_Off}, axiom-build creates an image with the tools pre-installed, as defined by the chosen Provisioner"
+        echo -e "  Using ${BGreen}Packer${Color_Off}, axiom-build creates an image with the tools pre-installed, as defined by the chosen Provisioner"
         echo -e "  choose between multiple Provisioners (barebones, default, reconftw, and extras) or bring your own (custom)"
         echo -e ""
-        echo -e "  axiom-build bakes in your${BGreen} SSH key${Color_Off}, allowing you to connect to instances created using the image"
-        echo -e "  by default, it uses the SSH key located at ~/.ssh/axiom_ssh.pub, but you can specify a ${BGreen}custom SSH key${Color_Off} if needed"
+        echo -e "  axiom-build adds your${BGreen} SSH key${Color_Off} to the image, allowing you to connect to instances created using the image"
+        echo -e "  by default, it creates and uses an SSH key located at ~/.ssh/axiom_ssh.pub, but you can specify a ${BGreen}custom SSH key${Color_Off} if needed"
         echo -e "${BWhite}Examples:${Color_Off}"
         echo -e "  ${BGreen}axiom-build --run ${Color_Off}# Kick off the interactive build wizard"
         echo -e "  ${BGreen}axiom-build default${Color_Off} # Build a new Packer image using the Default Provisioner"
@@ -93,7 +93,7 @@ exit
 fi
 
 ###########################################################################################################
-# Parse command line arguments 
+# Parse command line arguments
 #
 i=0
 for arg in "$@"
@@ -150,13 +150,12 @@ if [ -z "$provisioner" ]; then
     echo -e -n "${BGreen}Which axiom provisioner would you like to use: default, reconftw, barebones, custom? (option: press enter to select Default) \n>>${Color_Off}"
 
     read ans
-    if [[ $ans == "default" ]] || [[ $ans == "Default" ]]; then 
+    if [[ $ans == "default" ]] || [[ $ans == "Default" ]]; then
               echo -e "${Green}Selected provisioner option 'Default'${Color_Off}"
               provisioner="default"
     elif [[ $ans == "reconftw" ]] ||  [[ $ans == "Reconftw" ]] ||  [[ $ans == "ReconFTW" ]]; then
                echo -e "${Green}Selected provisioner option 'ReconFTW'${Color_Off}"
                provisioner="reconftw"
-
     elif [[ $ans == "barebones" ]] || [[ $ans == "Barebones" ]]; then
                echo -e "${Green}Selected provisioner option 'Barebones'${Color_Off}"
                provisioner="barebones"
@@ -196,8 +195,8 @@ if [ ! -f "$packer_provisioner_path" ]; then
          echo -e "${Yellow}Warning: can not find legacy Packer JSON in $AXIOM_PATH/images/json/provisioners/$provisioner.json"
          echo -e "${Yellow}Looking in $AXIOM_PATH/images/provisioners/$provisioner.json just in case...${Color_Off}"
           if [ -f "$AXIOM_PATH/images/provisioners/$provisioner.json" ]; then
-           echo -e "${BGreen}Provisioner found! Copying it to $AXIOM_PATH/images/json/provisioners/$provisioner.json${Color_Off}"
-           cp $AXIOM_PATH/images/provisioners/$provisioner.json $AXIOM_PATH/images/json/provisioners/$provisioner.json
+           echo -e "${BGreen}Provisioner found! Moving it to $AXIOM_PATH/images/json/provisioners/$provisioner.json${Color_Off}"
+           mv $AXIOM_PATH/images/provisioners/$provisioner.json $AXIOM_PATH/images/json/provisioners/$provisioner.json
            packer_provisioner_path="$AXIOM_PATH/images/$extension/provisioners/$provisioner.$extension"
            extension=json
           else
@@ -263,7 +262,7 @@ if [[ "$custom_ssh_key" == false ]]; then
   sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
 
 # If axiom_rsa is not created, create it and then add it to "$AXIOM_PATH/axiom.json" and Packer builder
- else 
+ else
   echo -e "${BGreen}Creating axiom SSH key in ~/.ssh/axiom_rsa.pub and adding it to Packer Builder${Color_Off}"
   ssh-keygen -b 2048 -t rsa -f ~/.ssh/axiom_rsa -q -N ""
   jq '.sshkey="'axiom_rsa'"' <"$account_path">"$AXIOM_PATH"/tmp.json ; mv "$AXIOM_PATH"/tmp.json "$account_path"
@@ -273,7 +272,7 @@ if [[ "$custom_ssh_key" == false ]]; then
 
  if [[ ! -f "$AXIOM_PATH/configs/authorized_keys" ]]
  then
-	 echo -e "${BRed}You have no authorized keys file at $AXIOM_PATH/configs/authorized_keys" 
+	 echo -e "${BRed}You have no authorized keys file at $AXIOM_PATH/configs/authorized_keys"
 	 echo -e  "Please make sure an SSH key exists in ~/.axiom/axiom.json or rerun axiom-configure."
 	 echo -e "Then run axiom-build..${Color_Off}"
 	 exit
@@ -304,7 +303,7 @@ cd "$AXIOM_PATH"/ || exit
 #############################################################################################################
 # change password or fail
 #
-if [ -z "$op_ssh_password" ]; then 
+if [ -z "$op_ssh_password" ]; then
     echo -e "Unable to generate random password for Packer image.. exiting"
     exit 0
 fi
