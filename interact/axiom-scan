@@ -102,7 +102,7 @@ function parse_module() {
 function help(){
 cat << EOF
 axiom-scan provides easy distribution of arbitrary binaries and scripts.
-axiom-scan splits user-provided input files (target lists), wordlists and configuration files and uploads them to a unique scan working directory on the remote instance.
+axiom-scan optionally splits user-provided input files (target lists), and wordlists and uploads them to a unique scan working directory on the remote instance.
 axiom-scan combines user-provided command-line arguments with commands in the module (~/.axiom/modules) and executes the final command on the remote instance.
 axiom-scan downloads and merges scan output in a variety of different formats, specified by the extension in the module (dir, txt, oG, csv, xml, jsonl, none).
 individual scanning operations are executed from a detacted tmux session (\$module+\$timestamp) inside a unique scan working directory (/home/op/scan/\$module+\$timestamp) on the remote instances.
@@ -114,7 +114,7 @@ Usage:
    axiom-scan inputfile.txt -m nuclei --remote-folder /home/op/nuclei-templates-on-remote-instances -o outputfile.txt
    axiom-scan inputfile.txt -m nuclei --local-folder /home/localuser/local-custom-nuclei-template-folder-to-upload/ -o outputfile.txt
    axiom-scan inputfile.txt -m nuclei --local-config /home/localuser/local-custom-nuclei-config-file-to-upload.yaml -o outputfile.txt --anew
-   axiom-scan inputfile.txt -m gowitness -oD screenshots-folder --spinup 10 --rm-when-done
+   axiom-scan inputfile.txt -m gowitness -oD screenshots-folder --spinup 10
    axiom-scan inputfile.txt -m nmapx -p- -sV -T4 -v --open -oA nampx-scan --spinup 100 --rm-when-done --regions dal13,lon06,fra05,sjc04
 
 Flags:
