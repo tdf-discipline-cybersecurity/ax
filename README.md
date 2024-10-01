@@ -8,9 +8,9 @@
 # Overview
 The Ax Framework is a free and open-source tool utilized by Bug Hunters and Penetration Testers to efficiently operate in multiple cloud environments. It helps build and deploy repeatable infrastructure tailored for offensive security purposes.
 
-Ax includes a set of Packer [Provisioner](https://github.com/attacksurge/ax/tree/master/images/provisioners) files to choose from, or you can [create your own](https://ax-framework.gitbook.io/wiki/fundamentals/bring-your-own-provisioner) (recommended).
+Ax includes a set of Packer Provisioner files to choose from ([JSON](https://github.com/attacksurge/ax/tree/master/images/json/provisioners) or [HCL](https://github.com/attacksurge/ax/tree/master/images/pkr.hcl/provisioners)), or you can [create your own](https://ax-framework.gitbook.io/wiki/fundamentals/bring-your-own-provisioner) (recommended).
 
-Whichever [Packer](https://www.packer.io/) Provisioner you select, Ax installs your tools of choice into a "base image". Then using that image, you can deploy fleets of fresh instances (cloud hosted compute devices). Using the [Default](https://github.com/attacksurge/ax/blob/master/images/provisioners/default.json) image, you can connect and immediately access a wide range of tools useful for both Bug Hunting and Penetration Testing.
+Whichever [Packer](https://www.packer.io/) Provisioner you select, Ax installs your tools of choice into a "base image". Then using that image, you can deploy fleets of fresh instances (cloud hosted compute devices). When building an image using the [Default](https://github.com/attacksurge/ax/blob/master/images/pkr.hcl/provisioners/default.pkr.hcl) Provisioner, you can connect and immediately access a wide range of tools useful for both Bug Hunting and Penetration Testing.
 
 Various [Ax Utility Scripts](https://ax-framework.gitbook.io/wiki/fundamentals/ax-utility-scripts) streamline tasks like spinning up and deleting fleets of instances, parallel command execution and file transfers, instance and image backups, and many other operations.
 
