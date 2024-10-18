@@ -352,7 +352,7 @@ fi
 #
 echo -e "${Red}Now running ${Color_Off}[ ${BBlue}axiom-build $provisioner ${Color_Off}]${Red}"
 echo "The Packer Build will take about 25 minutes, spin up a temporary instance, then take a snapshot and use it for our future instances"
-echo -e "Starting Packer Build in a 5 seconds... Ctrl+C to quit, remember, you can just run ${Color_Off}[ ${BBlue}axiom-build --run ${Color_Off}] ${Red}at any time${Color_Off}"
+echo -e "Starting Packer Build in 5 seconds... Ctrl+C to quit, remember, you can just run ${Color_Off}[ ${BBlue}axiom-build --run ${Color_Off}] ${Red}at any time${Color_Off}"
 sleep 8
 
 #############################################################################################################
