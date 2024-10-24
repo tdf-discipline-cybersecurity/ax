@@ -102,6 +102,7 @@ done
 
 aws configure set aws_access_key_id "$ACCESS_KEY"
 aws configure set aws_secret_access_key "$SECRET_KEY"
+aws configure set output json
 
 default_region="us-west-2"
 echo -e -n "${Green}Please enter your default region (you can always change this later with axiom-region select \$region): Default '$default_region', press enter \n>> ${Color_Off}"
