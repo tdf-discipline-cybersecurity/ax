@@ -32,24 +32,42 @@ esac
 
 check_and_create_firewall_rule() {
     firewall_rule_name="axiom-ssh"
+    expected_target_tag="axiom-ssh"
 
+    # Check if the firewall rule exists
     rule_exists=$(gcloud compute firewall-rules list --filter="name=$firewall_rule_name" --format="value(name)")
 
     if [[ -z "$rule_exists" ]]; then
         echo "Firewall rule '$firewall_rule_name' does not exist. Creating it now..."
 
-        # Create the firewall rule to allow SSH (port 22)
+        # Create the firewall rule to allow SSH (port 2266)
         gcloud compute firewall-rules create "$firewall_rule_name" \
             --allow tcp:2266 \
             --direction INGRESS \
             --priority 1000 \
-            --target-tags allow-ssh \
+            --target-tags "$expected_target_tag" \
             --description "Allow SSH traffic" \
             --quiet
 
         echo "Firewall rule '$firewall_rule_name' created successfully."
     else
         echo "Firewall rule '$firewall_rule_name' already exists."
+
+        # Check the current target tags
+        current_target_tag=$(gcloud compute firewall-rules describe "$firewall_rule_name" --format="value(targetTags)")
+
+        if [[ "$current_target_tag" != *"$expected_target_tag"* ]]; then
+            echo "Target tag is not set to '$expected_target_tag'. Updating the firewall rule..."
+
+            # Update the firewall rule to set the correct target tag
+            gcloud compute firewall-rules update "$firewall_rule_name" \
+                --target-tags="$expected_target_tag" \
+                --quiet
+
+            echo "Firewall rule '$firewall_rule_name' updated with the correct target tag '$expected_target_tag'."
+        else
+            echo "Firewall rule '$firewall_rule_name' already has the correct target tag '$expected_target_tag'."
+        fi
     fi
 }
 
