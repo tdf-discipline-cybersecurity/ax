@@ -240,21 +240,19 @@ clean_up() {
      # Merge the downloaded results
      merge_output
 
+
      # If --download is used, download a user provided file from tmp scan working dir
      if [[ "$download_user_arg" != "false" ]]; then
-      if [ -e "$(basename $download_file_path)" ]; then
-       new_download_file_path=$download_file_path+$RANDOM
-       echo -e "${BGreen}local file ${Color_Off}[ ${BBlue}$(basename $download_file_path) ${Color_Off} ] ${BGreen}already exists downloading arbitrary remote file ${BGreen}to${Color_Off}: ${Color_Off}[ ${BBlue}$(basename $new_download_file_path)${Color_Off} ]"
-       mkdir -p $(basename $new_download_file_path)
-       $interlace_cmd_nobar -c "$AXIOM_PATH/interact/axiom-scp _target_:$download_file_path $(basename $new_download_file_path)/_target_ --cache -F=$sshconfig >/dev/null 2>&1" | grep -v "Gen"
-       echo -e "${Green}arbitrary remote file downloaded successfully!${Color_Off}"
-      else
-       echo -e "${BGreen}downloading arbitrary remote file ${BGreen}to${Color_Off}: ${Color_Off}[ ${BBlue}$(basename $download_file_path)${Color_Off} ]"
-       mkdir -p $(basename $download_file_path)
-       $interlace_cmd_nobar -c "$AXIOM_PATH/interact/axiom-scp _target_:$download_file_path $(basename $download_file_path)/_target_ --cache -F=$sshconfig >/dev/null 2>&1" | grep -v "Gen"
-       echo -e "${Green}arbitrary remote file downloaded successfully!${Color_Off}"
+      if [ -e "$outfile-download" ]; then
+       backup_timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+       echo -e "${BYellow}File or folder already exists at ${Color_Off}[ ${BBlue}$outfile-download ${Color_Off}]${BYellow} backing up to ${Color_Off}[ ${BBlue}$outfile-download-$backup_timestamp ${Color_Off}]${BYellow} just in case.${Color_Off}"
+       mv "$outfile-download" "$outfile-download-$backup_timestamp"
       fi
-    fi
+       mkdir -p "$outfile-download"
+       echo -e "${BGreen}downloading arbitrary remote file ${BGreen}to${Color_Off}: ${Color_Off}[ ${BBlue}$outfile-download${Color_Off} ]"
+       $interlace_cmd_nobar -c "$AXIOM_PATH/interact/axiom-scp _target_:/home/op/scan/$uid/$download_file_path $outfile-download/_target_ --cache -F=$sshconfig >/dev/null 2>&1" | grep -v "Gen"
+       echo -e "${Green}arbitrary remote file downloaded successfully!${Color_Off}"
+     fi
 
     # If delete logs is set to true, execute delete_logs function. if remove_all_logs is set to true, even remove the output folder in log file
     if [[ "$keeplogs" == "false" ]]; then
@@ -735,7 +733,7 @@ do
             pass+=($i)
             pass+=($n)
         fi
-        if [[ "$arg" == "-wL" ]] || [[ "$arg" == "--wordlist-local" ]]; then
+        if [[ "$arg" == "-wL" ]] || [[ "$arg" == "--local-wordlist" ]]; then
             n=$((i+1))
             local_wordlist=$(echo ${!n})
             set=true
