@@ -239,23 +239,22 @@ fi
 ###########################################################################################################
 # Function called by trap
 #
-other_commands() {
+clean_up() {
     tput setaf 1
-    printf "\rExiting..."
-    echo "Cleaning up created resources..."
-    kill -9  "$PID"
-    "$AXIOM_PATH"/interact/axiom-rm "$gen_name" -f
-        echo "Thank you for using ax :) "
+    echo ''
+    echo -e "${BRed}Exiting..."
+    echo -e "${Color_Off}You may need to delete the instance if it was created"
+    echo -e "run [ ${BGreen}ax ls ${Color_Off}] to list all instance and [ ${BGreen}ax rm $name ${Color_Off}] to delete it"
+    echo "Thank you for using ax :) "
         exit
 }
-
-trap 'other_commands' SIGINT
 
 ###########################################################################################################
 # quiet flag
 #
 if [ $quiet == "true" ]
 then
+    trap 'clean_up' SIGINT
     create_instance "$name" "$image_id" "$size" "$region" &
     PID="$!"
     waitabit "$PID"
@@ -277,7 +276,9 @@ echo -e "${BWhite}INITIALIZING IN 5 SECONDS, CTRL+C to quit... ${Color_Off}"
 sleep 5
 region_transfer
 mkdir -p "$AXIOM_PATH/tmp/"
+trap 'clean_up' SIGINT
 create_instance "$name" "$image_id" "$size" "$region" &
+
 PID="$!"
 "$NOTIFY_CMD" "Axiom Info" "Initializing '$name'..."
 

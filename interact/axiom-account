@@ -539,7 +539,7 @@ if [[ "$provider" == "scaleway" ]]; then
             else
                 echo -e "${BGreen}Checking for Homebrew... already installed.${Color_Off}"
             fi
-                echo -e "${BGreen}Installing Scaleway CLI (hcloud)...${Color_Off}"
+                echo -e "${BGreen}Installing Scaleway CLI (scw)...${Color_Off}"
                 brew install scw
 
         # Handle Linux installation/update
