@@ -4,7 +4,6 @@ AXIOM_PATH="$HOME/.axiom"
 resource_group="$(jq -r '.resource_group' "$AXIOM_PATH"/axiom.json)"
 subscription_id="$(jq -r '.subscription_id' "$AXIOM_PATH"/axiom.json)"
 
-
 ###################################################################
 #  Create Instance is likely the most important provider function :)
 #  needed for init and fleet
@@ -45,10 +44,10 @@ delete_instance() {
                 az resource delete --ids $(az network public-ip list --query '[?ipAddress==`null`].[id]' -otsv | grep $name) >/dev/null 2>&1
                 az resource delete --ids $(az network nsg list --query "[?(subnets==null) && (networkInterfaces==null)].id" -o tsv | grep $name) >/dev/null 2>&1
                 az resource delete --ids $(az network nic list --query '[?virtualMachine==`null` && privateEndpoint==`null`].[id]' -o tsv | grep $name) >/dev/null 2>&1
-    
+
     else
         # az vm delete --name "$name" --resource-group $resource_group
-                echo -e -n "  Are you sure you want to delete $name (y/N) - default NO: "
+                echo -e -n "Are you sure you want to delete $name (y/N) - default NO: "
                 read ans
                 if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
                         echo -e "${Red}...deleting $name...${Color_Off}"
@@ -56,7 +55,6 @@ delete_instance() {
                 fi
     fi
 }
-
 
 ###################################################################
 # Instances functions
@@ -253,4 +251,67 @@ region="$(jq -r '.region' "$AXIOM_PATH"/axiom.json)"
 # Format the output with correct column alignment
 awk -F'\t' '{printf "%-20s %-10s %-10s\n", $1, $2, $3}'
 
+}
+
+###################################################################
+# experimental v2 function
+# deletes multiple instances at the same time by name, if the second argument is set to "true", will not prompt
+# used by axiom-rm --multi
+#
+delete_instances() {
+    names="$1"
+    force="$2"
+    name_array=($names)
+    tag_query=""
+
+    # Create a tag query for Azure CLI
+    for name in "${name_array[@]}"; do
+        if [ -n "$tag_query" ]; then
+            tag_query+=" || "
+        fi
+        tag_query+="tags.$name == 'True'"
+    done
+
+    # Retrieve all resources associated with the instances in one Azure CLI call
+    all_resource_ids=$(az resource list --query "[?${tag_query}].id" -o tsv)
+
+    if [ -z "$all_resource_ids" ]; then
+        echo "No resources found for the given instance names."
+        return 1
+    fi
+
+    # Force delete case
+    if [ "$force" == "true" ]; then
+        confirmed_resource_ids="$all_resource_ids"
+    else
+        # Non-force delete case: prompt user for each instance
+        confirmed_names=()
+        confirmed_resource_ids=""
+
+        for name in "${name_array[@]}"; do
+            echo -e -n "Are you sure you want to delete all resources associated with instance '$name'? (y/N) - default NO: "
+            read -r ans
+            if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
+                confirmed_names+=("$name")
+                # Append resource IDs related to this instance to the list
+                for resource_id in $all_resource_ids; do
+                    if [[ "$resource_id" == *"$name"* ]]; then
+                        confirmed_resource_ids+="$resource_id "
+                    fi
+                done
+            fi
+        done
+    fi
+
+    # Delete confirmed resources
+    if [ -n "$confirmed_resource_ids" ]; then
+        if [ "$force" == "true" ]; then
+            echo -e "${Red}Deleting: ${name_array[*]}${Color_Off}"
+        else
+            echo -e "${Red}Deleting: ${confirmed_names[*]}${Color_Off}"
+        fi
+        az resource delete --ids $confirmed_resource_ids --no-wait
+    else
+        echo "No resources were selected for deletion."
+    fi
 }

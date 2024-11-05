@@ -203,11 +203,11 @@ create_snapshot() {
 # Get data about regions
 # Used by axiom-regions
 list_regions() {
-    gcloud compute regions list
+    gcloud compute zones list
 }
 
 regions() {
-    gcloud compute regions list --format=json | jq -r '.[].name'
+    gcloud compute zones list --format=json
 }
 
 ###################################################################
@@ -239,5 +239,98 @@ instance_disk() {
 # Used by ax sizes
 #
 sizes_list() {
-    gcloud compute machine-types list --format="table(name, zone, guestCpus, memoryMb)"
+    region="$(jq -r '.region' "$AXIOM_PATH"/axiom.json)"
+    gcloud compute machine-types list --filter="zone:($region)" --format="table(name, zone, guestCpus, memoryMb)"
+}
+
+###################################################################
+# experimental v2 function
+# deletes multiple instances at the same time by name, if the second argument is set to "true", will not prompt
+# used by axiom-rm --multi
+#
+delete_instances() {
+    names="$1"
+    force="$2"
+
+    # Convert names to an array for processing
+    name_array=($names)
+
+    # Make a single call to get all GCP instances with their zones
+    all_instances=$(gcloud compute instances list --format="json")
+
+    # Declare arrays to store instance names and zones for deletion
+    all_instance_names=()
+    all_instance_zones=()
+
+    # Iterate over all instances and filter by the provided names
+    for name in "${name_array[@]}"; do
+        instance_info=$(echo "$all_instances" | jq -r --arg name "$name" '.[] | select(.name | test($name))')
+
+        if [ -n "$instance_info" ]; then
+            instance_name=$(echo "$instance_info" | jq -r '.name')
+            instance_zone=$(echo "$instance_info" | jq -r '.zone' | awk -F/ '{print $NF}')
+
+            all_instance_names+=("$instance_name")
+            all_instance_zones+=("$instance_zone")
+        else
+            echo -e "${BRed}Warning: No GCP instance found for the name '$name'.${Color_Off}"
+        fi
+    done
+
+    # Force deletion: Delete all instances without prompting
+    if [ "$force" == "true" ]; then
+        echo -e "${Red}Deleting: ${all_instance_names[@]}...${Color_Off}"
+        # Delete instances in bulk by zone
+        for zone in $(printf "%s\n" "${all_instance_zones[@]}" | sort -u); do
+            instances_to_delete=()
+            for i in "${!all_instance_names[@]}"; do
+                if [ "${all_instance_zones[$i]}" == "$zone" ]; then
+                    instances_to_delete+=("${all_instance_names[$i]}")
+                fi
+            done
+            if [ ${#instances_to_delete[@]} -gt 0 ]; then
+                gcloud compute instances delete "${instances_to_delete[@]}" --zone="$zone" --quiet >/dev/null 2>&1 &
+            fi
+        done
+
+    # Prompt for each instance if force is not true
+    else
+        # Collect instances for deletion after user confirmation
+        confirmed_instance_names=()
+        confirmed_instance_zones=()
+
+        for i in "${!all_instance_names[@]}"; do
+            instance_name="${all_instance_names[$i]}"
+            instance_zone="${all_instance_zones[$i]}"
+
+            echo -e -n "Are you sure you want to delete $instance_name (y/N) - default NO: "
+            read ans
+            if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
+                confirmed_instance_names+=("$instance_name")
+                confirmed_instance_zones+=("$instance_zone")
+            else
+                echo "Deletion aborted for $instance_name."
+            fi
+        done
+
+        # Delete confirmed instances in bulk by zone
+        if [ ${#confirmed_instance_names[@]} -gt 0 ]; then
+            echo -e "${Red}Deleting: ${confirmed_instance_names[@]}...${Color_Off}"
+            for zone in $(printf "%s\n" "${confirmed_instance_zones[@]}" | sort -u); do
+                instances_to_delete=()
+                for i in "${!confirmed_instance_names[@]}"; do
+                    if [ "${confirmed_instance_zones[$i]}" == "$zone" ]; then
+                        instances_to_delete+=("${confirmed_instance_names[$i]}")
+                    fi
+                done
+                if [ ${#instances_to_delete[@]} -gt 0 ]; then
+                    gcloud compute instances delete "${instances_to_delete[@]}" --zone="$zone" --quiet &
+                fi
+            done
+        else
+            echo -e "${BRed}No instances were confirmed for deletion.${Color_Off}"
+        fi
+    fi
+    # wait until all background jobs are finished deleting
+    wait
 }

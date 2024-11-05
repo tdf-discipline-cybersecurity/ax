@@ -34,6 +34,7 @@ function formatSeconds (){
 
 ###########################################################################################################
 # List path of all axiom modules and their commands axiom-scan --list
+#
 function list_modules() {
     echo -e "${BGreen}Printing available modules from ~/.axiom/modules${Color_Off}"
 
