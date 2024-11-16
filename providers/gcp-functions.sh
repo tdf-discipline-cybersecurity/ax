@@ -129,7 +129,9 @@ generate_sshconfig() {
 }
 
 ###################################################################
-# Query instances
+# takes any number of arguments, each argument should be an instance or a glob, say 'omnom*', returns a sorted list of instances based on query
+# $ query_instances 'john*' marin39
+# Resp >>  john01 john02 john03 john04 nmarin39
 # Used by axiom-ls axiom-select axiom-fleet axiom-rm axiom-power
 #
 query_instances() {
@@ -137,29 +139,28 @@ query_instances() {
     selected=""
 
     for var in "$@"; do
-        if [[ "$var" =~ "*" ]]; then
+        if [[ "$var" == "\\*" ]]; then
+            var="*"
+        fi
+
+        if [[ "$var" == *"*"* ]]; then
             var=$(echo "$var" | sed 's/*/.*/g')
-            selected="$selected $(echo $instances_data | jq -r '.[].name' | grep "$var")"
+            matches=$(echo "$instances_data" | jq -r '.[].name' | grep -E "^${var}$")
         else
-            if [[ $query ]]; then
-                query="$query\|$var"
-            else
-                query="$var"
-            fi
+            matches=$(echo "$instances_data" | jq -r '.[].name' | grep -w -E "^${var}$")
+        fi
+
+        if [[ -n "$matches" ]]; then
+            selected="$selected $matches"
         fi
     done
 
-    if [[ "$query" ]]; then
-        selected="$selected $(echo $instances_data | jq -r '.[].name' | grep -w "$query")"
-    else
-        if [[ ! "$selected" ]]; then
-            echo -e "${Red}No instance supplied, use * if you want to delete all instances...${Color_Off}"
-            exit
-        fi
+    if [[ -z "$selected" ]]; then
+        return 1
     fi
 
-    selected=$(echo "$selected" | tr ' ' '\n' | sort -u)
-    echo -n $selected
+    selected=$(echo "$selected" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    echo -n "${selected## }"
 }
 
 ###################################################################

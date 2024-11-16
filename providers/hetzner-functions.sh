@@ -166,37 +166,32 @@ fi
 # used by axiom-ls axiom-select axiom-fleet axiom-rm axiom-power
 #
 query_instances() {
-        droplets="$(instances)"
-        selected=""
+    droplets="$(instances)"
+    selected=""
 
-        for var in "$@"; do
-                if [[ "$var" =~ "*" ]]
-                then
-                        var=$(echo "$var" | sed 's/*/.*/g')
-                        selected="$selected $(echo $droplets | jq -r '.[].name' | grep "$var")"
-                else
-                        if [[ $query ]];
-                        then
-                                query="$query\|$var"
-                        else
-                                query="$var"
-                        fi
-                fi
-        done
-
-        if [[ "$query" ]]
-        then
-                selected="$selected $(echo $droplets | jq -r '.[].name' | grep -w "$query")"
-        else
-                if [[ ! "$selected" ]]
-                then
-                        echo -e "${Red}No instance supplied, use * if you want to delete all instances...${Color_Off}"
-                        exit
-                fi
+    for var in "$@"; do
+        if [[ "$var" == "\\*" ]]; then
+            var="*"
         fi
 
-        selected=$(echo "$selected" | tr ' ' '\n' | sort -u)
-        echo -n $selected
+        if [[ "$var" == *"*"* ]]; then
+            var=$(echo "$var" | sed 's/\*/.*/g')
+            matches=$(echo "$droplets" | jq -r '.[].name' | grep -E "^${var}$")
+        else
+            matches=$(echo "$droplets" | jq -r '.[].name' | grep -w -E "^${var}$")
+        fi
+
+        if [[ -n "$matches" ]]; then
+            selected="$selected $matches"
+        fi
+    done
+
+    if [[ -z "$selected" ]]; then
+        return 1  # Exit with non-zero code but no output
+    fi
+
+    selected=$(echo "$selected" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    echo -n "${selected##}"
 }
 
 ###################################################################
