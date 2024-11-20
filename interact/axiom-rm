@@ -3,12 +3,11 @@
 AXIOM_PATH="$HOME/.axiom"
 source "$AXIOM_PATH/interact/includes/vars.sh"
 source "$AXIOM_PATH/interact/includes/functions.sh"
-output="${Red}No instance supplied, use '\*' to delete all instances on the account, use -f to force delete and avoid confirmation prompts${Color_Off}" 
+output="${Red}No instance supplied, use '\*' to delete all instances on the account, use -f to force delete and avoid confirmation prompts${Color_Off}"
 
-if [ -z "$1" ]
-then
-	echo -e "$output"
-	exit
+if [ -z "$1" ]; then
+    echo -e "$output"
+    exit
 fi
 
 force="false"
@@ -16,38 +15,32 @@ query=""
 instance_names=""
 multi=false
 
-# Iterate over all passed arguments
 for var in "$@"; do
     case "$var" in
-        -f)
+        -f|--force)
             force=true
             ;;
         --multi)
             multi=true
             ;;
         *)
-            query+="$var "
+            query="$query '$var'"
             ;;
     esac
 done
 
-# Trim any trailing spaces from the query variable
-#query=$(echo "$query" | xargs)
+instance_names=$(eval query_instances "$query")
 
-instance_names=$(query_instances $query)
-
-if [[ "$instance_names" ]] ; then
-	if [ "$multi" == "true" ]; then
-		delete_instances "$instance_names" "$force"
-	else
-		for instance in $instance_names
-		do
-	    		echo -e "${Red}Deleting '$instance'...${Color_Off}"
-			delete_instance "$instance" "$force"
-		done
-	fi
+if [[ "$instance_names" ]]; then
+    if [ "$multi" == "true" ]; then
+        delete_instances "$instance_names" "$force"
+    else
+        for instance in $instance_names; do
+            echo -e "${Red}Deleting '$instance'...${Color_Off}"
+            delete_instance "$instance" "$force"
+        done
+    fi
 else
-        >&2 echo -e "$output ${Color_Off}"
-       exit
+    >&2 echo -e "$output ${Color_Off}"
+    exit
 fi
-

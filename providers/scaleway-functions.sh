@@ -119,23 +119,38 @@ generate_sshconfig() {
 }
 
 ###################################################################
-# Query instances based on a name pattern
-# Used by axiom-ls, axiom-select, axiom-fleet, axiom-rm, and axiom-power
+# takes any number of arguments, each argument should be an instance or a glob, say 'omnom*', returns a sorted list of instances based on query
+# $ query_instances 'john*' marin39
+# Resp >>  john01 john02 john03 john04 nmarin39
+# used by axiom-ls axiom-select axiom-fleet axiom-rm axiom-power
+#
 query_instances() {
     droplets="$(instances)"
     selected=""
 
     for var in "$@"; do
-        if [[ "$var" =~ "*" ]]; then
-            var=$(echo "$var" | sed 's/*/.*/g')
-            selected="$selected $(echo $droplets | jq -r '.[].name' | grep "$var")"
+        if [[ "$var" == "\\*" ]]; then
+            var="*"
+        fi
+
+        if [[ "$var" == *"*"* ]]; then
+            var=$(echo "$var" | sed 's/\*/.*/g')
+            matches=$(echo "$droplets" | jq -r '.[].name' | grep -E "^${var}$")
         else
-            selected="$selected $(echo $droplets | jq -r '.[].name' | grep -w "$var")"
+            matches=$(echo "$droplets" | jq -r '.[].name' | grep -w -E "^${var}$")
+        fi
+
+        if [[ -n "$matches" ]]; then
+            selected="$selected $matches"
         fi
     done
 
-    selected=$(echo "$selected" | tr ' ' '\n' | sort -u)
-    echo -n $selected
+    if [[ -z "$selected" ]]; then
+        return 1  # Exit with non-zero code but no output
+    fi
+
+    selected=$(echo "$selected" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    echo -n "${selected}" | xargs
 }
 
 ###################################################################

@@ -76,17 +76,17 @@ instance_pretty() {
 
     header="Instance,Primary Ip,Backend Ip,DC,Memory,CPU,Status,Hours used,\$/H,\$/M"
     fields=".[] | [.hostname, .primaryIpAddress, .primaryBackendIpAddress, .datacenter.name, .maxMemory, .maxCpu, .powerState.name, .billingItem.hoursUsed, .billingItem.orderItem.hourlyRecurringFee, .billingItem.orderItem.recurringAfterTaxAmount ] | @csv"
-    totals="_,_,_,_,Instances,$droplets,Total Hours,$totalhours_used,\$$totalhourly_Price/hr,\$$totalmonthly_Price/mo" 
+    totals="_,_,_,_,Instances,$droplets,Total Hours,$totalhours_used,\$$totalhourly_Price/hr,\$$totalmonthly_Price/mo"
 
-    #data is sorted by default by field name    
+    #data is sorted by default by field name
     data=$(echo $data | jq  -r "$fields"| sed 's/^,/0,/; :a;s/,,/,0,/g;ta')
-    (echo "$header" && echo "$data" && echo $totals) | sed 's/"//g' | column -t -s, 
+    (echo "$header" && echo "$data" && echo $totals) | sed 's/"//g' | column -t -s,
 }
 
 ###################################################################
 #  Dynamically generates axiom's SSH config based on your cloud inventory
 #  Choose between generating the sshconfig using private IP details, public IP details or optionally lock
-#  Lock will never generate an SSH config and only used the cached config ~/.axiom/.sshconfig 
+#  Lock will never generate an SSH config and only used the cached config ~/.axiom/.sshconfig
 #  Used for axiom-exec axiom-fleet axiom-ssh
 #
 generate_sshconfig() {
@@ -94,33 +94,32 @@ generate_sshconfig() {
 	current=$(readlink -f "$AXIOM_PATH/axiom.json" | rev | cut -d / -f 1 | rev | cut -d . -f 1)> /dev/null 2>&1
 	droplets="$(instances)"
         sshnew="$AXIOM_PATH/.sshconfig.new$RANDOM"
-	echo -n "" > $sshnew 
-	echo -e "\tServerAliveInterval 60\n" >> $sshnew 
+	echo -n "" > $sshnew
+	echo -e "\tServerAliveInterval 60\n" >> $sshnew
 	sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
-	echo -e "IdentityFile $HOME/.ssh/$sshkey" >> $sshnew 
+	echo -e "IdentityFile $HOME/.ssh/$sshkey" >> $sshnew
 	generate_sshconfig="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.generate_sshconfig')"
 
   if [[ "$generate_sshconfig" == "private" ]]; then
   echo -e "Warning your SSH config generation toggle is set to 'Private' for account : $(echo $current)."
   echo -e "axiom will always attempt to SSH into the instances from their private backend network interface. To revert run: axiom-ssh --just-generate"
   for name in $(echo "$droplets" | jq -r '.[].hostname')
-  do 
+  do
   ip=$(echo "$droplets" | jq -r ".[] | select(.hostname==\"$name\") | .primaryBackendIpAddress")
-  echo -e "Host $name\n\tHostName $ip\n\tUser op\n\tPort 2266\n" >> $sshnew 
+  echo -e "Host $name\n\tHostName $ip\n\tUser op\n\tPort 2266\n" >> $sshnew
   done
   mv $sshnew  $AXIOM_PATH/.sshconfig
 
 	elif [[ "$generate_sshconfig" == "cache" ]]; then
 	echo -e "Warning your SSH config generation toggle is set to 'Cache' for account : $(echo $current)."
 	echo -e "axiom will never attempt to regenerate the SSH config. To revert run: axiom-ssh --just-generate"
-	
   # If anything but "private" or "cache" is parsed from the generate_sshconfig in account.json, generate public IPs only
   #
-	else 
+	else
   for name in $(echo "$droplets" | jq -r '.[].hostname')
-	do 
+	do
 	ip=$(echo "$droplets" | jq -r ".[] | select(.hostname==\"$name\") | .primaryIpAddress")
-	echo -e "Host $name\n\tHostName $ip\n\tUser op\n\tPort 2266\n" >> $sshnew 
+	echo -e "Host $name\n\tHostName $ip\n\tUser op\n\tPort 2266\n" >> $sshnew
 	done
 	mv $sshnew  $AXIOM_PATH/.sshconfig
 fi
@@ -134,37 +133,32 @@ fi
 # used by axiom-ls axiom-select axiom-fleet axiom-rm axiom-power
 #
 query_instances() {
-	droplets="$(instances)"
-	selected=""
+    droplets="$(instances)"
+    selected=""
 
-	for var in "$@"; do
-		if [[ "$var" =~ "*" ]]
-		then
-			var=$(echo "$var" | sed 's/*/.*/g')
-			selected="$selected $(echo $droplets | jq -r '.[].hostname' | grep "$var")"
-		else
-			if [[ $query ]];
-			then
-				query="$query\|$var"
-			else
-				query="$var"
-			fi
-		fi
-	done
+    for var in "$@"; do
+        if [[ "$var" == "\\*" ]]; then
+            var="*"
+        fi
 
-	if [[ "$query" ]]
-	then
-		selected="$selected $(echo $droplets | jq -r '.[].hostname' | grep -w "$query")"
-	else
-		if [[ ! "$selected" ]]
-		then
-			echo -e "${Red}No instance supplied, use * if you want to delete all instances...${Color_Off}"
-			exit
-		fi
-	fi
+        if [[ "$var" == *"*"* ]]; then
+            var=$(echo "$var" | sed 's/\*/.*/g')
+            matches=$(echo "$droplets" | jq -r '.[].hostname' | grep -E "^${var}$")
+        else
+            matches=$(echo "$droplets" | jq -r '.[].hostname' | grep -w -E "^${var}$")
+        fi
 
-	selected=$(echo "$selected" | tr ' ' '\n' | sort -u)
-	echo -n $selected
+        if [[ -n "$matches" ]]; then
+            selected="$selected $matches"
+        fi
+    done
+
+    if [[ -z "$selected" ]]; then
+        return 1  # Exit with non-zero code but no output
+    fi
+
+    selected=$(echo "$selected" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    echo -n "${selected}" | xargs
 }
 
 ###################################################################

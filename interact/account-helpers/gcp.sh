@@ -237,11 +237,7 @@ function gcp_setup() {
     fi
     echo -e "${BGreen}Available GCP machine types for zone: $zone${Color_Off}"
 
-    # look for default machine-type
-    default_size_search=$(gcloud compute machine-types list --zones $zone \
-     --filter="guestCpus=1 AND (memoryMb=3840 OR memoryMb=4096)" \
-     --format="value(name)" | head -n 1)
-
+    default_size_search=n1-standard-1
     # List available machine types in the selected zone
     gcloud compute machine-types list --zones $zone --format="table(name, description)" | tee /tmp/gcp-machine-types.txt
 
