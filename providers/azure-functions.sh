@@ -158,7 +158,7 @@ query_instances() {
 
     # Trim whitespace, sort, and remove duplicates
     selected=$(echo "$selected" | tr ' ' '\n' | sort -u | tr '\n' ' ')
-    echo -n "${selected## }"
+    echo -n "${selected}" | xargs
 }
 
 ###################################################################

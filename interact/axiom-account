@@ -25,7 +25,7 @@ case $BASEOS in
 *) ;;
 esac
 
-accounts=$(ls -A1 "$AXIOM_PATH/accounts/" | grep "json" | sed 's/\.json//g')
+accounts=$(ls -A1 "$AXIOM_PATH/accounts/" | grep '\.json$' | sed 's/\.json//g')
 if [ -f ~/.axiom/axiom.json ] ; then
 	current=$(readlink -f "$AXIOM_PATH/axiom.json" | rev | cut -d / -f 1 | rev | cut -d . -f 1)> /dev/null 2>&1
 fi
