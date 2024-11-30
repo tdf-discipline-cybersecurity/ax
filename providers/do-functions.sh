@@ -13,6 +13,15 @@ create_instance() {
         region="$4"
         user_data="$5"
 
+        # import pub ssh key or get ssh key fingerprint for DO to avoid emails
+        sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
+        sshkey_fingerprint="$(ssh-keygen -l -E md5 -f ~/.ssh/$sshkey.pub | awk '{print $2}' | cut -d : -f 2-)"
+        keyid=$(doctl compute ssh-key import $sshkey \
+         --public-key-file ~/.ssh/$sshkey.pub \
+         --format ID \
+         --no-header 2>/dev/null) ||
+        keyid=$(doctl compute ssh-key list | grep "$sshkey_fingerprint" | awk '{ print $1 }')
+
         doctl compute droplet create "$name" --image "$image_id" --size "$size" --region "$region" --enable-ipv6 --ssh-keys "$keyid" --user-data "$user_data" >/dev/null
         sleep 260
 }
