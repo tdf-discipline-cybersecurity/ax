@@ -97,7 +97,7 @@ function usage() {
         echo -e "  ${Green}axiom-sizes default${Color_Off} # Restore instance size to the default"
         echo -e "${BWhite}Usage:${Color_Off}"
         echo -e "  ls (optional)"
-        echo -e "    List all available instance sizes '${BGreen}axiom-images ls${Color_Off}'"
+        echo -e "    List all available instance sizes '${BGreen}axiom-sizes ls${Color_Off}'"
         echo -e "  get (optional)"
         echo -e "    Print information about currently used instance size, equivalent to (cat ~/.axiom/axiom.json) '${BGreen}axiom-sizes get${Color_Off}'"
         echo -e "  select <required insntance size name>"

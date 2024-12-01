@@ -103,7 +103,7 @@ function usage() {
 }
 
 ###########################################################################################################
-# Parse command line arguments 
+# Parse command line arguments
 #
 if [ $# -eq 0 ]; then
     usage
@@ -196,8 +196,8 @@ then
 else
     image_id="$(get_image_id "$image")"
     if [ -z "$image_id" ]; then
-        echo -e "${BRed}ERROR: image ${Color_Off}[ ${BBlue}$image ${Color_Off}]${BRed} not found. you may need to run ${Color_Off}[ ${BBlue}axiom-build --setup ${Color_Off}]${BRed} to build a new image."
-        echo -e "${BRed}if you've already built an image, list all images with ${Color_Off}[ ${BBlue}axiom-images ls ${Color_Off}]${BRed} and select it with ${Color_Off}[ ${BBlue}axiom-images select \$image_name${Color_Off}]"
+        echo -e "${BRed}ERROR: imageid ${Color_Off}[ ${BBlue}$image ${Color_Off}]${BRed} not found in ${Color_Off}[ ${BBlue}~/.axiom/axiom.json ${Color_Off}]${BRed}. you may need to run ${Color_Off}[ ${BBlue}axiom-build --setup ${Color_Off}]${BRed} to build a new image."
+        echo -e "${BRed}if you've already built an image, list all images with ${Color_Off}[ ${BBlue}axiom-images ls ${Color_Off}]${BRed} and select it with ${Color_Off}[ ${BBlue}axiom-images select axiom-\$provisioner-\$timestamp ${Color_Off}]"
         echo -e "${BRed}exiting...${Color_Off}"
         exit 1
     fi
@@ -207,8 +207,7 @@ fi
 # Check if ssh key is specified in axiom.json
 #
 if [ "$sshkey" == "" ] || [ "$sshkey" == "null" ]; then
-echo -e  "${BYellow}WARNING: sshkey not found in ~/.axiom/axiom.json. Adding ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}key as a backup."
-echo -e  "${BYellow}If ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}was not used to build the initial image ${Color_Off}[ ${BBlue}$image_id ${Color_Off}]${BYellow}, you may have to manually edit ~/.axiom/axiom.json to set the correct sshkey${Color_Off}"
+echo -e  "${BYellow}WARNING: sshkey not found in ${Color_Off}[ ${BBlue}~/.axiom/axiom.json ${Color_Off}]${BYellow}. adding ${Color_Off}[ ${BBlue}axiom_rsa ${Color_Off}] ${BYellow}key as a backup."
 account_path=$(ls -la "$AXIOM_PATH"/axiom.json | rev | cut -d " " -f 1 | rev)
 sshkey=axiom_rsa
  if [ -f ~/.ssh/axiom_rsa ] ; then
@@ -229,7 +228,6 @@ if [[ "$cycle_regions" == "false" ]]; then
 # Chance to cancel initialization of fleet
 #
 echo -e "${BWhite}Initializing new fleet '${BGreen}$gen_name${BWhite}' with '${BGreen}$amount${BWhite}' instances using image '${BGreen}$image${BWhite}' in region '${BGreen}$region${BWhite}'${Color_Off}...${Color_Off}"
-echo -e "${BWhite}Injecting SSH pub key '${BGreen}$HOME/.ssh/$sshkey.pub${Color_Off}${BWhite}' into new fleet"
 echo -e "${BWhite}INITIALIZING IN 5 SECONDS, CTRL+C to quit... ${Color_Off}"
 sleep 5
 

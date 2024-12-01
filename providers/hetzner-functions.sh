@@ -16,8 +16,23 @@ create_instance() {
     user_data_file=$(mktemp)
     echo "$user_data" > "$user_data_file"
 
-    hcloud server create --type "$size_slug" --location "$region" --image "$image_id" \
-        --name "$name" --poll-interval 250s --quiet --without-ipv6 --user-data-from-file "$user_data_file" &
+    # import pub ssh key or get ssh key fingerprint for Hetzner to avoid emails
+    sshkey="$(jq -r '.sshkey' "$AXIOM_PATH/axiom.json")"
+    pubkey_path="$HOME/.ssh/$sshkey.pub"
+    sshkey_fingerprint="$(ssh-keygen -l -E md5 -f "$pubkey_path" | awk '{print $2}' | cut -d : -f 2-)"
+    keyid=$(hcloud ssh-key list | grep "$sshkey_fingerprint" | awk '{ print $1 }')
+    if [[ -z "$keyid" ]]; then
+        keyid=$(hcloud ssh-key create --name "$sshkey" --public-key-from-file "$pubkey_path" 2>&1)
+        # If there was a uniqueness error create a key with random name and use that
+        if [[ "$keyid" == *"uniqueness_error"* ]]; then
+            sshkey="$sshkey+$RANDOM"
+            keyid=$(hcloud ssh-key create --name "$sshkey" --public-key-from-file "$pubkey_path" 2>&1)
+            return 1
+        fi
+    fi
+
+    hcloud server create --type "$size_slug" --location "$region" --image "$image_id" --name "$name" \
+     --ssh-key "$keyid" --poll-interval 250s --quiet --without-ipv6 --user-data-from-file "$user_data_file" &
 
     sleep 260
 }
