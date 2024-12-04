@@ -141,7 +141,7 @@ function specs {
 }
 
 function setprofile {
-    data="{\"sl_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm\",\"default_size\":\"$size\",\"cpu\":\"$cpu\",\"username\":\"$username\"}"
+    data="{\"sl_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm-classic\",\"default_size\":\"$size\",\"cpu\":\"$cpu\",\"username\":\"$username\"}"
     echo -e "${BGreen}Profile settings below:${Color_Off}"
     echo $data | jq '.sl_key = "********" | .ibm_cloud_api_key = "********"'
     echo -e "${BWhite}Press enter to save these to a new profile, type 'r' to start over.${Color_Off}"

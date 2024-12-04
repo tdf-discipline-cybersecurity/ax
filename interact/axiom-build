@@ -328,7 +328,7 @@ elif [[ "$provider" == "do" ]]; then
  jq '.op = "***************************************************************************************************************************"' | \
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
 
-elif [[ "$provider" == "ibm-classic" ]]; then
+elif [[ "$provider" == "ibm-classic" ]] || [[ "$provider" == "ibm" ]]; then
  cat "$account_path" | jq '.sl_key = "************************************************************************" | .ibm_cloud_api_key = "***************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
  jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
@@ -373,7 +373,7 @@ sleep 8
 #############################################################################################################
 # Change packer version for IBM Cloud Classic
 #
-if [[ "$provider" == "ibm-classic" ]]; then
+if [[ "$provider" == "ibm-classic" ]] || [[ "$provider" == "ibm" ]]; then
  if [[ "$extension" == "json" ]]; then
   mkdir -p ~/.packer.d/plugins/
   mkdir -p /tmp/packer-ibm/

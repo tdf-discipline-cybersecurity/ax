@@ -175,7 +175,10 @@ fi # provider linode
 
 # check installed version of ibmcloud cli and update if needed. check for valid token. If token isnt valid, kick off account bootstrap
 #
-if [[ "$provider" == "ibm-classic" ]] || [[ "$provider" == "ibm-vpc" ]] ; then
+if [[ "$provider" == "ibm-classic" ]] || [[ "$provider" == "ibm-vpc" ]] || [[ "$provider" == "ibm" ]]  ; then
+   if [[ "$provider" == "ibm" ]]; then
+    provider=ibm-classic
+   fi
    installed_version=$(ibmcloud version  2>/dev/null| cut -d ' ' -f 2 | cut -d + -f 1)
    if [[ "$(printf '%s\n' "$installed_version" "$IBMCloudCliVersion" | sort -V | head -n 1)" != "$IBMCloudCliVersion" ]]; then
 
