@@ -1,0 +1,16 @@
+{
+  "builders": [
+    {
+      "type": "ibmcloud-vpc",
+      "api_key": "{{user `ibm_cloud_api_key`}}",
+      "region": "{{user `physical_region`}}",
+      "subnet_id": "{{user `subnet_id`}}",
+      "vsi_base_image_name": "ibm-ubuntu-22-04-4-minimal-amd64-4",
+      "communicator": "ssh",
+      "vsi_profile": "{{user `default_size`}}",
+      "ssh_username": "root",
+      "image_name": "{{user `snapshot_name`}}",
+      "timeout": "50m"
+    }
+  ]
+}

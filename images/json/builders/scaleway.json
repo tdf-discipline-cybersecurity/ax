@@ -1,0 +1,17 @@
+{
+  "builders": [
+    {
+      "type": "scaleway",
+      "project_id": "{{user `default_project_id`}}",
+      "access_key": "{{user `access_key`}}",
+      "secret_key": "{{user `secret_key`}}",
+      "image": "ubuntu_focal",
+      "zone": "{{user `region`}}",
+      "commercial_type": "{{user `default_size`}}",
+      "ssh_username": "root",
+      "image_name": "{{user `snapshot_name`}}",
+      "snapshot_name": "{{user `snapshot_name`}}",
+      "remove_volume": true
+    }
+  ]
+}
