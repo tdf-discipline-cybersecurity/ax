@@ -316,47 +316,47 @@ echo -e "${Green}If this build completes successfully, the following updated axi
 if [[ "$provider" == "aws" ]]; then
  cat "$account_path" | jq '.aws_secret_access_key = "*************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "azure" ]]; then
  cat "$account_path" | jq '.client_secret = "*************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "do" ]]; then
  cat "$account_path" | jq '.do_key = "************************************************************************"'| \
  jq '.op = "***************************************************************************************************************************"' | \
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "ibm-classic" ]] || [[ "$provider" == "ibm" ]]; then
  cat "$account_path" | jq '.sl_key = "************************************************************************" | .ibm_cloud_api_key = "***************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "ibm-vpc" ]]; then
  cat "$account_path" | jq '.ibm_cloud_api_key = "***************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "linode" ]]; then
  cat "$account_path" | jq '.linode_key = "*******************************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "hetzner" ]]; then
  cat "$account_path" |jq '.hetzner_key =  "****************************************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "scaleway" ]]; then
  cat "$account_path" |jq '.secret_key = "************************************"'| \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 elif [[ "$provider" == "gcp" ]]; then
  cat "$account_path" | \
  jq '.op = "***************************************************************************************************************************"' |
- jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.provisioner = "'$provisioner'"'| jq '.sshkey = "'$sshkey'"'
+ jq '.imageid = "'$snapshot_name'"' | jq '.provisioner = "'$provisioner'"' | jq '.sshkey = "'$sshkey'"'
 
 else
  cat "$account_path"

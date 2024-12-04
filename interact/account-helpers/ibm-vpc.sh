@@ -155,42 +155,43 @@ function setVPC {
    echo -e "${Green}Creating subnets in all zones in $region ${Color_Off}"
    subnet_name="$vpc-subnet-$region"
    for i in $(seq 1 3); do
-    ibmcloud is subnet-create $subnet_name-$i $vpc --ipv4-address-count 256 --zone $region-$i --output json --resource-group-name $resource_group 2>&1 >>/dev/null
+    ibmcloud is subnet-create $subnet_name-$i $vpc --ipv4-address-count 256 --zone $region-$i --output json --resource-group-name $resource_group >/dev/null 2>&1
    done
+   subnet_id=$(ibmcloud is subnets --vpc $vpc --output json | jq -r '.[] | select(.name == "'$subnet_name-1'") | .id')
 
- echo -e "${BGreen}Printing Available Security Groups for VPC $vpc${Color_Off}"
- ibmcloud is security-groups --vpc $vpc --resource-group-name $resource_group
+   echo -e "${BGreen}Printing Available Security Groups for VPC $vpc${Color_Off}"
+   ibmcloud is security-groups --vpc $vpc --resource-group-name $resource_group
 
- # Prompt user to enter a security group name
- echo -e -n "${Green}Please enter a security group name above or press enter to create a new security group with a random name \n>> ${Color_Off}"
- read SECURITY_GROUP
+   # Prompt user to enter a security group name
+   echo -e -n "${Green}Please enter a security group name above or press enter to create a new security group with a random name \n>> ${Color_Off}"
+   read SECURITY_GROUP
 
- # If no security group name is provided, create a new one with a random name
- if [[ "$SECURITY_GROUP" == "" ]]; then
-  axiom_sg_random="axiom-$(date +%m-%d-%H-%M-%S-%1N)"
-  SECURITY_GROUP=$axiom_sg_random
-  echo -e "${BGreen}Creating an Axiom Security Group: ${Color_Off}"
-  ibmcloud is security-group-delete "$SECURITY_GROUP"  --force > /dev/null 2>&1
-  sc=$(ibmcloud is security-group-create $SECURITY_GROUP $vpc --resource-group-name $resource_group --output JSON)
-  group_name=$(echo "$sc" | jq -r .name )
-  echo -e "${BGreen}Created Security Group: $group_name ${Color_Off}"
- else
-  # Use the existing security group
-  echo -e "${BGreen}Using Security Group: $SECURITY_GROUP ${Color_Off}"
-  group_name=$SECURITY_GROUP
+   # If no security group name is provided, create a new one with a random name
+   if [[ "$SECURITY_GROUP" == "" ]]; then
+    axiom_sg_random="axiom-$(date +%m-%d-%H-%M-%S-%1N)"
+    SECURITY_GROUP=$axiom_sg_random
+    echo -e "${BGreen}Creating an Axiom Security Group: ${Color_Off}"
+    ibmcloud is security-group-delete "$SECURITY_GROUP"  --force > /dev/null 2>&1
+    sc=$(ibmcloud is security-group-create $SECURITY_GROUP $vpc --resource-group-name $resource_group --output JSON)
+    group_name=$(echo "$sc" | jq -r .name )
+    echo -e "${BGreen}Created Security Group: $group_name ${Color_Off}"
+   else
+    # Use the existing security group
+    echo -e "${BGreen}Using Security Group: $SECURITY_GROUP ${Color_Off}"
+    group_name=$SECURITY_GROUP
 
-  if [ -z "$group_name" ]; then
-    echo -e "${BGreen}Security Group '$SECURITY_GROUP' not found. Exiting.${Color_Off}"
-    exit 1
-  fi
- fi
+    if [ -z "$group_name" ]; then
+     echo -e "${BGreen}Security Group '$SECURITY_GROUP' not found. Exiting.${Color_Off}"
+     exit 1
+    fi
+   fi
 
- # Attempt to add the rule
- ibmcloud is security-group-rule-add $group_name inbound tcp --port-min 1 --port-max 65535 --vpc $vpc --output JSON | jq -r .id 2>&1 && ibmcloud is security-group-rule-add $group_name outbound all --vpc $vpc --output JSON | jq -r .id 2>&1
+   # Attempt to add the rule
+   ibmcloud is security-group-rule-add $group_name inbound tcp --port-min 1 --port-max 65535 --vpc $vpc --output JSON | jq -r .id 2>&1 && ibmcloud is security-group-rule-add $group_name outbound all --vpc $vpc --output JSON | jq -r .id 2>&1
 }
 
 function setprofile {
-    data="{\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"default_size\":\"$profile\",\"resource_group\":\"$resource_group\",\"physical_region\":\"$region\",\"region\":\"$zone\",\"provider\":\"ibm-vpc\",\"vpc\":\"$vpc\",\"security_group\":\"$group_name\"}"
+    data="{\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"default_size\":\"$profile\",\"resource_group\":\"$resource_group\",\"physical_region\":\"$region\",\"region\":\"$zone\",\"provider\":\"ibm-vpc\",\"vpc\":\"$vpc\",\"security_group\":\"$group_name\",\"subnet_id\":\"$subnet_id\"}"
     echo -e "${BGreen}Profile settings below:${Color_Off}"
     echo $data | jq ' .ibm_cloud_api_key = "********************************************"'
     echo -e "${BWhite}Press enter to save these to a new profile, type 'r' to start over.${Color_Off}"
