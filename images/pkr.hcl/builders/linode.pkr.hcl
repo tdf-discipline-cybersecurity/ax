@@ -23,6 +23,7 @@ source "linode" "packer" {
   image            = "linode/ubuntu20.04"
   region           = var.region
   instance_type    = var.default_size
+  image_create_timeout = "60m"
 }
 
 build {

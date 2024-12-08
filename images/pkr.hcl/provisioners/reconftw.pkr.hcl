@@ -73,16 +73,24 @@
       "chmod 600 /home/op/.ssh/authorized_keys",
 
       "echo 'Downloading Files and Lists'",
+
       "echo 'Downloading axiom-dockerfiles'",
       "git clone https://github.com/attacksurge/dockerfiles.git /home/op/lists/axiom-dockerfiles",
+
       "echo 'Downloading permutations'",
       "wget -q -O /home/op/lists/permutations.txt https://gist.github.com/six2dez/ffc2b14d283e8f8eff6ac83e20a3c4b4/raw",
+
       "echo 'Downloading resolvers'",
       "wget -q -O /home/op/lists/resolvers.txt https://raw.githubusercontent.com/trickest/resolvers/master/resolvers.txt",
+
       "echo 'Downloading trusted resolvers'",
       "wget -q -O /home/op/lists/resolvers_trusted.txt https://raw.githubusercontent.com/six2dez/resolvers_reconftw/master/resolvers_trusted.txt",
+
       "echo 'Downloading fuzz wordlist'",
       "wget -O /home/op/lists/fuzz_wordlist.txt https://raw.githubusercontent.com/six2dez/OneListForAll/master/onelistforallmicro.txt",
+
+      "echo 'Downloading Nuclei Templates'",
+      "git clone https://github.com/projectdiscovery/nuclei-templates /home/op/recon/nuclei",
 
       "echo 'Installing Tools'",
       "echo 'Installing anew'",
@@ -91,8 +99,11 @@
       "echo 'Installing Amass'",
       "/bin/su -l op -c '/usr/local/go/bin/go install github.com/owasp-amass/amass/v3/...@master'",
 
-       "echo 'Installing ax framework'",
-       "/bin/su -l op -c 'git clone https://github.com/attacksurge/ax.git /home/op/.axiom && cd /home/op/.axiom/interact && ./axiom-configure --shell zsh --unattended --setup'",
+      "echo 'Installing ax framework'",
+      "/bin/su -l op -c 'git clone https://github.com/attacksurge/ax.git /home/op/.axiom && cd /home/op/.axiom/interact && ./axiom-configure --shell zsh --unattended --setup'",
+
+      "echo 'Installing awscli'",
+      "curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o '/tmp/awscliv2.zip' && cd /tmp && unzip awscliv2.zip && sudo ./aws/install",
 
       "echo 'Installing commix'",
       "/bin/su -l op -c 'docker image build - < /home/op/lists/axiom-dockerfiles/commix/Dockerfile -t axiom/commix'",
@@ -107,7 +118,7 @@
       "/bin/su -l op -c 'GO111MODULE=on /usr/local/go/bin/go install github.com/hahwul/dalfox/v2@latest'",
 
       "echo 'Installing dnsvalidator'",
-        "git clone https://github.com/vortexau/dnsvalidator.git /home/op/recon/dnsvalidator && cd /home/op/recon/dnsvalidator/ && sudo python3 setup.py install",
+      "git clone https://github.com/vortexau/dnsvalidator.git /home/op/recon/dnsvalidator && cd /home/op/recon/dnsvalidator/ && sudo python3 setup.py install",
 
       "echo 'Installing dnsx'",
       "/bin/su -l op -c 'GO111MODULE=on /usr/local/go/bin/go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest'",
@@ -129,7 +140,6 @@
 
       "echo 'Installing github-endpoints'",
       "/bin/su -l op -c '/usr/local/go/bin/go install github.com/gwen001/github-endpoints@latest'",
-
 
       "echo 'Installing google-chrome'",
       "wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && cd /tmp/ && sudo apt install -y /tmp/chrome.deb -qq && apt --fix-broken install -qq",
@@ -197,15 +207,11 @@
 
       "/bin/su -l op -c '/usr/local/go/bin/go  clean -modcache'",
       "/bin/su -l op -c 'wget -q -O gf-completion.zsh https://raw.githubusercontent.com/tomnomnom/gf/master/gf-completion.zsh && cat gf-completion.zsh >> /home/op/.zshrc && rm gf-completion.zsh && cd'",
-
-      "echo 'Installing awscli'",
-      "curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o '/tmp/awscliv2.zip' && cd /tmp && unzip awscliv2.zip && sudo ./aws/install",
-       
-      "git clone https://github.com/projectdiscovery/nuclei-templates /home/op/recon/nuclei",
-      "echo 'Installing Nuclei'",
-      "/bin/su -l op -c 'go install github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest'",
-        
       "/bin/su -l root -c 'apt-get clean'",
+      "echo \"CkNvbmdyYXR1bGF0aW9ucywgeW91ciBidWlsZCBpcyBhbG1vc3QgZG9uZSEKCiDilojilojilojilojilojilZcg4paI4paI4pWXICDilojilojilZcgICAg4paI4paI4paI4paI4paI4paI4pWXIOKWiOKWiOKVlyAgIOKWiOKWiOKVl+KWiOKWiOKVl+KWiOKWiOKVlyAgICAg4paI4paI4paI4paI4paI4paI4pWXCuKWiOKWiOKVlOKVkOKVkOKWiOKWiOKVl+KVmuKWiOKWiOKVl+KWiOKWiOKVlOKVnSAgICDilojilojilZTilZDilZDilojilojilZfilojilojilZEgICDilojilojilZHilojilojilZHilojilojilZEgICAgIOKWiOKWiOKVlOKVkOKVkOKWiOKWiOKVlwrilojilojilojilojilojilojilojilZEg4pWa4paI4paI4paI4pWU4pWdICAgICDilojilojilojilojilojilojilZTilZ3ilojilojilZEgICDilojilojilZHilojilojilZHilojilojilZEgICAgIOKWiOKWiOKVkSAg4paI4paI4pWRCuKWiOKWiOKVlOKVkOKVkOKWiOKWiOKVkSDilojilojilZTilojilojilZcgICAgIOKWiOKWiOKVlOKVkOKVkOKWiOKWiOKVl+KWiOKWiOKVkSAgIOKWiOKWiOKVkeKWiOKWiOKVkeKWiOKWiOKVkSAgICAg4paI4paI4pWRICDilojilojilZEK4paI4paI4pWRICDilojilojilZHilojilojilZTilZ0g4paI4paI4pWXICAgIOKWiOKWiOKWiOKWiOKWiOKWiOKVlOKVneKVmuKWiOKWiOKWiOKWiOKWiOKWiOKVlOKVneKWiOKWiOKVkeKWiOKWiOKWiOKWiOKWiOKWiOKWiOKVl+KWiOKWiOKWiOKWiOKWiOKWiOKVlOKVnQrilZrilZDilZ0gIOKVmuKVkOKVneKVmuKVkOKVnSAg4pWa4pWQ4pWdICAgIOKVmuKVkOKVkOKVkOKVkOKVkOKVnSAg4pWa4pWQ4pWQ4pWQ4pWQ4pWQ4pWdIOKVmuKVkOKVneKVmuKVkOKVkOKVkOKVkOKVkOKVkOKVneKVmuKVkOKVkOKVkOKVkOKVkOKVnQoKTWFpbnRhaW5lcjogMHh0YXZpYW4KCvCdk7LwnZO38J2TvPCdk7nwnZOy8J2Tu/Cdk67wnZOtIPCdk6vwnZSCIPCdk6rwnZSB8J2TsvCdk7jwnZO2OiDwnZO98J2TsfCdk64g8J2TrfCdlILwnZO38J2TqvCdk7bwnZOy8J2TrCDwnZOy8J2Tt/Cdk6/wnZO78J2TqvCdk7zwnZO98J2Tu/Cdk77wnZOs8J2TvfCdk77wnZO78J2TriDwnZOv8J2Tu/Cdk6rwnZO28J2TrvCdlIDwnZO48J2Tu/Cdk7Qg8J2Tr/Cdk7jwnZO7IPCdk67wnZO/8J2TrvCdk7vwnZSC8J2Tq/Cdk7jwnZOt8J2UgiEgLSBA8J2TufCdk7vwnZSCMPCdk6zwnZOsIEAw8J2UgfCdk73wnZOq8J2Tv/Cdk7LwnZOq8J2TtwoKUmVhZCB0aGVzZSB3aGlsZSB5b3UncmUgd2FpdGluZyB0byBnZXQgc3RhcnRlZCA6KQoKICAgIC0gTmV3IFdpa2k6IGh0dHBzOi8vYXgtZnJhbWV3b3JrLmdpdGJvb2suaW8vd2lraS8KICAgIC0gRXhpc3RpbmcgVXNlcnM6IGh0dHBzOi8vYXgtZnJhbWV3b3JrLmdpdGJvb2suaW8vd2lraS9vdmVydmlldy9leGlzdGluZy11c2VycwogICAgLSBCcmluZyBZb3VyIE93biBQcm92aXNpb25lcjogaHR0cHM6Ly9heC1mcmFtZXdvcmsuZ2l0Ym9vay5pby93aWtpL2Z1bmRhbWVudGFscy9icmluZy15b3VyLW93bi1wcm92aXNpb25lciAKICAgIC0gRmlsZXN5c3RlbSBVdGlsaXRpZXM6IGh0dHBzOi8vYXgtZnJhbWV3b3JrLmdpdGJvb2suaW8vd2lraS9mdW5kYW1lbnRhbHMvZmlsZXN5c3RlbS11dGlsaXRpZXMKICAgIC0gRmxlZXRzOiBodHRwczovL2F4LWZyYW1ld29yay5naXRib29rLmlvL3dpa2kvZnVuZGFtZW50YWxzL2ZsZWV0cwogICAgLSBTY2FuczogaHR0cHM6Ly9heC1mcmFtZXdvcmsuZ2l0Ym9vay5pby93aWtpL2Z1bmRhbWVudGFscy9zY2FuCg==\" | base64 -d",
+      "touch /home/op/.z",
+      "chown -R op:users /home/op",
+      "chown root:root /etc/sudoers /etc/sudoers.d -R"
     ]
     inline_shebang = "/bin/sh -x"
   }

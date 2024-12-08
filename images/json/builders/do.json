@@ -7,7 +7,7 @@
       "api_token": "{{ user `do_key` }}",
       "image": "ubuntu-20-04-x64",
       "region": "{{ user `region`  }}",
-      "size": "s-1vcpu-1gb"
+      "size": "{{ user `default_size` }}"
     }
   ]
 }

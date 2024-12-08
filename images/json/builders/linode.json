@@ -3,13 +3,14 @@
     {
       "type": "linode",
       "ssh_username": "root",
-      "image_label":  "{{ user `snapshot_name` }}",
+      "image_label": "{{ user `snapshot_name` }}",
       "instance_label": "{{ user `snapshot_name` }}",
-      "image_description":"Axiom image",
+      "image_description": "Axiom image",
       "linode_token": "{{ user `linode_key` }}",
       "image": "linode/ubuntu20.04",
       "region": "{{ user `region`  }}",
-	  "instance_type": "g6-nanode-1"
+      "instance_type": "{{ user `default_size` }}",
+      "image_create_timeout": "60m"
     }
   ]
 }
