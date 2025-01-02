@@ -270,7 +270,6 @@ if [[ "$cycle_regions" != "false" ]]; then
 # Chance to cancel initialization of fleet
 #
 echo -e "${BWhite}Initializing new fleet '${BGreen}$gen_name${BWhite}' with '${BGreen}$amount${BWhite}' instances using image '${BGreen}$image${Color_Off}'...${Color_Off}"
-echo -e "${BWhite}Injecting SSH pub key '${BGreen}$HOME/.ssh/$sshkey.pub${Color_Off}${BWhite}' into new fleet"
 echo -e "${BWhite}Cycling through following regions:${BGreen}$cycle_regions${BWhite}...${Color_Off}"
 echo -e "${BWhite}INITIALIZING IN 5 SECONDS, CTRL+C to quit... ${Color_Off}"
 sleep 5

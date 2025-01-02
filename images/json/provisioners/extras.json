@@ -277,7 +277,7 @@
         "wget -q -O /tmp/rustscan.deb https://github.com/brandonskerritt/RustScan/releases/download/2.0.1/rustscan_2.0.1_amd64.deb && apt install /tmp/rustscan.deb -y -qq",
 
         "echo 'Installing s3scanner'",
-        "/bin/su -l op -c 'pip3 install s3scanner'",
+        "/bin/su -l op -c '/usr/local/go/bin/go install -v github.com/sa7mon/s3scanner@latest'",
 
         "echo 'Installing scrying'",
         "wget -q -O /tmp/scrying.deb https://github.com/nccgroup/scrying/releases/download/v0.9.0-alpha.2/scrying_0.9.0-alpha.2_amd64.deb && apt install /tmp/scrying.deb -y -qq && apt install xvfb -y -qq",
@@ -299,13 +299,13 @@
 
         "echo 'Installing testssl'",
         "git clone --depth 1 https://github.com/drwetter/testssl.sh.git /home/op/recon/testssl.sh",
-        
+
         "echo 'Installing tlsx'",
         "/bin/su -l op -c 'GO111MODULE=on /usr/local/go/bin/go install github.com/projectdiscovery/tlsx/cmd/tlsx@latest'",
-        
+
         "echo 'Installing trufflehog'",
         "/bin/su -l op -c 'docker image build - < /home/op/lists/axiom-dockerfiles/trufflehog/Dockerfile -t axiom/trufflehog'",
-        
+
         "echo 'Installing unimap'",
         "wget -q -O /tmp/unimap https://github.com/Edu4rdSHL/unimap/releases/download/0.5.1/unimap-linux && mv /tmp/unimap /usr/bin/unimap && chmod +x /usr/bin/unimap",
 
@@ -317,13 +317,13 @@
 
         "echo 'Installing waymore'",
         "git clone https://github.com/xnl-h4ck3r/waymore.git /home/op/recon/ && cd /home/op/recon/waymore && sudo python3 setup.py install && sudo pip3 install -r requirements.txt",
-        
+
         "echo 'Installing webscreenshot'",
         "/bin/su -l op -c 'pip3 install webscreenshot'",
 
         "echo 'Installing wpscan'",
         "gem install wpscan",
-        
+
         "echo 'Removing unneeded Docker images'",
         "/bin/su -l op -c 'docker image prune -f'",
 

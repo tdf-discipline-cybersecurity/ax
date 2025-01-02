@@ -276,7 +276,7 @@
         "wget -q -O /tmp/rustscan.deb https://github.com/brandonskerritt/RustScan/releases/download/2.0.1/rustscan_2.0.1_amd64.deb && apt install /tmp/rustscan.deb -y -qq",
 
         "echo 'Installing s3scanner'",
-        "/bin/su -l op -c 'pip3 install s3scanner'",
+        "/bin/su -l op -c '/usr/local/go/bin/go install -v github.com/sa7mon/s3scanner@latest'",
 
         "echo 'Installing scrying'",
         "wget -q -O /tmp/scrying.deb https://github.com/nccgroup/scrying/releases/download/v0.9.0-alpha.2/scrying_0.9.0-alpha.2_amd64.deb && apt install /tmp/scrying.deb -y -qq && apt install xvfb -y -qq",

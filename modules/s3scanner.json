@@ -1,6 +1,6 @@
 [
   {
-    "command": "/home/op/.local/bin/s3scanner scan -f input | tee output",
+    "command": "s3scanner -bucket-file input | tee output",
     "ext": "txt"
   }
 ]

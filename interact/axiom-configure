@@ -248,7 +248,7 @@ function usage() {
         echo -e "  ${BGreen}axiom-configure --config <personal.json string>${Color_Off} # Use personal.json data supplied by command-line for account setup (must be vaild personal.json data wrapped in single quotes)"
         echo -e "  ${BGreen}axiom-configure --shell bash --unattended --config <path to personal.json file> ${Color_Off} # Use bash for default shell, do not promot, use personal.json data from file for axiom setup"
         echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  --run (optional)"
+        echo -e "  --run (required)"
         echo -e "    Start axiom-configure wizard, install dependencies, kick off axiom-account-setup and axiom-build"
         echo -e "  --config <axiom.json data>"
         echo -e "    Setup account with data from file or supplied from the command line (must be vaild data from a personal.json axiom file)"

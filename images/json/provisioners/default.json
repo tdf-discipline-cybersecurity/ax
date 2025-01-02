@@ -207,6 +207,9 @@
         "echo 'Installing puredns'",
         "/bin/su -l op -c 'GO111MODULE=on /usr/local/go/bin/go install github.com/d3mondev/puredns/v2@latest'",
 
+        "echo 'Installing s3scanner'",
+        "/bin/su -l op -c '/usr/local/go/bin/go install -v github.com/sa7mon/s3scanner@latest'",
+
         "echo 'Installing shuffledns'",
         "/bin/su -l op -c 'GO111MODULE=on /usr/local/go/bin/go install github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest'",
 
