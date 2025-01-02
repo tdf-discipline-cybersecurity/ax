@@ -1138,8 +1138,7 @@ preflight_function
 #  Check total instances does not equal zero
 #
 if [[ "$total_instances" -eq "0" ]]; then
-   echo -e "${Red}error with number of instances, do you have instances selected? (axiom-select)"
-   echo -e "exiting..${Color_Off}";
+   echo -e "${BRed}Error: Unable to reach any instance selected. List all instances with ${Color_Off}ax ls${BRed} or select instances with ${Color_Off}ax select${BRed} exiting..${Color_Off}"
    exit;
 fi
 
@@ -1220,7 +1219,7 @@ fi
 rawcommand="$(parse_module "$module" "$ext" | jq -r '.command')"
  if [ -z "${rawcommand}" ]; then
   echo -e "${Red}Error: the module${Color_Off} [ ${Blue}$module${Color_Off} ] ${Red}does not include the extension ${Red}${Color_Off}[${Blue} $ext ${Color_Off}] ${Red}you requested${Color_Off}"
-  echo -e "${Red}Review the module ${Color_Off} [ ${Blue}~/.axiom/modules/$module.json${Color_Off} ] ${Red}and make sure to add the appropriate module extension.. existing.${Color_Off}"
+  echo -e "${Red}Review the module ${Color_Off} [ ${Blue}~/.axiom/modules/$module.json${Color_Off} ] ${Red}and make sure to add the appropriate module extension.. exiting.${Color_Off}"
   exit
 fi
 
