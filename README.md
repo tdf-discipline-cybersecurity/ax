@@ -22,6 +22,8 @@ Ax attempts to follow the Unix philosophy by providing building blocks that allo
 
 Currently Digital Ocean, IBM Cloud, Linode, Azure, AWS, Hetzner, GCP and Scaleway are officially supported cloud providers.
 
+![](https://raw.githubusercontent.com/attacksurge/ax/refs/heads/master/screenshots/axiom-fleet.gif)
+
 # Resources
 
 -   [Introduction](https://ax-framework.gitbook.io/wiki#overview)
