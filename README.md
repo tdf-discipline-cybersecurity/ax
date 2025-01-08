@@ -6,7 +6,9 @@
 
 
 # Overview
-The Ax Framework is a free and open-source tool utilized by Bug Hunters and Penetration Testers to efficiently operate in multiple cloud environments. It helps build and deploy repeatable infrastructure tailored for offensive security purposes.
+The Distributed Scanning Framework for Everybody!
+
+Ax Framework is a free and open-source tool utilized by Bug Hunters and Penetration Testers to efficiently operate in multiple cloud environments. It helps build and deploy repeatable infrastructure tailored for offensive security purposes.
 
 Ax includes a set of Packer Provisioner files to choose from ([JSON](https://github.com/attacksurge/ax/tree/master/images/json/provisioners) or [HCL](https://github.com/attacksurge/ax/tree/master/images/pkr.hcl/provisioners)), or you can [create your own](https://ax-framework.gitbook.io/wiki/fundamentals/bring-your-own-provisioner) (recommended).
 
