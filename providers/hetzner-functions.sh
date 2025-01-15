@@ -412,3 +412,203 @@ delete_instances() {
         fi
     fi
 }
+
+###################################################################
+# experimental v2 function
+# create multiple instances at the same time
+# used by axiom-fleet2
+#
+create_instances() {
+    local image_id="$1"
+    local server_type="$2"
+    local location="$3"
+    local user_data="$4"
+    local timeout="$5"
+    shift 5
+
+    names=("$@")
+    pids_data=()   # Will store "pid:name:tmpfile"
+    created_names=()
+    notified_names=()
+
+    # Create the user-data file
+    user_data_file=$(mktemp)
+    echo "$user_data" > "$user_data_file"
+
+    # Ensure SSH key exists in Hetzner
+    sshkey="$(jq -r '.sshkey' "$AXIOM_PATH/axiom.json")"
+    pubkey_path="$HOME/.ssh/$sshkey.pub"
+    if [ ! -f "$pubkey_path" ]; then
+        >&2 echo -e "${BRed}Error: SSH public key not found at $pubkey_path${Color_Off}"
+        rm -f "$user_data_file"
+        return 1
+    fi
+
+    sshkey_fingerprint="$(ssh-keygen -l -E md5 -f "$pubkey_path" | awk '{print $2}' | cut -d : -f 2-)"
+    keyid="$(hcloud ssh-key list -o json | jq -r ".[] | select(.fingerprint == \"$sshkey_fingerprint\").id")"
+    if [ -z "$keyid" ]; then
+        keyid="$(
+            hcloud ssh-key create \
+                --name "$sshkey" \
+                --public-key-from-file "$pubkey_path" \
+                -o json 2>/dev/null \
+            | jq -r '.id'
+        )"
+        if [ -z "$keyid" ]; then
+            >&2 echo -e "${BRed}Error: Failed to create SSH key in Hetzner${Color_Off}"
+            rm -f "$user_data_file"
+            return 1
+        fi
+    fi
+
+    # Spin up each server in the background.
+    for name in "${names[@]}"; do
+        tmpfile=$(mktemp)
+
+        (
+            hcloud server create \
+                --type "$server_type" \
+                --location "$location" \
+                --image "$image_id" \
+                --name "$name" \
+                --ssh-key "$keyid" \
+                --user-data-from-file "$user_data_file" \
+                --without-ipv6 \
+                -o json 2>&1
+        ) >"$tmpfile" 2>&1 &
+
+        pid=$!
+        pids_data+=( "$pid:$name:$tmpfile" )
+    done
+
+    total=${#pids_data[@]}
+    completed=0
+    success_count=0
+    fail_count=0
+
+    already_notified() {
+        local x
+        for x in "${notified_names[@]}"; do
+            [ "$x" = "$1" ] && return 0
+        done
+        return 1
+    }
+
+    mark_notified() {
+        notified_names+=( "$1" )
+    }
+
+    elapsed=0
+    interval=8
+
+    while [ "$elapsed" -lt "$timeout" ]; do
+
+        # Check which creation processes finished
+        still_running=()
+        for entry in "${pids_data[@]}"; do
+            pid="${entry%%:*}"
+            rest="${entry#*:}"
+            nm="${rest%%:*}"
+            file="${rest#*:}"
+
+            if kill -0 "$pid" 2>/dev/null; then
+                still_running+=( "$entry" )
+            else
+                wait "$pid"
+                exit_code=$?
+                completed=$((completed + 1))
+
+                output="$(cat "$file" 2>/dev/null)"
+                rm -f "$file"
+
+                if [ "$exit_code" -eq 0 ]; then
+                    success_count=$((success_count + 1))
+                    created_names+=( "$nm" )
+                else
+                    fail_count=$((fail_count + 1))
+                    >&2 echo -e "${BRed}Error creating instance '$nm':${Color_Off}"
+                    >&2 echo "$output"
+                fi
+            fi
+        done
+        pids_data=( "${still_running[@]}" )
+
+
+        if [ "${#created_names[@]}" -gt 0 ]; then
+            servers_json="$(hcloud server list -o json 2>/dev/null)"
+
+            # parse everything in one pass
+            server_lines="$(
+                echo "$servers_json" \
+                | jq -c '.[] | {name: .name, status: .status, ip: .public_net.ipv4.ip}'
+            )"
+
+            # each line is like {"name":"host1","status":"running","ip":"X.X.X.X"}
+            IFS=$'\n'
+            for line in $server_lines; do
+                IFS=$' \t\n'
+                name="$(echo "$line" | jq -r '.name')"
+                status="$(echo "$line" | jq -r '.status')"
+                ip="$(echo "$line" | jq -r '.ip')"
+
+                # only handle if name is in created_names
+                # and not yet "notified"
+                if [[ " ${created_names[*]} " == *" $name "* ]]; then
+                    if ! already_notified "$name"; then
+                        if [ "$status" = "running" ] && [ -n "$ip" ] && [ "$ip" != "null" ]; then
+                            mark_notified "$name"
+                            >&2 echo -e "${BWhite}Initialized instance '${BGreen}$name${Color_Off}${BWhite}' at '${BGreen}$ip${BWhite}'!${Color_Off}"
+                        fi
+                    fi
+                fi
+            done
+            IFS=$' \t\n'
+        fi
+
+        # Check if done
+        done_creating=false
+        if [ "$completed" -eq "$total" ] || [ "$fail_count" -eq "$total" ]; then
+            done_creating=true
+        fi
+
+        if $done_creating; then
+            all_running=true
+            for x in "${created_names[@]}"; do
+                if ! already_notified "$x"; then
+                    all_running=false
+                    break
+                fi
+            done
+            if $all_running; then
+                break
+            fi
+        fi
+
+        sleep "$interval"
+        elapsed=$((elapsed + interval))
+    done
+
+    # If timed out but some processes still run, kill them
+    if [ "$elapsed" -ge "$timeout" ] && [ "${#pids_data[@]}" -gt 0 ]; then
+        >&2 echo -e "${BRed}Error: Timeout reached (${elapsed}s) before creation finished or instances ran.${Color_Off}"
+        rm -f "$user_data_file"
+        return 1
+    fi
+
+    # Now safe to remove the user_data_file
+    rm -f "$user_data_file"
+
+    # Final checks
+    if [ "$fail_count" -eq "$total" ]; then
+        >&2 echo -e "${BRed}Error: All $total instance(s) failed to create.${Color_Off}"
+        return 1
+    fi
+
+    if [ "$fail_count" -gt 0 ]; then
+        >&2 echo -e "${BRed}Warning: $fail_count instance(s) failed, $success_count succeeded.${Color_Off}"
+        return 1
+    fi
+
+    >&2 echo -e "${BGreen}Success: All $success_count instance(s) created and running!${Color_Off}"
+    return 0
+}
