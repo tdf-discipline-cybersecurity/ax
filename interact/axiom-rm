@@ -24,6 +24,8 @@ function usage() {
         echo -e "    Avoid confirmation prompts"
         echo -e "  -m/--multi (optional)"
         echo -e "    Delete multiple instances at once"
+        echo -e "  --debug (optional)"
+        echo -e "    Run with set -xv, warning: very verbose"
         echo -e "  --help (optional)"
         echo -e "    Display this help menu"
 }
