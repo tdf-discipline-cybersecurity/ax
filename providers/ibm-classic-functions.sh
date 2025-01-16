@@ -7,17 +7,28 @@ AXIOM_PATH="$HOME/.axiom"
 #  needed for init and fleet
 #
 create_instance() {
-        name="$1"
-        image_id="$2"
-        size_slug="$3"
-        region="$4"
-        user_data="$5"
-        domain="ax.private"
-        cpu="$(jq -r '.cpu' $AXIOM_PATH/axiom.json)"
+    name="$1"
+    image_id="$2"
+    size_slug="$3"
+    region="$4"
+    user_data="$5"
+    domain="ax.private"
+    cpu="$(jq -r '.cpu' "$AXIOM_PATH/axiom.json")"
 
-        ibmcloud sl vs create -H "$name" -D "$domain" -c "$cpu" -m "$size_slug" -n 1000 -d "$region" --image "$image_id" --userdata "$user_data" -f  2>&1 >>/dev/null
+    # If cpu is null or empty, run the first command. Otherwise, run the second.
+    if [ -z "$cpu" ] || [ "$cpu" == "null" ]; then
+        ibmcloud sl vs create -H "$name" -D "$domain" \
+            --flavor "$size_slug" -n 1000 -d "$region" \
+            --image "$image_id" --userdata "$user_data" -f \
+            2>&1 >> /dev/null
+    else
+        ibmcloud sl vs create -H "$name" -D "$domain" \
+            -c "$cpu" -m "$size_slug" -n 1000 -d "$region" \
+            --image "$image_id" --userdata "$user_data" -f \
+            2>&1 >> /dev/null
+    fi
 
-	sleep 260
+    sleep 260
 }
 
 ###################################################################
@@ -320,10 +331,7 @@ instance_id() {
 #  Used by ax sizes
 #
 sizes_list() {
-cat << EOF
-RAM: 2048, 4096, 8192, 16384, 32768, 64512
-CPU: 1, 2, 4, 8, 16, 32, 48
-EOF
+    ibmcloud sl vs options --output json | jq -r .sizes | jq 'keys'
 }
 
 ###################################################################
@@ -387,8 +395,8 @@ create_instances() {
     shift 5
     names=("$@")  # Remaining arguments are instance names
 
+    cpu="$(jq -r '.cpu' "$AXIOM_PATH/axiom.json")"
     domain="ax.private"
-    cpu="$(jq -r '.cpu' $AXIOM_PATH/axiom.json)"
     count="${#names[@]}"
     sleep 5
 
@@ -396,7 +404,34 @@ create_instances() {
     base_hostname="axiom-temp-$(date +%s)"
 
     # Create multiple instances in one command and capture the output in JSON
-    instance_data=$(ibmcloud sl vs create -H "$base_hostname" -D "$domain" -c "$cpu" -m "$size" -n 1000 -d "$region" --image "$image_id" --userdata "$user_data" --quantity "$count" -f)
+    if [ -z "$cpu" ] || [ "$cpu" == "null" ]; then
+        instance_data=$(
+            ibmcloud sl vs create \
+                -H "$base_hostname" \
+                -D "$domain" \
+                --flavor "$size" \
+                -n 1000 \
+                -d "$region" \
+                --image "$image_id" \
+                --userdata "$user_data" \
+                --quantity "$count" \
+                -f
+        )
+    else
+        instance_data=$(
+            ibmcloud sl vs create \
+                -H "$base_hostname" \
+                -D "$domain" \
+                -c "$cpu" \
+                -m "$size" \
+                -n 1000 \
+                -d "$region" \
+                --image "$image_id" \
+                --userdata "$user_data" \
+                --quantity "$count" \
+                -f
+        )
+    fi
 
     # Extract instance IDs from the creation response
     instance_ids=($(echo "$instance_data" | grep $base_hostname | awk '{print $1}'))

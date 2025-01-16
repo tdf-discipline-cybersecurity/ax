@@ -7,7 +7,6 @@ token=""
 region=""
 provider=""
 size=""
-cpu=""
 username=""
 ibm_cloud_api_key=""
 
@@ -125,25 +124,21 @@ function create_apikey {
 function specs {
     echo -e -n "${Green}Printing available regions..\n${Color_Off}"
     ibmcloud sl vs options --output json | jq .locations
-    echo -e -n "${BGreen}Please enter your default region (press enter for 'dal13'): \n>> ${Color_Off}"
+    echo -e -n "${BGreen}Please enter your default region (you can always change this later with axiom-region select \$region); Defqult is 'dal13'. press enter \n>> ${Color_Off}"
     read region
     region=${region:-dal13}
 
-    echo -e -n "${BGreen}Please enter your default RAM (press enter for '2048'): \n>> ${Color_Off}"
-    echo -e -n "${Blue}Options: 2048, 4096, 8192, 16384, 32768, 64512\n>> ${Color_Off}"
+    echo -e -n "${Green}Printing available sizes..\n${Color_Off}"
+    ibmcloud sl vs options --output json | jq -r .sizes | jq 'keys'
+    echo -e -n "${Green}Please enter your default size (you can always change this later with axiom-sizes select \$size): Default 'C1_2x2x25', press enter \n>> ${Color_Off}"
     read size
-    size=${size:-2048}
-
-    echo -e -n "${Green}Please enter amount of CPU Cores (press enter for '2'): \n>> ${Color_Off}"
-    echo -e -n "${Blue}Options: 1, 2, 4, 8, 16, 32, 48\n>> ${Color_Off}"
-    read cpu
-    cpu=${cpu:-2}
+    size=${size:-C1_2X2X25}
 }
 
 function setprofile {
-    data="{\"sl_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm-classic\",\"default_size\":\"$size\",\"cpu\":\"$cpu\",\"username\":\"$username\"}"
+    data="{\"sl_key\":\"$token\",\"ibm_cloud_api_key\":\"$ibm_cloud_api_key\",\"region\":\"$region\",\"provider\":\"ibm-classic\",\"default_size\":\"$size\",\"username\":\"$username\"}"
     echo -e "${BGreen}Profile settings below:${Color_Off}"
-    echo $data | jq '.sl_key = "********" | .ibm_cloud_api_key = "********"'
+    echo $data | jq '.sl_key = "****************************************************************" | .ibm_cloud_api_key = "********************************************"'
     echo -e "${BWhite}Press enter to save these to a new profile, type 'r' to start over.${Color_Off}"
     read ans
     if [[ "$ans" == "r" ]]; then
