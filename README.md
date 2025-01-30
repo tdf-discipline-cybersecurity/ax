@@ -6,7 +6,7 @@
 
 
 # Overview
-The Distributed Scanning Framework for Everybody!
+The Distributed Scanning Framework for Everybody! Join our Discord https://discord.gg/KYcD5E4qjU!
 
 Ax Framework is a free and open-source tool utilized by Bug Hunters and Penetration Testers to efficiently operate in multiple cloud environments. It helps build and deploy repeatable infrastructure tailored for offensive security purposes.
 
