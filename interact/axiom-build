@@ -83,7 +83,6 @@ function help() {
         echo -e "    Display this help menu"
 }
 
-
 ###########################################################################################################
 # Parse command line arguments
 #
@@ -137,6 +136,55 @@ do
     fi
 done
 
+#############################################################################################################
+# IBM Cloud Classic specific logic here:
+# Update legacy account config to use instance flavor instead of CPU/MEM
+# Change packer version for IBM Cloud Classic
+#
+if [[ "$provider" == "ibm-classic" ]] || [[ "$provider" == "ibm" ]]; then
+
+ # Get the target file of the symlink
+ symlink_target=$(readlink $AXIOM_PATH/axiom.json)
+
+ # Get the value of default_size from the target file
+ default_size=$(jq -r '.default_size' "$symlink_target")
+
+ # Check if the value of default_size contains only numbers
+ if [[ "$default_size" =~ ^[0-9]+$ ]]; then
+   # If it only contains numbers, replace the value with C1_2X2X25
+   jq 'del(.cpu) | .default_size = "C1_2X2X25"' "$symlink_target" > $AXIOM_PATH/accounts/ibm-classic-temp.json && mv $AXIOM_PATH/accounts/ibm-classic-temp.json "$symlink_target"
+   echo -e "${BYellow}Warning: Detected legacy account configuration for IBM Classic.${Color_Off}"
+   echo -e "${BYellow}Replacing default_size in axiom.json with C1_2X2X25${Color_Off}"
+   echo -e "${BYellow}You can always change this later by running ${Color_Off}'${BGreen}ax sizes ls${Color_Off}' ${BYellow}to list all sizes${Color_Off}"
+   echo -e "${BYellow}Then select a new default_size ${Color_Off}'${BGreen}ax sizes select \$size${Color_Off}'"
+ fi
+
+ if [[ "$extension" == "json" ]]; then
+  mkdir -p ~/.packer.d/plugins/
+  mkdir -p /tmp/packer-ibm/
+  if [[ ! -f /tmp/packer-ibm/packer ]] || [[ ! -f "$HOME/.packer.d/plugins/packer-builder-ibmcloud" ]]; then
+   if [[ $BASEOS == "Linux" ]]; then
+    wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip && unzip -qq /tmp/packer.zip -d /tmp/packer-ibm/ && rm /tmp/packer.zip
+    wget -q https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_linux_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
+   elif [[ $BASEOS == "Darwin" ]]; then
+    wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip  && unzip -qq /tmp/packer.zip -d /tmp/packer-ibm/ && rm /tmp/packer.zip
+    wget -q https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_macOS_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
+   fi
+  fi
+
+  BASEOS="$(uname)"
+  case $BASEOS in
+  'Darwin')
+   PATH="/tmp/packer-ibm/:$(brew --prefix coreutils)/libexec/gnubin:$PATH"
+   ;;
+  'Linux')
+   PATH="/tmp/packer-ibm:$PATH"
+   ;;
+  *) ;;
+  esac
+ fi
+fi
+
 ############################################################################################################
 # Get the provisioner file
 #
@@ -177,7 +225,6 @@ if [ -z "$provisioner" ]; then
                provisioner=$ans
     fi
 fi
-
 
 ############################################################################################################
 # check the provisioner and bulder exist
@@ -244,7 +291,6 @@ fi
 # TIPS: if you want to swap out the SSH key axiom uses, just edit the account.json.
 # For example: change key:value pair "sshkey": "id_rsa" to "sshkey": "axiom_rsa" and rerun axiom-build.
 #
-
 if [[ "$custom_ssh_key" == false ]]; then
  account_path=$(ls -la $AXIOM_PATH/axiom.json | rev | cut -d " " -f 1 | rev)
  sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
@@ -370,36 +416,7 @@ echo "The Packer Build will take about 25 minutes, spin up a temporary instance,
 echo -e "Starting Packer Build in 5 seconds... Ctrl+C to quit, remember, you can just run ${Color_Off}[ ${BBlue}axiom-build --run ${Color_Off}] ${Red}at any time${Color_Off}"
 sleep 8
 
-#############################################################################################################
-# Change packer version for IBM Cloud Classic
-#
-if [[ "$provider" == "ibm-classic" ]] || [[ "$provider" == "ibm" ]]; then
- if [[ "$extension" == "json" ]]; then
-  mkdir -p ~/.packer.d/plugins/
-  mkdir -p /tmp/packer-ibm/
-  if [[ ! -f /tmp/packer-ibm/packer ]] || [[ ! -f "$HOME/.packer.d/plugins/packer-builder-ibmcloud" ]]; then
-   if [[ $BASEOS == "Linux" ]]; then
-    wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip && unzip -qq /tmp/packer.zip -d /tmp/packer-ibm/ && rm /tmp/packer.zip
-    wget -q https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_linux_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
-   elif [[ $BASEOS == "Darwin" ]]; then
-    wget -q -O /tmp/packer.zip https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_darwin_amd64.zip  && unzip -qq /tmp/packer.zip -d /tmp/packer-ibm/ && rm /tmp/packer.zip
-    wget -q https://github.com/IBM/packer-plugin-ibmcloud/releases/download/v1.0.1/packer-builder-ibmcloud_1.0.1_macOS_64-bit.tar.gz -O - | tar -xz -C ~/.packer.d/plugins/
-   fi
-  fi
-
-  BASEOS="$(uname)"
-  case $BASEOS in
-  'Darwin')
-   PATH="/tmp/packer-ibm/:$(brew --prefix coreutils)/libexec/gnubin:$PATH"
-   ;;
-  'Linux')
-   PATH="/tmp/packer-ibm:$PATH"
-   ;;
-  *) ;;
-  esac
- fi
-fi
-# ###########################################################################################################
+############################################################################################################
 # Execute the Packer binary to build the final image
 #
 counter=0
