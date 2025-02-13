@@ -105,14 +105,45 @@ function hetznersetup(){
 done
 
 default_region=nbg1
+echo -e "${BGreen}Listing regions${Color_Off}"
+
+hcloud location list --output json | jq -r '
+  sort_by(.country)
+  | (["Name","Country","City"] | @tsv),
+    (.[]
+     | [ .name, .country, .city ]
+     | @tsv
+    )
+' | column -t -s $'\t'
+
 echo -e -n "${BGreen}Please enter your default region (you can always change this later with axiom-region select \$region): Default '$default_region', press enter \n>> ${Color_Off}"
 read region
-	if [[ "$region" == "" ]]; then
+if [[ "$region" == "" ]]; then
 	echo -e "${BGreen}Selected default option '$default_region'${Color_Off}"
 	region="$default_region"
-	fi
-	echo -e -n "${BGreen}Please enter your default size (you can always change this later with axiom-sizes select \$size): Default 'cx22', press enter \n>> ${Color_Off}"
-	read size
+fi
+
+echo -e "${BGreen}Listing Sizes${Color_Off}"
+echo -e "${BYellow}Recommended Architecture: ${Color_Off}'${BGreen}x86${Color_Off}'${BYellow}. Pick a size that is available in region: ${Color_Off}'${BGreen}${region}${Color_Off}'${BYellow}.${Color_Off}"
+hcloud server-type list --output json | jq -r '
+  [
+    "Name","Cores","Memory (GB)","Disk (GB)",
+    "CPU Type","Architecture","Price (€/Month)",
+    "Price (€/Hour)","Price per TB Traffic (€/TB)","Locations"
+  ],
+  (
+    .[] | [
+      .name,.cores, .memory, .disk, .cpu_type, .architecture,
+      (.prices[0].price_monthly.net        | tonumber),
+      (.prices[0].price_hourly.net         | tonumber),
+      (.prices[0].price_per_tb_traffic.net | tonumber),
+      ([ .prices[].location ] | unique | sort | join(", "))
+    ]
+  )
+  | @tsv
+' | iconv -c -t UTF-8 | column -t -s $'\t'
+echo -e -n "${BGreen}Please enter your default size (you can always change this later with axiom-sizes select \$size): Default 'cx22', press enter \n>> ${Color_Off}"
+read size
 	if [[ "$size" == "" ]]; then
 	echo -e "${BGreen}Selected default option 'cx22'${Color_Off}"
         size="cx22"

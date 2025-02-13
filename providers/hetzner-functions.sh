@@ -324,24 +324,24 @@ instance_id() {
 #  Used by ax sizes
 #
 sizes_list() {
-hcloud server-type list --output json | jq -r '
-  ["ID", "Name", "Description", "Cores", "Memory (GB)", "Disk (GB)", "Storage Type", "CPU Type", "Architecture", "Price (€/Month)", "Price (€/Hour)", "Price per TB Traffic (€/TB)"],
-  (.[]
-  | [
-      .id,
-      .name,
-      .description,
-      .cores,
-      .memory,
-      .disk,
-      .storage_type,
-      .cpu_type,
-      .architecture,
-      (.prices[0].price_monthly.net | tonumber),
-      (.prices[0].price_hourly.net | tonumber),
-      (.prices[0].price_per_tb_traffic.net | tonumber)
-    ]) | @tsv
-' | iconv -c -t UTF-8 | column -t -s $'\t'
+  hcloud server-type list --output json | jq -r '
+    [
+      "Name","Cores","Memory (GB)","Disk (GB)",
+      "CPU Type","Architecture","Price (€/Month)",
+      "Price (€/Hour)","Price per TB Traffic (€/TB)","Locations"
+    ],
+    (
+      .[] | [
+        .name, .cores, .memory, .disk,
+        .cpu_type, .architecture,
+        (.prices[0].price_monthly.net         | tonumber),
+        (.prices[0].price_hourly.net          | tonumber),
+        (.prices[0].price_per_tb_traffic.net  | tonumber),
+        ([ .prices[].location ] | unique | sort | join(", "))
+      ]
+    )
+    | @tsv
+  ' | iconv -c -t UTF-8 | column -t -s $'\t'
 }
 
 ###################################################################
