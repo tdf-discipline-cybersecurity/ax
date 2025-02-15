@@ -84,7 +84,7 @@
         "echo 'Downloading permutations'",
         "wget -q -O /home/op/lists/permutations.txt https://gist.github.com/six2dez/ffc2b14d283e8f8eff6ac83e20a3c4b4/raw",
 
-        "echo 'Downloading resolvers'",
+        "echo 'Downloading Trickest resolvers'",
         "wget -q -O /home/op/lists/resolvers.txt https://raw.githubusercontent.com/trickest/resolvers/master/resolvers.txt",
 
         "echo 'Downloading SecLists'",
@@ -92,11 +92,14 @@
 
         "echo 'Installing Tools'",
 
-        "echo 'Installing assetfinder'",
-        "/bin/su -l op -c '/usr/local/go/bin/go install github.com/tomnomnom/assetfinder@latest'",
+        "echo 'Installing anew'",
+        "/bin/su -l op -c '/usr/local/go/bin/go install -v github.com/tomnomnom/anew@latest'",
 
         "echo 'Installing Amass'",
         "wget -q -O /tmp/amass.zip https://github.com/OWASP/Amass/releases/download/v3.21.2/amass_linux_amd64.zip && cd /tmp/ && unzip /tmp/amass.zip && mv /tmp/amass_linux_amd64/amass /usr/bin/amass",
+
+        "echo 'Installing assetfinder'",
+        "/bin/su -l op -c '/usr/local/go/bin/go install github.com/tomnomnom/assetfinder@latest'",
 
         "echo 'Installing ax framework'",
         "/bin/su -l op -c 'git clone https://github.com/attacksurge/ax.git /home/op/.axiom && cd /home/op/.axiom/interact && ./axiom-configure --setup --shell zsh --unattended'",
