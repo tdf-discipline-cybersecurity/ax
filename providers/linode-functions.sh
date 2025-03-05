@@ -14,6 +14,17 @@ create_instance() {
         user_data="$5"
         root_pass="$(jq -r .op "$AXIOM_PATH/axiom.json")"
 
+        # Check if root_pass is empty or "null"
+         if [ -z "$root_pass" ] || [ "$root_pass" = "null" ]; then
+          # Generate a new password
+          root_pass=$(cat /dev/urandom | base64 | head -c 128 | tr -d '+=-' | tr -d '\n' | tr -d /)
+          # Resolve the real file behind the symlink
+          real_file=$(readlink -f "$AXIOM_PATH/axiom.json")
+          tmp_file=$(mktemp)
+          # Update the "op" field with the new password
+          jq --arg pass "$root_pass" '.op = $pass' "$real_file" > "$tmp_file" && mv "$tmp_file" "$real_file"
+        fi
+
         user_data_base64=$(mktemp)
         echo "$user_data" | base64 | tr -d '\n' > "$user_data_base64"
 
