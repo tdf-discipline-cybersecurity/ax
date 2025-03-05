@@ -371,7 +371,19 @@ create_instances() {
     shift 5
     names=("$@")  # Remaining arguments are instance names
 
+    # Get the root password from axiom.json
     root_pass="$(jq -r .op "$AXIOM_PATH/axiom.json")"
+
+    # Check if root_pass is empty or "null"
+    if [ -z "$root_pass" ] || [ "$root_pass" = "null" ]; then
+        # Generate a new password
+        root_pass=$(cat /dev/urandom | base64 | head -c 128 | tr -d '+=-' | tr -d '\n' | tr -d /)
+        # Resolve the real file behind the symlink
+        real_file=$(readlink -f "$AXIOM_PATH/axiom.json")
+        tmp_file=$(mktemp)
+        # Update the "op" field with the new password
+        jq --arg pass "$root_pass" '.op = $pass' "$real_file" > "$tmp_file" && mv "$tmp_file" "$real_file"
+    fi
 
     # Encode user data as Base64
     user_data_base64=$(mktemp)
@@ -388,7 +400,7 @@ create_instances() {
 
     # Create instances in batches of 'batch_size'
     for name in "${names[@]}"; do
-        linode_id=$(linode-cli linodes create \
+        linode_output=$(linode-cli linodes create \
             --type "$size" \
             --region "$region" \
             --image "$image_id" \
@@ -397,13 +409,15 @@ create_instances() {
             --private_ip true \
             --metadata.user_data "$(cat "$user_data_base64")" \
             --format id \
-            --no-header 2>/dev/null \
-            --text )
+            --no-header \
+            --text \
+            --no-defaults 2>&1)
 
-        if [ -n "$linode_id" ]; then
-            instance_ids+=("$linode_id")
+        if [[ "$linode_output" =~ ^[0-9]+$ ]]; then
+            instance_ids+=("$linode_output")
         else
-            >&2 echo "Error creating instance: $name"
+            >&2 echo "Error creating instance '$name'"
+            >&2 echo "$linode_output"
         fi
 
         # After every 'batch_size' creations, wait before creating the next batch
@@ -413,7 +427,7 @@ create_instances() {
         fi
     done
 
-    # Clean up temporary file
+    # Clean up temporary file for user data
     rm -f "$user_data_base64"
 
     # Monitor instance statuses
@@ -431,7 +445,7 @@ create_instances() {
             id="${instance_ids[$i]}"
             name="${instance_names[$i]}"
 
-            # Extract status and IP
+            # Extract status and IP using awk
             status=$(echo "$current_statuses" | awk -v id="$id" '$1 == id {print $3}')
             ip=$(echo "$current_statuses" | awk -v id="$id" '$1 == id {print $4}')
 
@@ -456,7 +470,7 @@ create_instances() {
         elapsed=$((elapsed + interval))
     done
 
-    # If we exit the loop, timeout was reached without all instances running
+    # Timeout reached without all instances running
     rm -f "$processed_file"
     return 1
 }
