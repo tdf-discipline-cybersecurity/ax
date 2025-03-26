@@ -474,7 +474,7 @@ merge_output() {
         echo "mode set to $ext.. combining results into one file."
         find $tmp/output/ -type f -exec cat {} \; > $tmp/merge
         if [[ "$anew" == "true" ]]; then
-            cat "$tmp/merge" | anew "$outfile"
+            cat "$tmp/merge" | anew -q "$outfile"
         else
             mv "$tmp/merge" "$outfile"
         fi
@@ -483,7 +483,7 @@ merge_output() {
         echo "mode set to $ext.. sorting unique."
         find $tmp/output/ -type f -exec cat {} \; | sort -u > $tmp/merge
         if [[ "$anew" == "true" ]]; then
-            cat "$tmp/merge" | anew "$outfile"
+            cat "$tmp/merge" | anew -q "$outfile"
         else
             mv "$tmp/merge" "$outfile"
         fi
@@ -502,7 +502,7 @@ merge_output() {
         echo "$header" > $tmp/merge
         find $tmp/output/ -type f -exec cat {} \; | grep -v "$header" | sort -u -V >> $tmp/merge
         if [[ "$anew" == "true" ]]; then
-            cat "$tmp/merge" | anew "$outfile"
+            cat "$tmp/merge" | anew -q "$outfile"
         else
             mv "$tmp/merge" "$outfile"
         fi
