@@ -23,7 +23,7 @@ esac
 #
 function help() {
         echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  Welcome to the Ax Framework! You can use this wrapper to execute the various axiom scripts (located in ~/.axiom/interact/)"
+        echo -e "  Welcome to Ax Framework! You can use this wrapper to execute the various axiom scripts (located in ~/.axiom/interact/)"
         echo -e "  To supply additional arguments to a script, simply append them to the command"
         echo -e "  For more options, print the help menu for any script (ax init, ax fleet, ax scan, ax images, etc)"
         echo -e "  Or you could just run the scripts without the wrapper (axiom-exec for example)"
@@ -68,6 +68,8 @@ function help() {
         echo -e "   Evaluate shell one-liners or execute single commands on one or more instances in parallel (axiom-exec)"
         echo -e "  fleet"
         echo -e "   Display commands to manage fleets (axiom-fleet)"
+        echo -e "  fleet2"
+        echo -e "   A faster but experimental axiom-fleet (axiom-fleet2)"
         echo -e "  images"
         echo -e "   Create a new snapshot of a running axiom instance, select the new snapshot to deploy future axiom instances/fleets, get and delete images (axiom-images)"
         echo -e "  init"

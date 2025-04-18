@@ -434,7 +434,13 @@ create_instances() {
     fi
 
     # Extract instance IDs from the creation response
-    instance_ids=($(echo "$instance_data" | grep $base_hostname | awk '{print $1}'))
+    if [ "$count" -eq 1 ]; then
+        # Single instance: parse vertical table output
+        instance_ids=($(echo "$instance_data" | awk '/^ID[ \t]+[0-9]+/ { print $2 }'))
+    else
+        # Multiple instances: parse tabular response
+        instance_ids=($(echo "$instance_data" | grep "$base_hostname" | awk '{print $1}'))
+    fi
 
     # Verify we got the expected number of instances
     if [ "${#instance_ids[@]}" -ne "$count" ]; then
