@@ -45,7 +45,7 @@ get_default_size() {
 
   elif [[ "$provider" == "scaleway" ]]; then
     default_size="DEV1-S"
-  
+
   elif [[ "$provider" == "exoscale" ]]; then
     default_size="standard.medium"
 
@@ -59,28 +59,28 @@ get_default_size() {
 # Help Menu:
 #
 function usage() {
-        echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  Manage the default instance size used by '${BGreen}axiom-init${Color_Off}' or '${BGreen}axiom-fleet${Color_Off}' with '${BGreen}axiom-sizes${Color_Off}'!"
-        echo -e "  List all sizes the cloud provider has with '${BGreen}axiom-sizes ls${Color_Off}' and select a new one with '${BGreen}axiom-sizes select \$new_size${Color_Off}' "
-        echo -e "  All this does is replaces the .default_size in ~/.axiom/axiom.json with a new size"
-        echo -e "${BWhite}Examples:"
-        echo -e "  ${Green}axiom-sizes ls${Color_Off} # List all sizes the cloud provider offers"
-        echo -e "  ${Green}axiom-sizes select Standard_F2${Color_Off} # Set a new default instance size to use with future ${Color_Off}'${BGreen}axiom-init/axiom-fleet${Color_Off}'"
-        echo -e "  ${Green}axiom-sizes default${Color_Off} # Restore instance size to the default"
-        echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  ls (optional)"
-        echo -e "    List all available instance sizes '${BGreen}axiom-sizes ls${Color_Off}'"
-        echo -e "  get (optional)"
-        echo -e "    Print information about currently used instance size, equivalent to (cat ~/.axiom/axiom.json) '${BGreen}axiom-sizes get${Color_Off}'"
-        echo -e "  select <required insntance size name>"
-        echo -e "    Select a new instance size to use for future ${Color_Off}'${BGreen}axiom-init/axiom-fleet${Color_Off}', replaces 'default_size' in ~/.axiom/axiom.json with new 'default_size' (must be valid instance size from '${BGreen}ax sizes ls${Color_Off}')"
-        echo -e "  default (optional)"
-        echo -e "    Restore the default instance size '${BGreen}axiom-sizes default${Color_Off}'"
-        echo -e "  --debug (optional)"
-        echo -e "    Enable debug mode (VERY VERBOSE!)"
-        echo -e "  --help (optional)"
-        echo -e "    Display this help menu"
-exit
+    echo -e "${BWhite}Usage:${Color_Off} axiom-sizes [COMMAND] [OPTIONS]"
+    echo
+    echo -e "${BWhite}Description:${Color_Off}"
+    echo -e "  Manage the default instance size used by axiom-init and axiom-fleet."
+    echo -e "  You can list, select, restore, or print the currently selected size."
+    echo
+    echo -e "${BWhite}Commands:${Color_Off}"
+    echo -e "  ls                         List all available instance sizes"
+    echo -e "  get                        Print the current default instance size from axiom.json"
+    echo -e "  select <size>              Set a new default size (must be a valid option from 'ls')"
+    echo -e "  default                    Restore the original default size"
+    echo
+    echo -e "${BWhite}Options:${Color_Off}"
+    echo -e "  --debug                    Enable debug output (very verbose)"
+    echo -e "  --help                     Show this help menu"
+    echo
+    echo -e "${BWhite}Examples:${Color_Off}"
+    echo -e "  ${BGreen}axiom-sizes ls${Color_Off}                              # List sizes available from provider"
+    echo -e "  ${BGreen}axiom-sizes get${Color_Off}                             # Show the currently selected size"
+    echo -e "  ${BGreen}axiom-sizes select s-4vcpu-8gb${Color_Off}              # Set 's-4vcpu-8gb' as the default"
+    echo -e "  ${BGreen}axiom-sizes default${Color_Off}                         # Reset to original default size"
+    echo
 }
 
 ###########################################################################################################

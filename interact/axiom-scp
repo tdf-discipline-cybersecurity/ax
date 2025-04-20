@@ -73,29 +73,26 @@ split=false
 # Help Menu:
 #
 function help() {
-        echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  axiom-scp supports downloading and uploading files or folders to fleets of axiom instance or single instances"
-        echo -e "  axiom-scp optionally allows splitting a local file across a fleet of instances"
-        echo -e "  axiom-scp supports globbing to expand the instance names from a fleet prefix"
-        echo -e "  when the literal string '\$name' is in the command, axiom-scp automatically interpolates the instances name"
-        echo -e "${BWhite}Examples:${Color_Off}"
-        echo -e "  ${Green}axiom-scp mytemplates/ 'myfleet*':/home/op/custom-templates ${Color_Off} # Upload a local folder to all instances in myfleet"
-        echo -e "  ${Green}axiom-scp custom-wordlist.txt 'myfleet*':/home/op/custom-wordlist.txt${Color_Off} # Upload local file to all instances in myfleet"
-        echo -e "  ${Green}axiom-scp custom-wordlist.txt 'myfleet*':/home/op/custom-wordlist.txt --split${Color_Off} # Split and upload local wordlist to all instances in myfleet"
-        echo -e "  ${Green}axiom-scp testy01:/home/op/download-file.txt download-file.txt${Color_Off} # Download file from a single instance named testy01"
-        echo -e "  ${Green}axiom-scp 'testy*':/home/op/results.txt '~/home/localuser/folder/\$name.txt'${Color_Off} # Download file from all instances in testy fleet,"
-        echo -e "  when using '\$name', it must be wrapped in single quotes and gets interpolated from the instance name"
-        echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  --split (optional)"
-        echo -e "    Split the local file depending on the size of the fleet, equally distribute the file across the fleet"
-        echo -e "  --sshconfig <path to custom ssh config> (optional)"
-        echo -e "    Path of custom SSH config file to use (default uses sshconfig in ~/.axiom/.sshconfig)"
-        echo -e "  --cache (optional)"
-        echo -e "    Temporarily do not generate SSH config and instead connect with cached SSH config"
-        echo -e "  --debug (optional)"
-        echo -e "    Enable debug mode (VERY VERBOSE!)"
-        echo -e "  --help (optional)"
-        echo -e "    Display this help menu"
+    echo -e "${BWhite}Usage:${Color_Off} axiom-scp <source> <target> [OPTIONS]"
+    echo
+    echo -e "${BWhite}Description:${Color_Off}"
+    echo -e "  Upload or download files and folders to/from Axiom instances or fleets."
+    echo -e "  Supports glob patterns, file splitting, and instance name interpolation with \$name."
+    echo
+    echo -e "${BWhite}Options:${Color_Off}"
+    echo -e "  --split                   Split local file and distribute across fleet"
+    echo -e "  --sshconfig <path>        Use a custom SSH config file (default: ~/.axiom/.sshconfig)"
+    echo -e "  --cache                   Use cached SSH config (skip regeneration)"
+    echo -e "  --debug                   Enable debug output (very verbose)"
+    echo -e "  --help                    Show this help menu"
+    echo
+    echo -e "${BWhite}Examples:${Color_Off}"
+    echo -e "  ${BGreen}axiom-scp mytemplates/ 'myfleet*':/home/op/custom-templates${Color_Off}       # Upload folder to all instances in fleet"
+    echo -e "  ${BGreen}axiom-scp wordlist.txt 'myfleet*':/home/op/wordlist.txt${Color_Off}           # Upload a file to fleet"
+    echo -e "  ${BGreen}axiom-scp wordlist.txt 'myfleet*':/home/op/wordlist.txt --split${Color_Off}   # Split file and upload evenly across fleet"
+    echo -e "  ${BGreen}axiom-scp testy01:/home/op/remote.txt local.txt${Color_Off}                   # Download file from single instance"
+    echo -e "  ${BGreen}axiom-scp 'testy*':/home/op/results.txt './output/\$name.txt'${Color_Off}      # Download file from all fleet instances (uses \$name interpolation)"
+    echo
 }
 
 ###########################################################################################################

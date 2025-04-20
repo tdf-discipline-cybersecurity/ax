@@ -7,13 +7,21 @@ instance=""
 
 # help menu
 function help() {
-	echo -e "${BWhite}Usage of axiom-sync${Color_Off}"
-        echo -e "Description: ${Green}Make a copy of an instances home directoy and sync to your local filesystem.${Color_Off}"
-	echo -e "Example Usage: ${Green}axiom-sync instance01 instance02${Color_Off}"
-	echo -e "  <instance> string"
-	echo -e "    Instance name you wish to backup"
-	echo -e "  --help (optional)"
-	echo -e "    Displays this menu"
+    echo -e "${BWhite}Usage:${Color_Off} axiom-sync [INSTANCE ...] [OPTIONS]"
+    echo
+    echo -e "${BWhite}Description:${Color_Off}"
+    echo -e "  Sync the home directory from one or more Axiom instances to your local machine."
+    echo
+    echo -e "${BWhite}Arguments:${Color_Off}"
+    echo -e "  <instance>                One or more instance names to sync from"
+    echo
+    echo -e "${BWhite}Options:${Color_Off}"
+    echo -e "  --help                    Show this help menu"
+    echo
+    echo -e "${BWhite}Examples:${Color_Off}"
+    echo -e "  ${BGreen}axiom-sync instance01${Color_Off}                    # Sync from 'instance01'"
+    echo -e "  ${BGreen}axiom-sync instance01 instance02${Color_Off}         # Sync from multiple instances"
+    echo
 }
 
 # take one arugment and downloads the home dir of the instance supplied
@@ -38,7 +46,7 @@ if [ "$1" == "" ]; then
  exit
 fi
 
-# if arguments --help or -h are specified print help 
+# if arguments --help or -h are specified print help
 if [[ "$@" == "--help" ]] || [[ "$@" == "-h" ]]; then
  help
  exit
@@ -51,5 +59,5 @@ for var in "$@"
 do
  instance=$var
  sync $1
-done  
+done
 fi

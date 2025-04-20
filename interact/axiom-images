@@ -26,35 +26,32 @@ provider="$(jq -r ".provider" "$AXIOM_PATH/axiom.json")"
 # Help Menu:
 #
 function usage() {
-        echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  Manage images created by '${BGreen}axiom-build${Color_Off}' or '${BGreen}axiom-images${Color_Off}' with '${BGreen}axiom-images${Color_Off}'!"
-        echo -e "  After creating an image, list all images on the account '${BGreen}axiom-images ls${Color_Off}'"
-        echo -e "  Delete images on the account that are no longer needed '${BGreen}axiom-images rm \$image_name${Color_Off}'"
-        echo -e "  Create a new image/snapshot from a deployed instance with '${BGreen}axiom-images create${Color_Off}' (list all deployed instances with '${BGreen}axiom-ls${Color_Off}')"
-        echo -e "  After the new image is created, or to switch to a different image on the account, select it with '${BGreen}axiom-images select \$image_name${Color_Off}' to use for '${BGreen}axiom-init/axiom-fleet${Color_Off}'!"
-        echo -e "${BWhite}Examples:"
-        echo -e "  ${Green}axiom-images ls ${Color_Off}# List all images on the account"
-        echo -e "  ${Green}axiom-images get ${Color_Off}# Print details from ~/.axiom/axiom.sjon"
-        echo -e "  ${Green}axiom-images rm axiom-default-1709878237${Color_Off} # Delete image named axiom-default-1709878237 from the account"
-        echo -e "  ${Green}axiom-images create${Color_Off} # Start '${BGreen}axiom-images${Color_Off}' image creation wizard"
-        echo -e "  ${Green}axiom-images create testy01${Color_Off} # Skip image creation wizard and instead create image from testy01 instance"
-        echo -e "  ${Green}axiom-images select axiom-barebones-1709944106${Color_Off} # Select image named axiom-barebones-1709944106 to use with future ${Color_Off}'${BGreen}axiom-init/axiom-fleet${Color_Off}'" 
-        echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  ls (optional)"
-        echo -e "    List all images on the account '${BGreen}axiom-images ls${Color_Off}'"
-        echo -e "  get (optional)"
-        echo -e "    Print information about current account, equivalent to (cat ~/.axiom/axiom.json) '${BGreen}axiom-images get${Color_Off}'"
-        echo -e "  rm <required image name>"
-        echo -e "    Specify an image by name to delete (must be an image name from '${BGreen}axiom-images ls${Color_Off}')"
-        echo -e "  create <optional instance name>"
-        echo -e "    Kick off axiom-images creation wizard or specify an instance to create an image from '${BGreen}axiom-images create \$instance_name${Color_Off}'"
-        echo -e "  select <required image name>"
-        echo -e "    Select a new image to use for future ${Color_Off}'${BGreen}axiom-init/axiom-fleet${Color_Off}', replaces 'imageid' in ~/.axiom/axiom.json with new 'imageid' (must be an image name from '${BGreen}axiom-images ls${Color_Off}')"
-        echo -e "  --debug (optional)"
-        echo -e "    Enable debug mode (VERY VERBOSE!)"
-        echo -e "  --help (optional)"
-        echo -e "    Display this help menu"
-exit
+    echo -e "${BWhite}Usage:${Color_Off} axiom-images [COMMAND] [OPTIONS]"
+    echo
+    echo -e "${BWhite}Description:${Color_Off}"
+    echo -e "  Manage images (snapshots) created from Axiom instances and Axiom build."
+    echo -e "  Supports listing, creating, selecting, and deleting images used for axiom-init or axiom-fleet."
+    echo
+    echo -e "${BWhite}Commands:${Color_Off}"
+    echo -e "  ls                         List all images on the current account"
+    echo -e "  get                        Print current image settings from ~/.axiom/axiom.json"
+    echo -e "  create [instance]          Create image from instance (or use wizard if instance is omitted)"
+    echo -e "  select <image>             Set image as default for future axiom-init / axiom-fleet"
+    echo -e "  rm <image>                 Delete specified image from the account"
+    echo
+    echo -e "${BWhite}Options:${Color_Off}"
+    echo -e "  --debug                    Enable debug output (very verbose)"
+    echo -e "  --help                     Show this help menu"
+    echo
+    echo -e "${BWhite}Examples:${Color_Off}"
+    echo -e "  ${BGreen}axiom-images ls${Color_Off}                              # List all available images"
+    echo -e "  ${BGreen}axiom-images get${Color_Off}                             # Show current image config"
+    echo -e "  ${BGreen}axiom-images create${Color_Off}                          # Start interactive image creation wizard"
+    echo -e "  ${BGreen}axiom-images create testy01${Color_Off}                  # Create image from instance 'testy01'"
+    echo -e "  ${BGreen}axiom-images select axiom-default-1709878237${Color_Off} # Select image for future init/fleet"
+    echo -e "  ${BGreen}axiom-images rm axiom-default-1709878237${Color_Off}     # Delete image by name"
+    echo
+
 }
 
 ###########################################################################################################

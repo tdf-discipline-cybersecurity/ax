@@ -100,93 +100,89 @@ function parse_module() {
 # add --rm-duplicates ( remove duplicates from target list, sort -u equivalent  )
 # add option to supply different SSH key
 #
-function help(){
-cat << EOF
-axiom-scan provides easy distribution of arbitrary binaries and scripts.
-axiom-scan optionally splits user-provided input files (target lists), and wordlists and uploads them to a unique scan working directory on the remote instances.
-axiom-scan combines user-provided command-line arguments with commands in the module (~/.axiom/modules) and executes the final command on the remote instances.
-axiom-scan downloads and merges scan output in a variety of different formats, determined by the extension in the module (dir, txt, oG, csv, xml, jsonl, none) and output option used at run-time.
-individual scanning operations are executed from a detached tmux session (<MODULE+TIMESTAMP>) inside a unique scan working directory (/home/op/scan/\$module+\$timestamp) on the remote instances.
-
-Usage:
-   axiom-scan inputfile.txt -m ffuf -w /home/op/wordlist-on-remote-instance
-   axiom-scan inputfile.txt -m ffuf -wL /home/localuser/local-wordlist-to-upload
-   axiom-scan inputfile.txt -m ffuf -wD /home/localuser/local-wordlist-to-split-and-upload
-   axiom-scan inputfile.txt -m nuclei --remote-folder /home/op/nuclei-templates-on-remote-instances -o outputfile.txt
-   axiom-scan inputfile.txt -m nuclei --local-folder /home/localuser/local-custom-nuclei-template-folder-to-upload/ -o outputfile.txt
-   axiom-scan inputfile.txt -m nuclei --local-config /home/localuser/local-custom-nuclei-config-file-to-upload.yaml -o outputfile.txt --anew
-   axiom-scan inputfile.txt -m gowitness -oD screenshots-folder --spinup 10
-   axiom-scan inputfile.txt -m nmapx -p- -sV -T4 -v --open -oA nampx-scan --spinup 100 --rm-when-done --regions dal13,lon06,fra05,sjc04
-
-Flags:
-INPUT:
-   <INPUT_FILE>          required positional first argument must always be an input file, this can be a list of URLs, IPs, hostnames, etc
-   --dont-shuffle        do not randomize input file before uploading (default is to randomize)
-   --dont-split          do not split input file, upload entire input file to every instance (default is to split the input file)
-   --expand-cidr         automatically expand any subnet in the input file (default does not expand subnets)
-
-MODULE:
-   -m <MODULE>           the axiom-scan module to use with the scan (must be a JSON file in ~/.axiom/modules)
-   --list                print all available modules located in ~/.axiom/modules
-
-WORDLIST:
-   -w <remote_file>                        replace _wordlist_ in module with user-provided wordlist (must be a path to a remote wordlist)
-   -wD,--distribute-wordlist <local_file>  replace _wordlist_ in module with user-provided local wordlist to split and upload (default does not split the wordlist)
-   -wL,--local-wordlist <local_file>       replace _wordlist_ in module with user-provided local wordlist (must be a path to a local wordlist)
-
-FOLDER:
-   --remote-folder <remote_path>           replace _folder_ in module with user-provided remote folder (must be a path to a remote folder)
-   --local-folder <local_path>             replace _folder_ in module with user-provided local folder to upload (must be a path to a local folder)
-
-CONFIGURATIONS:
-   --remote-config <remote_file>           replace _config_ in module with user-provided configuration file (must be a configuration file on the remote instances)
-   --local-config <local_file>             replace _config_ in module with user-provided local configuration file to upload (must be a local configuration file)
-
-ONE-SHOT:
-   --disable-oneshot            by default, if a module contains the string _target_ or _safe-target_ it is executed as a one-shot module. Use this flag to force disable
-   --unsafe                     for one-shot modules only, axiom will transparently replace _target_ with _safe-target_ in modules at runtime, use this flag to force disable
-   --track-finished             for one-shot modules only, add this flag to track finished targets (creates a file in the remote scan working directory named finished.txt)
-   --threads <number>           specify the number of threads to use with one-shot modules (default uses "threads": \$N key:value pair in the module)"
-
-OPTIMIZATIONS:
-   --upload <local_file>        before the scan, upload a file to the unique scan working directory (/home/op/scan/\$module+\$timestamp) on remote instances (must be a path to a local file)
-   --download <remote_file>     after the scan, download a file from the unique scan working directory (/home/op/scan/\$module+\$timestamp) on remote instances (must be a path to a remote file)
-   --max-runtime <duration>     kill scan if still running after DURATION, DURATION is a floating point number with an required suffix: 'm' for minutes, 'h' for hours or 'd' for days
-   --preflight-timeout <number> specifies the timeout (in seconds) used when connecting to the SSH server, instead of using the default 15 seconds
-   --skip-preflight             do not automatically remove instances that can not be reached (default removes instances from the queue that can not be reached)
-   --anew                       pipe the output to anew before creating the final output file (also requires extension "ext":"txt", "ext":"oG" or "ext":"csv" to be in the module)
-
-OUTPUT:
-   -o <file>             output as default (the first ext mentioned in the module)
-   -oT/-txt <file>       output as text (must also be supplied in the module using "ext":"txt")
-   -oD/-oA <directory>   output as directory (must also be supplied in the module using "ext":"dir" or "ext":"")
-   -oG <file>            output as greppable, merge and sort unique (must also be supplied in the module using "ext":"oG")
-   -oJ <file>            output as json lines, newline characters are used to delimit JSON data (must also be supplied in the module using "ext":"jsonl")
-   -oX <file>            output as XML/HTML (supported for nmap and masscan)(must also be supplied in the module using "ext":"xml")
-   -csv <file>           output as csv, extract csv header, merge and sort unique (must also be supplied in the module using "ext":"csv")
-   -none <file>          do not attempt to merge the output at all (must also be supplied in the module using "ext":"none")
-   --quiet               do not display findings to terminal
-   --rm-logs             delete remote and local logs after scan completes, except for the unmerged output files in ~/.axiom/logs/\$module+\$timestamp/output
-   --no-logs             do not store any logs at all, do not tail terminal output. Delete all logs even the unmerged output files in ~/.axiom/logs/\$module+\$timestamp/output
-   --stdout              only display stdout results to terminal (default displays stdout and stderr to the terminal)
-
-FLEET:
-   --custom-ssh <file>          path to custom SSH config file (default is located at ~/.axiom/.sshconfig)
-   --cache                      do not regenerate SSH config prior to scan, instead use cached config (located at ~/.axiom/.sshconfig)
-   --fleet <FLEET_PREFIX>       supply fleet prefix to use (default uses instances in ~/.axiom/selected.conf)
-   --regions <REGION1,REGION2>  round-robin region distribution using comma-separated regions to cycle through (default is region in ~/.axiom/axiom.json)
-   --rm-when-done               delete the instance when finished with its job (does not wait for all instances to complete)
-   --shutdown-when-done         shutdown the instance when finished with its job (does not wait for all instances to complete)
-   --spinup <number>            number of instances to spin up prior to scanning (default uses instances in ~/.axiom/selected.conf)
-
-DEBUG:
-   --debug                      run with set -xv, warning: very verbose (use with --cache for less output)
-
-EXTRA ARGS:
-   <ARGS>                supply additional arguments to be passed to the module
-   --extra-args <ARGS>   explicitly define extra args to be passed to the module, must be wrapped single or double quotes (depending on intended variable expansion)
-EOF
-
+function help() {
+    echo -e "${BGreen}Usage:${Color_Off} axiom-scan <input_file> -m <module> [options]"
+    echo
+    echo -e "${BGreen}Description:${Color_Off}"
+    echo -e "  Run large-scale distributed scans by splitting inputs, uploading resources,"
+    echo -e "  executing modules across instances, and automatically merging outputs."
+    echo
+    echo -e "${BGreen}Input:${Color_Off}"
+    echo -e "  <input_file>               Required list of targets (URLs, IPs, hostnames, etc.)"
+    echo -e "  --dont-shuffle             Upload input in original order (default: randomized)"
+    echo -e "  --dont-split               Upload full input file to each instance (default: split across fleet)"
+    echo -e "  --expand-cidr              Automatically expand CIDRs into individual IPs"
+    echo
+    echo -e "${BGreen}Module:${Color_Off}"
+    echo -e "  -m <module>                Module to run (must exist in ~/.axiom/modules)"
+    echo -e "  --list                     Show all available modules"
+    echo
+    echo -e "${BGreen}Wordlist:${Color_Off}"
+    echo -e "  -w <remote_path>           Use remote wordlist already on the instance"
+    echo -e "  -wD, --distribute-wordlist <local_file>   Split and upload local wordlist across fleet"
+    echo -e "  -wL, --local-wordlist <local_file>        Upload full wordlist without splitting"
+    echo
+    echo -e "${BGreen}Folders & Configs:${Color_Off}"
+    echo -e "  --remote-folder <path>     Use existing remote folder as _folder_ in the module"
+    echo -e "  --local-folder <path>      Upload a local folder to all instances as _folder_"
+    echo -e "  --remote-config <file>     Use remote config file as _config_ in the module"
+    echo -e "  --local-config <file>      Upload local config file to all instances as _config_"
+    echo
+    echo -e "${BGreen}One-shot Mode:${Color_Off}"
+    echo -e "  --disable-oneshot          Disable automatic one-shot behavior based on _target_/_safe-target_"
+    echo -e "  --unsafe                   Disable safe-target substitution in one-shot mode"
+    echo -e "  --track-finished           Create 'finished.txt' on instance to track completed targets"
+    echo -e "  --threads <int>            Manually set thread count for one-shot modules"
+    echo
+    echo -e "${BGreen}Optimizations:${Color_Off}"
+    echo -e "  --upload <file>            Upload a file to scan directory before scan starts"
+    echo -e "  --download <file>          Download a file from scan directory after scan ends"
+    echo -e "  --max-runtime <10m|2h|1.5d>  Auto-kill scan after specified duration"
+    echo -e "  --preflight-timeout <sec>  Timeout for initial SSH connection (default: 15s)"
+    echo -e "  --skip-preflight           Skip SSH health check before scan starts"
+    echo -e "  --anew                     Pipe scan output through 'anew' before final save (txt/oG/csv only)"
+    echo
+    echo -e "${BGreen}Output:${Color_Off}"
+    echo -e "  -o <file>                  Save output using default format in module"
+    echo -e "  -oT/-txt <file>            Save as plain .txt (requires ext:\"txt\" in module)"
+    echo -e "  -oD/-oA <dir>              Save to output directory (requires ext:\"dir\" or none)"
+    echo -e "  -oG <file>                 Save in greppable format (requires ext:\"oG\")"
+    echo -e "  -oJ <file>                 Save as newline-delimited JSON (requires ext:\"jsonl\")"
+    echo -e "  -oX <file>                 Save as XML or HTML (e.g. for nmap/masscan)"
+    echo -e "  -csv <file>                Save as CSV (requires ext:\"csv\")"
+    echo -e "  -none <file>               Don’t merge output (requires ext:\"none\")"
+    echo -e "  --quiet                    Suppress terminal output from remote scans"
+    echo -e "  --rm-logs                  Delete all logs after scan (keeps final output)"
+    echo -e "  --no-logs                  Don’t store or show logs at all (output only)"
+    echo -e "  --stdout                   Only print stdout from remote scans (hides stderr)"
+    echo
+    echo -e "${BGreen}Fleet Control:${Color_Off}"
+    echo -e "  --custom-ssh <file>        Use custom SSH config file instead of default"
+    echo -e "  --cache                    Use cached SSH config (skip regeneration)"
+    echo -e "  --fleet <prefix>           Use specific fleet prefix (default: selected.conf)"
+    echo -e "  --regions <r1,r2,...>      Use round-robin region distribution"
+    echo -e "  --rm-when-done             Destroy each instance after it finishes"
+    echo -e "  --shutdown-when-done       Shutdown each instance after it finishes"
+    echo -e "  --spinup <int>             Provision this many new instances for the scan"
+    echo
+    echo -e "${BGreen}Debug:${Color_Off}"
+    echo -e "  --debug                    Enable verbose output (set -xv)"
+    echo
+    echo -e "${BGreen}Extra Args:${Color_Off}"
+    echo -e "  <args>                     Additional arguments passed to the module"
+    echo -e "  --extra-args <args>        Explicit extra args (wrap in quotes)"
+    echo -e "  --help                     Show this help menu"
+    echo
+    echo -e "${BGreen}Examples:${Color_Off}"
+    echo -e "  axiom-scan targets.txt -m ffuf -w /home/op/wordlist.txt"
+    echo -e "  axiom-scan targets.txt -m ffuf -wL ~/wordlists.txt"
+    echo -e "  axiom-scan targets.txt -m ffuf -wD ~/biglist.txt"
+    echo -e "  axiom-scan targets.txt -m nuclei --local-folder ~/templates -o out.txt"
+    echo -e "  axiom-scan targets.txt -m nuclei --local-config ~/nuclei.yaml -o out.txt --anew"
+    echo -e "  axiom-scan targets.txt -m gowitness -oD screenshots --spinup 10$"
+    echo -e "  axiom-scan targets.txt -m nmapx -p- -sV -T4 --open -oA out \\"
+    echo -e "      --spinup 100 --rm-when-done --regions dal13,lon06,fra05"
+    echo
 }
 
 ###########################################################################################################
@@ -920,11 +916,11 @@ echo ''
 echo '
  "𝓲𝓷𝓼𝓹𝓲𝓻𝓮𝓭 𝓫𝔂 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
  "𝓽𝓱𝓮 𝓬𝓸𝓷𝓽𝓲𝓷𝓾𝓪𝓽𝓲𝓸𝓷 𝓸𝓯 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
- "𝓬𝓸𝓷𝓽𝓲𝓷𝓾𝓮𝓭 𝓯𝓻𝓸𝓶: 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
+ "𝓬𝓸𝓷𝓽𝓲𝓷𝓾𝓮𝓭 𝓯𝓻𝓸𝓶 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
  "𝓫𝓪𝓼𝓲𝓬𝓪𝓵𝓵𝔂, 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷 "
  "𝓶𝓲𝓰𝓱𝓽 𝓪𝓼 𝔀𝓮𝓵𝓵 𝓫𝓮 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
  "𝓪𝓵𝓻𝓲𝓰𝓱𝓽, 𝔂𝓸𝓾 𝓰𝓸𝓽 𝓶𝓮, 𝓲𝓽𝓼 𝓳𝓾𝓼𝓽 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
- "𝓼𝓽𝓸𝓵𝓮𝓷 𝓯𝓻𝓸𝓶: 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
+ "𝓼𝓽𝓸𝓵𝓮𝓷 𝓯𝓻𝓸𝓶 𝓪𝔁𝓲𝓸𝓶: 𝓽𝓱𝓮 𝓭𝔂𝓷𝓪𝓶𝓲𝓬 𝓲𝓷𝓯𝓻𝓪𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮 𝓯𝓻𝓪𝓶𝓮𝔀𝓸𝓻𝓴 𝓯𝓸𝓻 𝓮𝓿𝓮𝓻𝔂𝓫𝓸𝓭𝔂! - @𝓹𝓻𝔂0𝓬𝓬 @0𝔁𝓽𝓪𝓿𝓲𝓪𝓷"
  ' | xargs shuf -n1 -e
 echo ''
 

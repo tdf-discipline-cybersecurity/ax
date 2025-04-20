@@ -73,33 +73,32 @@ if [[ "$provider" == "do" ]]; then
  echo -n -e "${BWhite}Instances: ${Color_Off}[ ${BGreen}"
  fi
 echo -n -e ${BGreen}
-fi 
+fi
 }
 
 ###########################################################################################################
 # Help Menu
-# 
+#
 function usage() {
-        echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  Spin up fleets of axiom instances in one or multiple regions."
-        echo -e "  Specify the name of your fleet (fleet prefix) or have axiom choose for you."
-        echo -e "${BWhite}Examples:${Color_Off}"
-        echo -e "  ${BGreen}axiom-fleet ctbb ${Color_Off} # Spin up 3 instances named ctbb01 ctbb02 and ctbb03"
-        echo -e "  ${BGreen}axiom-fleet -i 10${Color_Off} # Spin up 10 instances with random fleet prefix"
-        echo -e "  ${BGreen}axiom-fleet jerry -i 25 --regions dal13,lon06,fra05${Color_Off} # Spin up 25 instances named jerry01 to jerry25 using Round-robin region distribution"
-        echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  <fleet prefix> (optional)"
-        echo -e "    Name of fleet prefix (default is random fleet prefix)"
-        echo -e "  -i/--instances <required integer>"
-        echo -e "    The number of instances to spin up"
-        echo -e "  -r/--regions <regions> (optional)"
-        echo -e "    Supply comma-separated regions to cycle through (default is region in ~/.axiom/axiom.json)"
-        echo -e "  --image <image name> (optional)"
-        echo -e "    Manually set the image to use (default is imageid in ~/.axiom/axiom.json)"
-        echo -e "  --debug (optional)"
-        echo -e "    Run with set -xv, warning: very verbose"
-        echo -e "  --help (optional)"
-        echo -e "    Display this help menu"
+    echo -e "${BWhite}Usage:${Color_Off} axiom-fleet [OPTIONS] [<fleet prefix>]"
+    echo
+    echo -e "${BWhite}Description:${Color_Off}"
+    echo -e "  Spin up fleets of Axiom instances across one or more regions."
+    echo -e "  Specify a custom fleet prefix, or let Axiom generate one randomly."
+    echo
+    echo -e "${BWhite}Options:${Color_Off}"
+    echo -e "  <fleet prefix>           Optional name for fleet prefix (e.g. ctbb, jerry)"
+    echo -e "  -i, --instances <int>    Number of instances to create (required)"
+    echo -e "  -r, --regions <list>     Comma-separated list of regions (optional)"
+    echo -e "  --image <name>           Specify image to use (default from axiom.json)"
+    echo -e "  --debug                  Enable debug mode (very verbose)"
+    echo -e "  --help                   Show this help menu"
+    echo
+    echo -e "${BWhite}Examples:${Color_Off}"
+    echo -e "  ${BGreen}axiom-fleet ctbb${Color_Off}                                  # Spin up 3 instances: ctbb01, ctbb02, ctbb03"
+    echo -e "  ${BGreen}axiom-fleet -i 10${Color_Off}                                 # Spin up 10 instances with random prefix"
+    echo -e "  ${BGreen}axiom-fleet jerry -i 25 --regions dal13,lon06,fra05${Color_Off} # Create 25 'jerry' instances using region round-robin"
+    echo
 }
 
 ###########################################################################################################

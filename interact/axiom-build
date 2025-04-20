@@ -54,33 +54,31 @@ banner
 # Help Menu:
 #
 function help() {
-        echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  axiom-build supports both legacy ${BGreen}Packer JSON${Color_Off} files as well as the new ${BGreen}HCL format${Color_Off}"
-        echo -e "  axiom-build combines a cloud provider's ${BGreen}Builder${Color_Off} (~/.axiom/images/\$format/builders) with a ${BGreen}Provisioner ${Color_Off}(~/.axiom/images/\$format/provisioners)"
-        echo -e "  to generate the final ${BGreen}Packer file${Color_Off} (~/.axiom/images/\$format/axiom.\$format)"
-        echo -e "  Using ${BGreen}Packer${Color_Off}, axiom-build creates an image with the tools pre-installed, as defined by the chosen Provisioner"
-        echo -e "  Choose between multiple Provisioners (barebones, default, reconftw, and extras) or bring your own (custom)"
-        echo -e ""
-        echo -e "  axiom-build adds your${BGreen} SSH key${Color_Off} to the image, allowing you to connect to instances created using the image"
-        echo -e "  By default, it creates and uses an SSH key located at ~/.ssh/axiom_ssh.pub, but you can specify a ${BGreen}custom SSH key${Color_Off} if needed"
-        echo -e "${BWhite}Examples:${Color_Off}"
-        echo -e "  ${BGreen}axiom-build --run ${Color_Off}# Kick off the interactive build wizard"
-        echo -e "  ${BGreen}axiom-build default${Color_Off} # Build a new Packer image using the Default Provisioner"
-        echo -e "  ${BGreen}axiom-build barebones --debug ${Color_Off}# Build a new Packer image using the Barebones Provisioner, run with --debug"
-        echo -e "  ${BGreen}axiom-build --ssh-key ~/.ssh/id_rsa.pub ${Color_Off}# Set a custom SSH key (default is SSH key in ~/.ssh/axiom_ssh.pub)"
-        echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  <provisioner> (optional)"
-        echo -e "    Name of provisioner to build, options are barebones, default, reconftw, extras or custom (provisioner must be located in ~/.axiom/images/\$format/provisioners)"
-        echo -e "  --run (optional)"
-        echo -e "    Start axiom-build setup wizard"
-        echo -e "  --legacy (optional)"
-        echo -e "    Use legacy Packer JSON Builder and Provisioner instead of pkr.hcl"
-        echo -e "  --ssh-key <file to pub key> (optional)"
-        echo -e "    Build the image using a custom SSH key (instead of using the default ssh key axiom creates ~/.ssh/axiom_ssh.pub)"
-        echo -e "  --debug (optional)"
-        echo -e "    Enable debug mode (VERY VERBOSE!)"
-        echo -e "  --help (optional)"
-        echo -e "    Display this help menu"
+    echo -e "${BWhite}Usage:${Color_Off} axiom-build [<provisioner>] [options]"
+    echo
+    echo -e "${BWhite}Description:${Color_Off}"
+    echo -e "  Build a base image using Packer with tools pre-installed, as defined by the selected provisioner."
+    echo -e "  Supports both legacy JSON and new HCL formats. Combines a builder and provisioner into a final config."
+    echo -e "  If no provisioner is specified, use --run to launch the interactive wizard."
+    echo
+    echo -e "${BWhite}Provisioner Options:${Color_Off}"
+    echo -e "  <provisioner>            Name of provisioner to use (barebones, default, reconftw, extras, or custom)"
+    echo -e "  --legacy                 Use legacy JSON format instead of HCL"
+    echo
+    echo -e "${BWhite}SSH Configuration:${Color_Off}"
+    echo -e "  --ssh-key <public_key>   Use a custom SSH key (default: ~/.ssh/axiom_ssh.pub)"
+    echo
+    echo -e "${BWhite}Execution & Debug:${Color_Off}"
+    echo -e "  --run                    Launch the interactive build wizard"
+    echo -e "  --debug                  Enable verbose debug output"
+    echo -e "  --help                   Display this help menu"
+    echo
+    echo -e "${BWhite}Examples:${Color_Off}"
+    echo -e "  ${BGreen}axiom-build --run${Color_Off}                            # Start interactive wizard"
+    echo -e "  ${BGreen}axiom-build default${Color_Off}                          # Build with 'default' provisioner"
+    echo -e "  ${BGreen}axiom-build barebones --debug${Color_Off}                # Build with debug mode enabled"
+    echo -e "  ${BGreen}axiom-build --ssh-key ~/.ssh/id_rsa.pub${Color_Off}      # Use custom SSH key"
+    echo
 }
 
 ###########################################################################################################

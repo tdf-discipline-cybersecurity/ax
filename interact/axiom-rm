@@ -9,25 +9,27 @@ output="${Red}No instance supplied or instance not found. Run 'ax ls' to list al
 # Help Menu
 #
 function usage() {
-        echo -e "${BWhite}Description:${Color_Off}"
-        echo -e "  Delete one or more cloud hosted compute devices"
-        echo -e "  Supports globbing (wildcarding) to match instances based on patterns in their names, such as prefix, suffix, or substring matches."
-        echo -e "${BWhite}Examples:${Color_Off}"
-        echo -e "  ${Green}axiom-rm testy01${Color_Off} # Delete instance named 'testy01'"
-        echo -e "  ${Green}axiom-rm 'testy*'${Color_Off} # Delete all instances starting with 'testy' (you may need to escape the asterisk)"
-        echo -e "  ${Green}axiom-rm '*tess*'${Color_Off} # Delete all instances containing the string 'tess' (you may need to escape the asterisks)"
-        echo -e "  ${Green}axiom-rm '\*' --force --multi${Color_Off} # Delete all instances on the account, avoid confirmation prompts, delete many instances with one API call"
-        echo -e "${BWhite}Usage:${Color_Off}"
-        echo -e "  <name> string (required)"
-        echo -e "    Name of the instance(s) to delete"
-        echo -e "  -f/--force (optional)"
-        echo -e "    Avoid confirmation prompts"
-        echo -e "  -m/--multi (optional)"
-        echo -e "    Delete multiple instances at once"
-        echo -e "  --debug (optional)"
-        echo -e "    Run with set -xv, warning: very verbose"
-        echo -e "  --help (optional)"
-        echo -e "    Display this help menu"
+    echo -e "${BWhite}Usage:${Color_Off} axiom-rm <pattern> [OPTIONS]"
+    echo
+    echo -e "${BWhite}Description:${Color_Off}"
+    echo -e "  Delete one or more Axiom instances by name or pattern."
+    echo -e "  Supports wildcards to match instance prefixes, suffixes, or substrings."
+    echo
+    echo -e "${BWhite}Arguments:${Color_Off}"
+    echo -e "  <pattern>                Name or glob pattern to match instances (e.g. testy01, 'prefix*', '*sub*')"
+    echo
+    echo -e "${BWhite}Options:${Color_Off}"
+    echo -e "  -f, --force              Skip confirmation prompts"
+    echo -e "  -m, --multi              Enable multi-delete via API when supported"
+    echo -e "  --debug                  Enable debug output (very verbose)"
+    echo -e "  --help                   Show this help menu"
+    echo
+    echo -e "${BWhite}Examples:${Color_Off}"
+    echo -e "  ${BGreen}axiom-rm testy01${Color_Off}                            # Delete a single instance by name"
+    echo -e "  ${BGreen}axiom-rm 'testy*'${Color_Off}                           # Delete all instances starting with 'testy'"
+    echo -e "  ${BGreen}axiom-rm '*tess*'${Color_Off}                           # Delete instances with 'tess' in their name"
+    echo -e "  ${BGreen}axiom-rm '*' --force --multi${Color_Off}                # Delete all instances without prompts using multi-delete"
+    echo
 }
 
 if [ -z "$1" ]; then

@@ -60,7 +60,17 @@ then
 	echo -e "${BWhite}Selected region $2${Color_Off}"
 	fi
 else
-	echo "Usage:"
-	echo -e "\taxiom-region ls - List available regions"
-	echo -e "\taxiom-region select <nyc3> - Select region"
+        echo -e "${BWhite}Usage:${Color_Off} axiom-region [COMMAND]"
+        echo
+        echo -e "${BWhite}Description:${Color_Off}"
+        echo -e "  List or select the default region used for instance creation."
+        echo
+        echo -e "${BWhite}Commands:${Color_Off}"
+        echo -e "  ls                         List all available regions for the current provider"
+        echo -e "  select <region>            Set the default region (e.g. nyc3, us-west, eu-central)"
+        echo
+        echo -e "${BWhite}Examples:${Color_Off}"
+        echo -e "  ${BGreen}axiom-region ls${Color_Off}                              # Show all available regions"
+        echo -e "  ${BGreen}axiom-region select nyc3${Color_Off}                     # Set 'nyc3' as the default region"
+        echo
 fi
