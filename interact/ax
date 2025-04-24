@@ -33,7 +33,7 @@ help() {
     echo -e "  build [provisioner]        Build a base image with pre-installed tools (using Packer)"
     echo
     echo -e "${BGreen}Instance Management:${Color_Off}"
-    echo -e "  init [options]             Launch a single cloud instance (use --name to specify name)"
+    echo -e "  init [options]             Launch a single cloud instance (use --run to auto-generate a random name)"
     echo -e "  fleet [options]            Spin up a fleet of multiple instances (with optional count, regions)"
     echo -e "  fleet2 [options]           A faster but experimental axiom-fleet"
     echo -e "  deploy <profile>           Deploy instances from a profile (in ~/.axiom/profiles)"
@@ -45,20 +45,20 @@ help() {
     echo -e "  power <on|off> <pattern>   Power on or off instances matching pattern"
     echo
     echo -e "${BGreen}Image & Size Management:${Color_Off}"
-    echo -e "  images                     Manage instance snapshots (list, create, select images)"
-    echo -e "  sizes                      Manage default instance size (list sizes, select default)"
+    echo -e "  images                     Manage instance snapshots (list, create, select, delete images)"
+    echo -e "  sizes                      Manage default instance size (list, select, restore default size)"
     echo
     echo -e "${BGreen}Regions:${Color_Off}"
     echo -e "  region                     Manage default region (list available, select default)"
     echo
     echo -e "${BGreen}File Operations:${Color_Off}"
-    echo -e "  scp                        Transfer files to/from instances (parallel SCP with patterns)"
+    echo -e "  scp                        Transfer files to/from instances in parallel (uses SCP-style syntax with patterns)"
     echo -e "  sync                       Sync an instance's home directory to local (download via rsync)"
     echo
     echo -e "${BGreen}Scanning:${Color_Off}"
     echo -e "  scan                       Run distributed scans using configured modules across fleet"
     echo
-    echo -e "${BGreen}Utilities:${Color_Off}"
+    echo -e "${BGreen}System Operations:${Color_Off}"
     echo -e "  update                     Update Ax to the latest version (git pull in ~/.axiom)"
     echo -e "  --help                     Display this help menu"
     echo
@@ -67,7 +67,7 @@ help() {
     echo -e "  ax account-setup                                          # Start interactive account setup wizard"
     echo -e "  ax account linode                                         # Switch to 'linode' cloud account"
     echo -e "  ax build default                                          # Build base image using 'default' provisioner"
-    echo -e "  ax init --name mybox1                                     # Launch one instance named 'mybox1'"
+    echo -e "  ax init mybox1                                            # Launch one instance named 'mybox1'"
     echo -e "  ax fleet -i 5 -r nyc1,nyc3,fra1 myfleet                   # Launch 5 instances across regions (prefix 'myfleet')"
     echo -e "  ax ls                                                     # List running instances"
     echo -e "  ax ssh mybox1                                             # SSH into instance 'mybox1'"

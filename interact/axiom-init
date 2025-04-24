@@ -103,7 +103,7 @@ function usage() {
     echo -e "  ${BGreen}axiom-init --deploy desktop${Color_Off}                    # Deploy 'desktop' profile after init"
     echo -e "  ${BGreen}axiom-init testy01${Color_Off}                             # Create instance named testy01"
     echo -e "  ${BGreen}axiom-init stok01 --region nyc3 --image axiom-default-123 \\ ${Color_Off}"
-    echo -e "    ${BGreen}--size s-1vcpu-2gb --deploy desktop --shell${Color_Off}   # Full init with custom settings"
+    echo -e "    ${BGreen}--size s-1vcpu-2gb --deploy desktop --shell${Color_Off}  # Full init with custom settings"
     echo
 }
 
