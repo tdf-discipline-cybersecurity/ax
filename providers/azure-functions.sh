@@ -3,6 +3,7 @@
 AXIOM_PATH="$HOME/.axiom"
 resource_group="$(jq -r '.resource_group' "$AXIOM_PATH"/axiom.json)"
 subscription_id="$(jq -r '.subscription_id' "$AXIOM_PATH"/axiom.json)"
+allowed_inbound_ip_addresses="$(jq -r '.allowed_inbound_ip_addresses' "$AXIOM_PATH"/axiom.json)"
 
 ###################################################################
 #  Create Instance is likely the most important provider function :)
@@ -14,10 +15,15 @@ create_instance() {
 	size_slug="$3"
 	region="$4"
 	user_data="$5"
-        sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
+    sshkey="$(cat "$AXIOM_PATH/axiom.json" | jq -r '.sshkey')"
 
-        az vm create --resource-group $resource_group --name "$name" --image "$image_id" --location "$region" --size "$size_slug" --tags "$name"=True --os-disk-delete-option delete --data-disk-delete-option delete --nic-delete-option delete --admin-username op --ssh-key-values ~/.ssh/$sshkey.pub >/dev/null 2>&1
-	az vm open-port --resource-group $resource_group --name "$name" --port 0-65535 >/dev/null 2>&1
+    az network nsg create --resource-group "$resource_group" --name "${name}NSG" --tags "$name"=True >/dev/null 2>&1
+    if [ -n "$allowed_inbound_ip_addresses" ]; then
+        az network nsg rule create --name r0 --resource-group "$resource_group" --nsg-name "${name}NSG" --priority 100 --destination-port-ranges "*" --source-address-prefixes "$allowed_inbound_ip_addresses"
+    fi
+
+    az vm create --resource-group "$resource_group" --name "$name" --nsg "${name}NSG" --image "$image_id" --location "$region" --size "$size_slug" --tags "$name"=True --os-disk-delete-option delete --data-disk-delete-option delete --nic-delete-option delete --admin-username op --ssh-key-values ~/.ssh/$sshkey.pub >/dev/null 2>&1
+    #az vm open-port --resource-group "$resource_group" --name "$name" --port 0-65535 >/dev/null 2>&1
 	sleep 260
 }
 
@@ -57,12 +63,13 @@ instances() {
 # used by axiom-ls axiom-init
 instance_ip() {
         name="$1"
-        az vm list --resource-group $resource_group  -d | jq -r ".[] | select(.name==\"$name\") | .publicIps"
+        #az vm list --resource-group $resource_group  -d | jq -r ".[] | select(.name==\"$name\") | .publicIps"
+        az vm show -d --resource-group "$resource_group" --name "$name" --query publicIps -o tsv
 }
 
 # used by axiom-select axiom-ls
 instance_list() {
-         az vm list --resource-group $resource_group | jq -r '.[].name'
+        az vm list --resource-group $resource_group | jq -r '.[].name'
 }
 
 # used by axiom-ls
@@ -420,6 +427,10 @@ create_instances() {
         for ((j=i; j<end; j++)); do
             name="${names[j]}"
             (
+                az network nsg create --resource-group "$resource_group" --name "${name}NSG" --tags "$name"=True >/dev/null 2>&1
+                if [ -n "$allowed_inbound_ip_addresses" ]; then
+                    az network nsg rule create --name r0 --resource-group "$resource_group" --nsg-name "${name}NSG" --priority 100 --destination-port-ranges "*" --source-address-prefixes "$allowed_inbound_ip_addresses"
+                fi
                 # Attempt creation
                 if output=$(az vm create \
                     --resource-group "$resource_group" \
@@ -436,11 +447,11 @@ create_instances() {
                     2>&1); then
 
                     # If creation succeeded, open ports
-                    az vm open-port \
-                        --resource-group "$resource_group" \
-                        --name "$name" \
-                        --port 0-65535 \
-                        >/dev/null 2>&1
+                   #az vm open-port \
+                   #     --resource-group "$resource_group" \
+                   #     --name "$name" \
+                   #     --port 0-65535 \
+                   #     >/dev/null 2>&1
 
                     echo "$name:success" >> "$creation_status_file"
                 else

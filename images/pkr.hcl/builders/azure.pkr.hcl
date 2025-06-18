@@ -25,11 +25,12 @@ source "azure-arm" "packer" {
 
   build_resource_group_name = var.resource_group  # Use your existing resource group name
 
-  os_type           = "Linux"
-  image_publisher   = "Canonical"
-  image_offer       = "0001-com-ubuntu-server-focal-daily"
-  image_sku         = "20_04-daily-lts-gen2"
-  vm_size           = var.default_size
+  os_type                       = "Linux"
+  image_publisher               = "Debian"
+  image_offer                   = "debian-12"
+  image_sku                     = "12-gen2"
+  vm_size                       = var.default_size
+  allowed_inbound_ip_addresses  = var.allowed_inbound_ip_addresses
 
 }
 

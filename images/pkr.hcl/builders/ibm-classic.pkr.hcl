@@ -14,7 +14,6 @@ variable "snapshot_name" {
   type = string
 }
 
-
 source "ibmcloud-classic" "packer" {
   api_key                = var.sl_key
   username               = var.username

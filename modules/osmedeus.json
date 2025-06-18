@@ -1,0 +1,7 @@
+[
+  {
+    "command": "sudo osmedeus update ; sudo osmedeus scan -f url input",
+    "ext": "",
+    "threads": 1
+  }
+]
