@@ -27,17 +27,17 @@ function help() {
 # take one arugment and downloads the home dir of the instance supplied
 function sync() {
 generate_sshconfig
-sync_path="$AXIOM_PATH/boxes/$1"
+sync_path="$AXIOM_PATH/sync/$1"
 if [ ! -d "$sync_path" ]
  then
     mkdir -p "$AXIOM_PATH/sync/$1"
 fi
 
-echo -e "${BWhite}Syncing $instance to local file system... ${Color_Off}"
+echo -e "${BWhite}Syncing $1 to local file system... ${Color_Off}"
 echo -n -e "${BGreen}"
-rsync -avzr -e "ssh -F $AXIOM_PATH/.sshconfig" --progress --include-from="$AXIOM_PATH"/interact/includes/backup-files.txt "$instance":~/ "$AXIOM_PATH"/boxes/"$instance"/
+rsync -avzr -e "ssh -F $AXIOM_PATH/.sshconfig" --progress --include-from="$AXIOM_PATH"/interact/includes/backup-files.txt "$1":~/ "$AXIOM_PATH"/sync/"$1"/
 echo -n -e "${Color_Off}"
-echo -e "${BGreen}Instance '$instance' home directory successfully downloaded to $AXIOM_PATH/sync/$1 !${Color_Off}"
+echo -e "${BGreen}Instance '$1' home directory successfully downloaded to $AXIOM_PATH/sync/$1 !${Color_Off}"
 }
 
 # if no arguments are specified print help menu
@@ -54,10 +54,10 @@ fi
 
 # iterate over the instance supplied and download the home dir recursively
 if [[ ! -z "$1" ]]; then
-mkdir -p $AXIOM_PATH/boxes
+mkdir -p $AXIOM_PATH/sync
 for var in "$@"
 do
  instance=$var
- sync $1
+ sync $instance
 done
 fi

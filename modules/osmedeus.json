@@ -1,0 +1,7 @@
+[
+  {
+    "command": "sudo su - root -c 'osmedeus scan -f redteam -t _target_'",
+    "ext": "",
+    "threads": 3
+  }
+]

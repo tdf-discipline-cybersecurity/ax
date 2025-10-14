@@ -10,5 +10,7 @@
   "default_size": "Standard_B1ls",
   "use_azure_cli_auth": "true",
   "imageid": "axiom-default-<timestamp>",
-  "provisioner": "default"
+  "provisioner": "default",
+  "allowed_inbound_ip_addresses": ["192.168.0.0"],
+  "osmedeus_install_path": "https://raw.githubusercontent.com/osmedeus/osmedeus-base/master/install.sh"
 }

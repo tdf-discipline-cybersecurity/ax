@@ -8,7 +8,7 @@ selected.conf
 .DS_store
 *.swp
 authorized_keys
-boxes/*
+sync/*
 archive/*
 tmp/*
 axiom.json

@@ -6,6 +6,7 @@
   "sshkey": "axiom_rsa",
   "op": "<redacted>",
   "imageid": "axiom-default-<timestamp>",
-  "provisioner": "default"
+  "provisioner": "default",
+  "osmedeus_install_path": "https://raw.githubusercontent.com/osmedeus/osmedeus-base/master/install.sh"
 }
 

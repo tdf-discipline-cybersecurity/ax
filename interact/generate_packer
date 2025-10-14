@@ -33,18 +33,22 @@ if [ -f "$packer_builder_path" ]; then
 
  elif [[ "$extension" == "pkr.hcl" ]]; then
 
-   # Create beginning of Packer pkr.hcl file
-   builder_contents=$(<"$packer_builder_path")
-
-   # Skip vars already defined in builder
-   jq -r 'keys[]' "$AXIOM_JSON" | while read -r key; do
-     if ! grep -q "variable[[:space:]]*\"$key\"" <<< "$builder_contents"; then
-cat <<EOF >> "$packer_output_path"
+  # Create beginning of Packer pkr.hcl file
+  jq -r '.|to_entries[]|select(.value|type == "string")|.key' "$AXIOM_JSON" | while read -r key; do
+  cat <<EOF >> "$packer_output_path"
 variable "$key" {
   type = string
 }
+
 EOF
-     fi
+  done
+
+  jq -r '.|to_entries[]|select(.value|type == "array")|.key' "$AXIOM_JSON" | while read -r key; do
+  cat <<EOF >> "$packer_output_path"
+variable "$key" {
+  type = list(string)
+}
+EOF
    done
 
    # cat the builder and provisioner data into final packer pkr.hcl
